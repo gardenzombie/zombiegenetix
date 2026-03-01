@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GrowOps — Cannabis Cultivation Dashboard</title>
+<title>Grow Tracker — Cannabis Cultivation Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@300;400;600;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -862,7 +862,7 @@
 <body>
 
 <nav>
-  <div class="nav-logo">GrowOps <span>// v1</span></div>
+  <div class="nav-logo">Grow Tracker <span>// v1</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
     <button class="nav-tab" onclick="showPage('tents')">Tents</button>
@@ -2080,7 +2080,7 @@ function calcDayInStage(startDate, fixedDay) {
 }
 
 // Plant start dates stored in localStorage (keyed by plant id)
-let plantStartDates = JSON.parse(localStorage.getItem('growops-startdates') || '{}');
+let plantStartDates = JSON.parse(localStorage.getItem('growtracker-startdates') || '{}');
 
 // Strain profiles — shared reference data, keyed by strain name slug
 const DEFAULT_STRAIN_PROFILES = {
@@ -2120,7 +2120,7 @@ const DEFAULT_STRAIN_PROFILES = {
   }
 };
 
-let strainProfiles = JSON.parse(localStorage.getItem('growops-strains') || JSON.stringify(DEFAULT_STRAIN_PROFILES));
+let strainProfiles = JSON.parse(localStorage.getItem('growtracker-strains') || JSON.stringify(DEFAULT_STRAIN_PROFILES));
 
 // Watering log keyed by plant id — last watered date
 function lastWatered(plantId) {
@@ -2216,8 +2216,8 @@ const DEFAULT_DOME = {
   notes: 'Testing for first time alongside bubble cloner. Clonex gel dip method.'
 };
 
-let clones = JSON.parse(localStorage.getItem('growops-clones') || JSON.stringify(DEFAULT_CLONES));
-let domeSettings = JSON.parse(localStorage.getItem('growops-dome') || JSON.stringify(DEFAULT_DOME));
+let clones = JSON.parse(localStorage.getItem('growtracker-clones') || JSON.stringify(DEFAULT_CLONES));
+let domeSettings = JSON.parse(localStorage.getItem('growtracker-dome') || JSON.stringify(DEFAULT_DOME));
 
 const TEA_RECIPES = [
   {
@@ -2449,10 +2449,10 @@ const BUILTIN_RECIPES = TEA_RECIPES.map((t, i) => ({
   builtin: true
 }));
 
-let userRecipes = JSON.parse(localStorage.getItem('growops-recipes') || '[]');
+let userRecipes = JSON.parse(localStorage.getItem('growtracker-recipes') || '[]');
 
 function allRecipes() {
-  const deletedIds = JSON.parse(localStorage.getItem('growops-recipes-deleted') || '[]');
+  const deletedIds = JSON.parse(localStorage.getItem('growtracker-recipes-deleted') || '[]');
   return [
     ...BUILTIN_RECIPES.filter(r => !deletedIds.includes(r.id)),
     ...userRecipes
@@ -2503,13 +2503,13 @@ const DEFAULT_BREEDING = [
   }
 ];
 
-let feedLog = JSON.parse(localStorage.getItem('growops-log') || '[]');
-let customPlants = JSON.parse(localStorage.getItem('growops-plants') || '[]');
-let breedingProjects = JSON.parse(localStorage.getItem('growops-breeding') || JSON.stringify(DEFAULT_BREEDING));
+let feedLog = JSON.parse(localStorage.getItem('growtracker-log') || '[]');
+let customPlants = JSON.parse(localStorage.getItem('growtracker-plants') || '[]');
+let breedingProjects = JSON.parse(localStorage.getItem('growtracker-breeding') || JSON.stringify(DEFAULT_BREEDING));
 
 // Resolve live dayInStage for all plants
 function resolvePlants() {
-  const baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+  const baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
   const base = [
     ...PLANTS_BASE.map(p => ({ ...p, ...(baseOverrides[p.id] || {}) })).filter(p => !p._hidden),
     ...customPlants.filter(p => !p._hidden)
@@ -2634,7 +2634,7 @@ const BREED_STATUS_MAP = {
 
 function setStartDate(plantId, dateStr) {
   plantStartDates[plantId] = dateStr;
-  localStorage.setItem('growops-startdates', JSON.stringify(plantStartDates));
+  localStorage.setItem('growtracker-startdates', JSON.stringify(plantStartDates));
   allPlants = resolvePlants();
 }
 
@@ -2791,12 +2791,12 @@ function removePlantFromTent(plantId) {
   if (!p) return;
   const baseIdx = PLANTS_BASE.findIndex(x => x.id === plantId);
   if (baseIdx !== -1) {
-    let baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+    let baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
     baseOverrides[plantId] = { ...(baseOverrides[plantId]||{}), tent: null };
-    localStorage.setItem('growops-base-overrides', JSON.stringify(baseOverrides));
+    localStorage.setItem('growtracker-base-overrides', JSON.stringify(baseOverrides));
   } else {
     customPlants = customPlants.map(x => x.id === plantId ? { ...x, tent: null } : x);
-    localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
   }
   allPlants = resolvePlants();
   refreshAllActivePages();
@@ -2807,7 +2807,7 @@ function removeCloneFromTent(cloneId) {
   const c = clones.find(x => x.id === cloneId);
   if (!c) return;
   clones = clones.map(x => x.id === cloneId ? { ...x, tent: null } : x);
-  localStorage.setItem('growops-clones', JSON.stringify(clones));
+  localStorage.setItem('growtracker-clones', JSON.stringify(clones));
   refreshAllActivePages();
   showToast('info', '↩', `${c.strain} clone unassigned from tent`);
 }
@@ -2848,19 +2848,19 @@ function confirmAssignToTent() {
     const p = allPlants.find(x => x.id === itemId);
     const baseIdx = PLANTS_BASE.findIndex(x => x.id === itemId);
     if (baseIdx !== -1) {
-      let baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+      let baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
       baseOverrides[itemId] = { ...(baseOverrides[itemId]||{}), tent: tentId };
-      localStorage.setItem('growops-base-overrides', JSON.stringify(baseOverrides));
+      localStorage.setItem('growtracker-base-overrides', JSON.stringify(baseOverrides));
     } else {
       customPlants = customPlants.map(x => x.id === itemId ? { ...x, tent: tentId } : x);
-      localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+      localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
     }
     allPlants = resolvePlants();
     showToast('success', '✓', `${p?.strain} assigned to ${tentName(tentId)}`);
   } else {
     const c = clones.find(x => x.id === itemId);
     clones = clones.map(x => x.id === itemId ? { ...x, tent: tentId } : x);
-    localStorage.setItem('growops-clones', JSON.stringify(clones));
+    localStorage.setItem('growtracker-clones', JSON.stringify(clones));
     showToast('success', '✓', `${c?.strain} clone assigned to ${tentName(tentId)}`);
   }
 
@@ -3175,7 +3175,7 @@ function saveEditPlant() {
   } else {
     plantStartDates[id] = { life: lifeStart };
   }
-  localStorage.setItem('growops-startdates', JSON.stringify(plantStartDates));
+  localStorage.setItem('growtracker-startdates', JSON.stringify(plantStartDates));
 
   const updates = {
     strain: newStrain || undefined,
@@ -3193,14 +3193,14 @@ function saveEditPlant() {
   const baseIdx = PLANTS_BASE.findIndex(p => p.id === id);
   if (baseIdx !== -1) {
     // Store base plant overrides in localStorage
-    let baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+    let baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
     baseOverrides[id] = { ...baseOverrides[id], ...updates };
-    localStorage.setItem('growops-base-overrides', JSON.stringify(baseOverrides));
+    localStorage.setItem('growtracker-base-overrides', JSON.stringify(baseOverrides));
   } else {
     const custIdx = customPlants.findIndex(p => p.id === id);
     if (custIdx !== -1) {
       customPlants[custIdx] = { ...customPlants[custIdx], ...updates };
-      localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+      localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
     }
   }
 
@@ -3209,7 +3209,7 @@ function saveEditPlant() {
     const oldStrain = allPlants.find(p => p.id === id)?.strain;
     if (oldStrain && oldStrain !== newStrain) {
       feedLog = feedLog.map(e => e.plantId === id ? { ...e, plantName: newStrain } : e);
-      localStorage.setItem('growops-log', JSON.stringify(feedLog));
+      localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
     }
   }
 
@@ -3223,12 +3223,12 @@ function deletePlant(id) {
   if (!confirm('Remove this plant from tracking?')) return;
   const baseIdx = PLANTS_BASE.findIndex(p => p.id === id);
   if (baseIdx !== -1) {
-    let baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+    let baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
     baseOverrides[id] = { ...baseOverrides[id], _hidden: true };
-    localStorage.setItem('growops-base-overrides', JSON.stringify(baseOverrides));
+    localStorage.setItem('growtracker-base-overrides', JSON.stringify(baseOverrides));
   } else {
     customPlants = customPlants.filter(p => p.id !== id);
-    localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
   }
   closeModal('modal-edit-plant');
   allPlants = resolvePlants();
@@ -3306,20 +3306,20 @@ function saveStrainProfile() {
   };
 
   strainProfiles[id] = profile;
-  localStorage.setItem('growops-strains', JSON.stringify(strainProfiles));
+  localStorage.setItem('growtracker-strains', JSON.stringify(strainProfiles));
 
   // Link to plant if this was a new profile creation
   const linkPlantId = idEl.dataset.linkPlant;
   if (linkPlantId) {
-    const baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+    const baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
     if (PLANTS_BASE.find(p => p.id === linkPlantId)) {
       baseOverrides[linkPlantId] = { ...baseOverrides[linkPlantId], strainId: id };
-      localStorage.setItem('growops-base-overrides', JSON.stringify(baseOverrides));
+      localStorage.setItem('growtracker-base-overrides', JSON.stringify(baseOverrides));
     } else {
       const custIdx = customPlants.findIndex(p => p.id === linkPlantId);
       if (custIdx !== -1) {
         customPlants[custIdx].strainId = id;
-        localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+        localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
       }
     }
     idEl.dataset.linkPlant = '';
@@ -3344,7 +3344,7 @@ function quickWaterFrom(plantId, strainName) {
     notes: 'Quick log from plant card'
   };
   feedLog.push(entry);
-  localStorage.setItem('growops-log', JSON.stringify(feedLog));
+  localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
   refreshAllActivePages();
 }
 
@@ -3430,7 +3430,7 @@ function saveEditLog() {
     date: dateVal ? new Date(dateVal).toISOString() : feedLog[idx].date
   };
 
-  localStorage.setItem('growops-log', JSON.stringify(feedLog));
+  localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
   closeModal('modal-edit-log');
   renderLogTable();
   showToast('success', '✓', 'Log entry updated');
@@ -3439,7 +3439,7 @@ function saveEditLog() {
 function deleteLogEntry(id) {
   if (!confirm('Delete this log entry?')) return;
   feedLog = feedLog.filter(e => e.id !== id);
-  localStorage.setItem('growops-log', JSON.stringify(feedLog));
+  localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
   renderLogTable();
   showToast('info', '✕', 'Entry deleted');
 }
@@ -3459,7 +3459,7 @@ function quickLog() {
     notes: document.getElementById('quick-notes').value
   };
   feedLog.push(entry);
-  localStorage.setItem('growops-log', JSON.stringify(feedLog));
+  localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
   document.getElementById('quick-vol').value = '';
   document.getElementById('quick-ph').value = '';
   document.getElementById('quick-notes').value = '';
@@ -3631,7 +3631,7 @@ function saveRecipe() {
     if (isBuiltin) deleteRecipe(id, true, true);
   }
 
-  localStorage.setItem('growops-recipes', JSON.stringify(userRecipes));
+  localStorage.setItem('growtracker-recipes', JSON.stringify(userRecipes));
   closeModal('modal-recipe');
   renderTeas();
   showToast('success', '✓', `Recipe saved — ${name}`);
@@ -3640,12 +3640,12 @@ function saveRecipe() {
 function deleteRecipe(id, isBuiltin, silent = false) {
   if (!silent && !confirm('Delete this recipe?')) return;
   if (isBuiltin) {
-    const deleted = JSON.parse(localStorage.getItem('growops-recipes-deleted') || '[]');
+    const deleted = JSON.parse(localStorage.getItem('growtracker-recipes-deleted') || '[]');
     if (!deleted.includes(id)) deleted.push(id);
-    localStorage.setItem('growops-recipes-deleted', JSON.stringify(deleted));
+    localStorage.setItem('growtracker-recipes-deleted', JSON.stringify(deleted));
   } else {
     userRecipes = userRecipes.filter(r => r.id !== id);
-    localStorage.setItem('growops-recipes', JSON.stringify(userRecipes));
+    localStorage.setItem('growtracker-recipes', JSON.stringify(userRecipes));
   }
   if (!silent) { renderTeas(); showToast('info', '✕', 'Recipe deleted'); }
 }
@@ -3657,7 +3657,7 @@ function deleteRecipe(id, isBuiltin, silent = false) {
 let chatHistory = [];
 
 function renderClaudePage() {
-  const key = localStorage.getItem('growops-api-key');
+  const key = localStorage.getItem('growtracker-api-key');
   const status = document.getElementById('api-key-status');
   if (key) {
     const masked = key.slice(0, 10) + '...' + key.slice(-4);
@@ -3674,14 +3674,14 @@ function saveApiKey() {
     showToast('error', '✕', 'Key should start with sk-ant-');
     return;
   }
-  localStorage.setItem('growops-api-key', key);
+  localStorage.setItem('growtracker-api-key', key);
   renderClaudePage();
   showToast('success', '✓', 'API key saved');
 }
 
 function clearApiKey() {
   if (!confirm('Remove saved API key?')) return;
-  localStorage.removeItem('growops-api-key');
+  localStorage.removeItem('growtracker-api-key');
   document.getElementById('api-key-input').value = '';
   renderClaudePage();
   showToast('info', '✕', 'API key cleared');
@@ -3790,7 +3790,7 @@ function updateChatBubble(id, content) {
 }
 
 async function sendChatMessage() {
-  const apiKey = localStorage.getItem('growops-api-key');
+  const apiKey = localStorage.getItem('growtracker-api-key');
   if (!apiKey) {
     showToast('error', '✕', 'Add your API key first (top of this page)');
     return;
@@ -4037,7 +4037,7 @@ function cloneCard(c) {
 
 function markCloneRooted(id) {
   clones = clones.map(c => c.id === id ? { ...c, status: 'rooted' } : c);
-  localStorage.setItem('growops-clones', JSON.stringify(clones));
+  localStorage.setItem('growtracker-clones', JSON.stringify(clones));
   refreshAllActivePages();
   showToast('success', '✓', 'Clone marked as rooted — ready to pot up');
 }
@@ -4045,7 +4045,7 @@ function markCloneRooted(id) {
 function removeClone(id) {
   if (!confirm('Remove this clone from tracking?')) return;
   clones = clones.map(c => c.id === id ? { ...c, _hidden: true, tent: null } : c);
-  localStorage.setItem('growops-clones', JSON.stringify(clones));
+  localStorage.setItem('growtracker-clones', JSON.stringify(clones));
   refreshAllActivePages();
   showToast('info', '✕', 'Clone removed');
 }
@@ -4060,7 +4060,7 @@ function promoteCloneToPlant(id) {
   document.getElementById('new-tent').innerHTML = TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
   // Mark clone as hidden
   clones = clones.map(x => x.id === id ? { ...x, _hidden: true } : x);
-  localStorage.setItem('growops-clones', JSON.stringify(clones));
+  localStorage.setItem('growtracker-clones', JSON.stringify(clones));
   closeModal('modal-edit-clone');
   openModal('modal-plant');
   showToast('info', '→', `${c.strain} promoted — assign a tent and save`);
@@ -4133,7 +4133,7 @@ function saveClone() {
   } else {
     clones.push({ id: 'clone-' + Date.now(), ...data, _hidden: false });
   }
-  localStorage.setItem('growops-clones', JSON.stringify(clones));
+  localStorage.setItem('growtracker-clones', JSON.stringify(clones));
   closeModal('modal-edit-clone');
   refreshAllActivePages();
   showToast('success', '✓', id ? 'Clone updated' : 'Clone added');
@@ -4144,7 +4144,7 @@ function removeCloneFromModal() {
   if (!id) return;
   if (!confirm('Remove this clone from tracking?')) return;
   clones = clones.map(c => c.id === id ? { ...c, _hidden: true, tent: null } : c);
-  localStorage.setItem('growops-clones', JSON.stringify(clones));
+  localStorage.setItem('growtracker-clones', JSON.stringify(clones));
   closeModal('modal-edit-clone');
   refreshAllActivePages();
   showToast('info', '✕', 'Clone removed');
@@ -4188,7 +4188,7 @@ function saveDome() {
     temp: document.getElementById('dome-temp').value.trim(),
     notes: document.getElementById('dome-notes').value.trim(),
   };
-  localStorage.setItem('growops-dome', JSON.stringify(domeSettings));
+  localStorage.setItem('growtracker-dome', JSON.stringify(domeSettings));
   closeModal('modal-edit-dome');
   refreshAllActivePages();
   showToast('success', '✓', 'Dome settings saved');
@@ -4281,7 +4281,7 @@ function renderBreeding() {
 
 function updateBreedStatus(id, status) {
   breedingProjects = breedingProjects.map(b => b.id === id ? { ...b, status } : b);
-  localStorage.setItem('growops-breeding', JSON.stringify(breedingProjects));
+  localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
   renderBreeding();
 }
 
@@ -4289,14 +4289,14 @@ function updateSeedCount(id) {
   const val = parseInt(document.getElementById('seed-count-' + id)?.value);
   if (isNaN(val)) return;
   breedingProjects = breedingProjects.map(b => b.id === id ? { ...b, seeds: val } : b);
-  localStorage.setItem('growops-breeding', JSON.stringify(breedingProjects));
+  localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
   renderBreeding();
 }
 
 function deleteBreeding(id) {
   if (!confirm('Delete this breeding project?')) return;
   breedingProjects = breedingProjects.filter(b => b.id !== id);
-  localStorage.setItem('growops-breeding', JSON.stringify(breedingProjects));
+  localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
   renderBreeding();
 }
 
@@ -4319,7 +4319,7 @@ function addBreeding() {
     log: []
   };
   breedingProjects.push(project);
-  localStorage.setItem('growops-breeding', JSON.stringify(breedingProjects));
+  localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
   closeModal('modal-breeding');
   renderBreeding();
 }
@@ -4348,7 +4348,7 @@ function addPlant() {
     stageStartDate: null
   };
   customPlants.push(plant);
-  localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+  localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
   closeModal('modal-plant');
   renderPlants();
 }
@@ -4475,7 +4475,7 @@ function saveBatchAdd() {
         _batchId: `batch-${now}`, // tag so you can identify the batch later
       });
     });
-    localStorage.setItem('growops-clones', JSON.stringify(clones));
+    localStorage.setItem('growtracker-clones', JSON.stringify(clones));
 
   } else {
     // Plants
@@ -4498,7 +4498,7 @@ function saveBatchAdd() {
         _batchId: `batch-${now}`,
       });
     });
-    localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
     allPlants = resolvePlants();
   }
 
@@ -4538,8 +4538,8 @@ function exportData() {
     clones,
     domeSettings,
     userRecipes,
-    recipesDeleted: JSON.parse(localStorage.getItem('growops-recipes-deleted') || '[]'),
-    baseOverrides: JSON.parse(localStorage.getItem('growops-base-overrides') || '{}')
+    recipesDeleted: JSON.parse(localStorage.getItem('growtracker-recipes-deleted') || '[]'),
+    baseOverrides: JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}')
   };
   const json = JSON.stringify(payload, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -4547,10 +4547,10 @@ function exportData() {
   const a = document.createElement('a');
   const dateStr = new Date().toISOString().split('T')[0];
   a.href = url;
-  a.download = `growops-backup-${dateStr}.json`;
+  a.download = `growtracker-backup-${dateStr}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('success', '✓', `Exported growops-backup-${dateStr}.json`);
+  showToast('success', '✓', `Exported growtracker-backup-${dateStr}.json`);
 }
 
 function shareWithClaude() {
@@ -4603,12 +4603,12 @@ function shareWithClaude() {
     : '  No logs in past 7 days';
 
   // Retired plants
-  const retired = JSON.parse(localStorage.getItem('growops-retired') || '[]');
+  const retired = JSON.parse(localStorage.getItem('growtracker-retired') || '[]');
   const retiredBlock = retired.length
     ? retired.map(function(r) { return '  \u2022 ' + r.strain + ' \u2014 retired ' + (r.chopDate || 'unknown'); }).join(NL)
     : '  None';
 
-  const calEventsData = JSON.parse(localStorage.getItem('growops-cal-events') || '[]');
+  const calEventsData = JSON.parse(localStorage.getItem('growtracker-cal-events') || '[]');
   const profileNames = Object.values(strainProfiles).map(function(s) { return s.name; }).join(', ') || 'None';
 
   const lines = [
@@ -4672,7 +4672,7 @@ function importData() {
     const existingIds = new Set(feedLog.map(e => e.id));
     const newEntries = parsed.feedLog.filter(e => !existingIds.has(e.id));
     feedLog = [...feedLog, ...newEntries];
-    localStorage.setItem('growops-log', JSON.stringify(feedLog));
+    localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
     imported += newEntries.length;
   }
 
@@ -4681,14 +4681,14 @@ function importData() {
     const existingIds = new Set(customPlants.map(p => p.id));
     const newPlants = parsed.customPlants.filter(p => !existingIds.has(p.id));
     customPlants = [...customPlants, ...newPlants];
-    localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
     imported += newPlants.length;
   }
 
   // Merge start dates — overwrite by plant ID
   if (parsed.plantStartDates && typeof parsed.plantStartDates === 'object') {
     plantStartDates = { ...plantStartDates, ...parsed.plantStartDates };
-    localStorage.setItem('growops-startdates', JSON.stringify(plantStartDates));
+    localStorage.setItem('growtracker-startdates', JSON.stringify(plantStartDates));
     imported++;
   }
 
@@ -4701,7 +4701,7 @@ function importData() {
       return match || b;
     });
     breedingProjects = [...updatedProjects, ...newProjects];
-    localStorage.setItem('growops-breeding', JSON.stringify(breedingProjects));
+    localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
     imported += newProjects.length;
   }
 
@@ -4710,13 +4710,13 @@ function importData() {
     const existingIds = new Set(userRecipes.map(r => r.id));
     const newRecipes = parsed.userRecipes.filter(r => !existingIds.has(r.id));
     userRecipes = [...userRecipes, ...newRecipes];
-    localStorage.setItem('growops-recipes', JSON.stringify(userRecipes));
+    localStorage.setItem('growtracker-recipes', JSON.stringify(userRecipes));
     imported += newRecipes.length;
   }
   if (Array.isArray(parsed.recipesDeleted)) {
-    const existing = JSON.parse(localStorage.getItem('growops-recipes-deleted') || '[]');
+    const existing = JSON.parse(localStorage.getItem('growtracker-recipes-deleted') || '[]');
     const merged = [...new Set([...existing, ...parsed.recipesDeleted])];
-    localStorage.setItem('growops-recipes-deleted', JSON.stringify(merged));
+    localStorage.setItem('growtracker-recipes-deleted', JSON.stringify(merged));
   }
 
   // Merge clones
@@ -4724,29 +4724,29 @@ function importData() {
     const existingIds = new Set(clones.map(c => c.id));
     const newClones = parsed.clones.filter(c => !existingIds.has(c.id));
     clones = [...clones, ...newClones];
-    localStorage.setItem('growops-clones', JSON.stringify(clones));
+    localStorage.setItem('growtracker-clones', JSON.stringify(clones));
     imported += newClones.length;
   }
 
   // Restore dome settings if present
   if (parsed.domeSettings && typeof parsed.domeSettings === 'object') {
     domeSettings = { ...domeSettings, ...parsed.domeSettings };
-    localStorage.setItem('growops-dome', JSON.stringify(domeSettings));
+    localStorage.setItem('growtracker-dome', JSON.stringify(domeSettings));
     imported++;
   }
 
   // Merge strain profiles
   if (parsed.strainProfiles && typeof parsed.strainProfiles === 'object') {
     strainProfiles = { ...strainProfiles, ...parsed.strainProfiles };
-    localStorage.setItem('growops-strains', JSON.stringify(strainProfiles));
+    localStorage.setItem('growtracker-strains', JSON.stringify(strainProfiles));
     imported++;
   }
 
   // Merge base overrides
   if (parsed.baseOverrides && typeof parsed.baseOverrides === 'object') {
-    const existing = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+    const existing = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
     const merged = { ...existing, ...parsed.baseOverrides };
-    localStorage.setItem('growops-base-overrides', JSON.stringify(merged));
+    localStorage.setItem('growtracker-base-overrides', JSON.stringify(merged));
     imported++;
   }
 
@@ -4792,7 +4792,7 @@ function retirePlant(id) {
   const chopDateFinal = chopDate && chopDate.trim() ? chopDate.trim() : new Date().toISOString().slice(0,10);
   const chopNotes = prompt('Harvest notes (yield, trichome stage, etc.) — optional:') || '';
 
-  let retiredPlants = JSON.parse(localStorage.getItem('growops-retired') || '[]');
+  let retiredPlants = JSON.parse(localStorage.getItem('growtracker-retired') || '[]');
   retiredPlants.push({
     ...p,
     retiredAt: new Date().toISOString(),
@@ -4801,17 +4801,17 @@ function retirePlant(id) {
     totalFlowerDays: p.dayInStage,
     totalVegDays: p.vegDays || 0,
   });
-  localStorage.setItem('growops-retired', JSON.stringify(retiredPlants));
+  localStorage.setItem('growtracker-retired', JSON.stringify(retiredPlants));
 
   // Hide from active AND clear tent assignment
   const baseIdx = PLANTS_BASE.findIndex(x => x.id === id);
   if (baseIdx !== -1) {
-    let baseOverrides = JSON.parse(localStorage.getItem('growops-base-overrides') || '{}');
+    let baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
     baseOverrides[id] = { ...(baseOverrides[id]||{}), _hidden: true, tent: null };
-    localStorage.setItem('growops-base-overrides', JSON.stringify(baseOverrides));
+    localStorage.setItem('growtracker-base-overrides', JSON.stringify(baseOverrides));
   } else {
     customPlants = customPlants.map(x => x.id === id ? { ...x, _hidden: true, tent: null } : x);
-    localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
   }
 
   closeModal('modal-edit-plant');
@@ -4821,7 +4821,7 @@ function retirePlant(id) {
 }
 
 function renderRetired() {
-  const retiredPlants = JSON.parse(localStorage.getItem('growops-retired') || '[]');
+  const retiredPlants = JSON.parse(localStorage.getItem('growtracker-retired') || '[]');
   const container = document.getElementById('retired-list');
   if (!retiredPlants.length) {
     container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3);font-family:var(--mono);font-size:0.7rem">No retired plants yet. Retire a plant from the Plants page when you chop it.</div>';
@@ -4856,7 +4856,7 @@ function renderRetired() {
       ${p.chopNotes ? `<div class="text-sm text-dim italic" style="margin-bottom:0.5rem;line-height:1.5">${p.chopNotes}</div>` : ''}
       <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">${logEntries.length} log entries · ${tentName(p.tent)}</div>
       <div style="margin-top:0.6rem;display:flex;gap:0.4rem">
-        <button onclick="if(confirm('Permanently delete this record?')){let r=JSON.parse(localStorage.getItem('growops-retired')||'[]');r=r.filter(x=>!(x.id==='${p.id}'&&x.chopDate==='${p.chopDate}'));localStorage.setItem('growops-retired',JSON.stringify(r));renderRetired();}" style="font-family:var(--mono);font-size:0.52rem;text-transform:uppercase;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(248,113,113,0.2);background:transparent;color:var(--red);cursor:pointer;opacity:0.6" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">Delete Record</button>
+        <button onclick="if(confirm('Permanently delete this record?')){let r=JSON.parse(localStorage.getItem('growtracker-retired')||'[]');r=r.filter(x=>!(x.id==='${p.id}'&&x.chopDate==='${p.chopDate}'));localStorage.setItem('growtracker-retired',JSON.stringify(r));renderRetired();}" style="font-family:var(--mono);font-size:0.52rem;text-transform:uppercase;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(248,113,113,0.2);background:transparent;color:var(--red);cursor:pointer;opacity:0.6" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">Delete Record</button>
       </div>
     </div>`;
   }).join('') + '</div>';
@@ -4876,7 +4876,7 @@ let calView = '2w';          // '2w' | '1w' | '1m'
 let calAnchor = new Date();  // anchor date (start of current view window)
 calAnchor.setHours(0,0,0,0);
 
-let calEvents = JSON.parse(localStorage.getItem('growops-cal-events') || '[]');
+let calEvents = JSON.parse(localStorage.getItem('growtracker-cal-events') || '[]');
 let calSelectedDate = null;
 
 // Event type metadata
@@ -4891,7 +4891,7 @@ const CAL_TYPE = {
 };
 
 function saveCalEvents() {
-  localStorage.setItem('growops-cal-events', JSON.stringify(calEvents));
+  localStorage.setItem('growtracker-cal-events', JSON.stringify(calEvents));
 }
 
 // ── Date helpers ─────────────────────────────────────────────────
@@ -5274,7 +5274,7 @@ function deleteCalEvent() {
 
 function renderTimeline() {
   allPlants = resolvePlants();
-  const retiredPlants = JSON.parse(localStorage.getItem('growops-retired') || '[]');
+  const retiredPlants = JSON.parse(localStorage.getItem('growtracker-retired') || '[]');
   const activePlants = allPlants; // already excludes _hidden
   const retiredWithFlag = retiredPlants.map(p => ({ ...p, _retired: true }));
   const allForTimeline = [...activePlants, ...retiredWithFlag];

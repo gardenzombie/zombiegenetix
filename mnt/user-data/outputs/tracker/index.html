@@ -930,7 +930,10 @@
       <div class="section-title">Plant Management</div>
       <div class="section-desc">All active plants across your operation</div>
     </div>
-    <button class="btn btn-primary" onclick="openAddPlant()">+ Add Plant</button>
+    <div style="display:flex;gap:0.5rem">
+      <button class="btn btn-ghost" onclick="openBatchAdd('plant')" style="font-size:0.65rem">+ Batch Add</button>
+      <button class="btn btn-primary" onclick="openAddPlant()">+ Add Plant</button>
+    </div>
   </div>
   <div id="plants-list"></div>
 </div>
@@ -1807,6 +1810,144 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-plant')">Cancel</button>
       <button class="btn btn-primary" onclick="addPlant()">Add Plant</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ BATCH ADD MODAL -->
+<div class="modal-overlay" id="modal-batch-add">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div class="modal-title" id="batch-modal-title">Batch Add Clones</div>
+      <button class="modal-close" onclick="closeModal('modal-batch-add')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Quantity + naming -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Strain / Name</label>
+          <input class="form-input" type="text" id="batch-strain" placeholder="e.g. CBD Runtz">
+        </div>
+        <div class="form-group" style="max-width:120px">
+          <label class="form-label">Quantity</label>
+          <input class="form-input" type="number" id="batch-qty" value="2" min="1" max="25" oninput="updateBatchPreview()">
+        </div>
+      </div>
+
+      <!-- Naming prefix / numbering -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Name Format</label>
+          <select class="form-select" id="batch-name-format" onchange="updateBatchPreview()">
+            <option value="numbered">Strain #1, #2, #3…</option>
+            <option value="alpha">Strain A, B, C…</option>
+            <option value="plain">Strain (no suffix)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Number / Letter</label>
+          <input class="form-input" type="number" id="batch-start-num" value="1" min="1" max="99" oninput="updateBatchPreview()">
+        </div>
+      </div>
+
+      <!-- Preview strip -->
+      <div id="batch-preview" style="font-family:var(--mono);font-size:0.6rem;color:var(--green);background:var(--bg3);border:1px solid var(--border);padding:0.6rem 0.9rem;border-radius:2px;margin-bottom:0.75rem;line-height:1.8;min-height:2.5rem"></div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:0.25rem 0 1rem">
+
+      <!-- Clone-specific fields (shown when mode=clone) -->
+      <div id="batch-clone-fields">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="batch-clone-status">
+              <option value="rooting">Rooting (in dome)</option>
+              <option value="stasis">Stasis (solo cup)</option>
+              <option value="rooted">Rooted ✓</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned Tent</label>
+            <select class="form-select" id="batch-clone-tent">
+              <option value="">— None / Unassigned —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Cut Date</label>
+            <input class="form-input" type="date" id="batch-clone-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rooting Method</label>
+            <select class="form-select" id="batch-clone-method">
+              <option value="">— Select —</option>
+              <option value="clonex-rockwool">Clonex + Rockwool</option>
+              <option value="bubble-cloner">Bubble Cloner</option>
+              <option value="solo-soil">Solo Cup (soil)</option>
+              <option value="water">Water Rooting</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mother Plant / Source</label>
+            <input class="form-input" type="text" id="batch-clone-mother" placeholder="e.g. CBD Runtz P1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location / Detail</label>
+            <input class="form-input" type="text" id="batch-clone-location" placeholder="e.g. AC Infinity Dome">
+          </div>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:0.75rem">
+          <input type="checkbox" id="batch-clone-breed" style="width:16px;height:16px;accent-color:var(--amber)">
+          <label class="form-label" for="batch-clone-breed" style="margin:0;cursor:pointer">Breeding stock — flag all for preservation</label>
+        </div>
+      </div>
+
+      <!-- Plant-specific fields (shown when mode=plant) -->
+      <div id="batch-plant-fields" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tent</label>
+            <select class="form-select" id="batch-plant-tent"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stage</label>
+            <select class="form-select" id="batch-plant-stage">
+              <option value="seedling">Seedling</option>
+              <option value="clone">Clone</option>
+              <option value="veg">Veg</option>
+              <option value="flower">Flower</option>
+              <option value="late">Late Flower</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Day in Stage</label>
+            <input class="form-input" type="number" id="batch-plant-day" placeholder="1" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Flower Length (days)</label>
+            <input class="form-input" type="number" id="batch-plant-flowerlen" placeholder="63" min="42" max="100">
+          </div>
+        </div>
+      </div>
+
+      <!-- Shared notes -->
+      <div class="form-group" style="margin-top:0.75rem">
+        <label class="form-label">Notes (applied to all)</label>
+        <textarea class="form-textarea" id="batch-notes" placeholder="Shared notes for this batch…" style="height:60px"></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);margin-right:auto" id="batch-footer-count"></div>
+      <button class="btn btn-ghost" onclick="closeModal('modal-batch-add')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBatchAdd()" id="batch-save-btn">Add Batch</button>
     </div>
   </div>
 </div>
@@ -3809,7 +3950,10 @@ function renderClones() {
 
     <div class="flex-between mb-md">
       <div class="section-title">All Clones</div>
-      <button class="btn btn-primary" onclick="openAddClone()" style="font-size:0.6rem;padding:0.4rem 0.8rem">+ Add Clone</button>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn btn-ghost" onclick="openBatchAdd('clone')" style="font-size:0.6rem;padding:0.4rem 0.8rem">+ Batch Add</button>
+        <button class="btn btn-primary" onclick="openAddClone()" style="font-size:0.6rem;padding:0.4rem 0.8rem">+ Add Clone</button>
+      </div>
     </div>
 
     ${dome.length ? `
@@ -4208,6 +4352,166 @@ function addPlant() {
   closeModal('modal-plant');
   renderPlants();
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// BATCH ADD
+// ═══════════════════════════════════════════════════════════════════
+
+let _batchMode = 'clone'; // 'clone' or 'plant'
+
+function openBatchAdd(mode) {
+  _batchMode = mode;
+
+  // Title
+  document.getElementById('batch-modal-title').textContent =
+    mode === 'clone' ? 'Batch Add Clones' : 'Batch Add Plants';
+
+  // Show/hide field groups
+  document.getElementById('batch-clone-fields').style.display = mode === 'clone' ? '' : 'none';
+  document.getElementById('batch-plant-fields').style.display = mode === 'plant' ? '' : 'none';
+
+  // Reset common fields
+  document.getElementById('batch-strain').value = '';
+  document.getElementById('batch-qty').value = '2';
+  document.getElementById('batch-name-format').value = 'numbered';
+  document.getElementById('batch-start-num').value = '1';
+  document.getElementById('batch-notes').value = '';
+
+  if (mode === 'clone') {
+    // Populate tent selector
+    const ts = document.getElementById('batch-clone-tent');
+    ts.innerHTML = '<option value="">— None / Unassigned —</option>' +
+      TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    document.getElementById('batch-clone-status').value = 'rooting';
+    document.getElementById('batch-clone-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('batch-clone-method').value = '';
+    document.getElementById('batch-clone-mother').value = '';
+    document.getElementById('batch-clone-location').value = '';
+    document.getElementById('batch-clone-breed').checked = false;
+  } else {
+    const ts = document.getElementById('batch-plant-tent');
+    ts.innerHTML = TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    document.getElementById('batch-plant-stage').value = 'seedling';
+    document.getElementById('batch-plant-day').value = '';
+    document.getElementById('batch-plant-flowerlen').value = '';
+  }
+
+  updateBatchPreview();
+  openModal('modal-batch-add');
+
+  // Focus strain input after open
+  setTimeout(() => document.getElementById('batch-strain').focus(), 120);
+}
+
+function _batchNames(strain, qty, format, startNum) {
+  if (!strain) strain = 'Plant';
+  const names = [];
+  for (let i = 0; i < qty; i++) {
+    if (format === 'plain') {
+      names.push(strain);
+    } else if (format === 'alpha') {
+      const letter = String.fromCharCode(64 + startNum + i); // A=65
+      names.push(`${strain} ${letter}`);
+    } else {
+      names.push(`${strain} #${startNum + i}`);
+    }
+  }
+  return names;
+}
+
+function updateBatchPreview() {
+  const strain = document.getElementById('batch-strain').value.trim() || 'Strain';
+  const qty    = Math.min(25, Math.max(1, parseInt(document.getElementById('batch-qty').value) || 1));
+  const format = document.getElementById('batch-name-format').value;
+  const start  = Math.max(1, parseInt(document.getElementById('batch-start-num').value) || 1);
+
+  const names = _batchNames(strain, qty, format, start);
+
+  // Show first 5, then ellipsis
+  const preview = document.getElementById('batch-preview');
+  const shown = names.slice(0, 5);
+  const rest  = names.length > 5 ? ` … +${names.length - 5} more` : '';
+  preview.textContent = shown.join('  ·  ') + rest;
+
+  document.getElementById('batch-footer-count').textContent =
+    `${qty} ${_batchMode}${qty !== 1 ? 's' : ''} will be created`;
+  document.getElementById('batch-save-btn').textContent = `Add ${qty} ${_batchMode === 'clone' ? 'Clone' : 'Plant'}${qty !== 1 ? 's' : ''}`;
+}
+
+function saveBatchAdd() {
+  const strain = document.getElementById('batch-strain').value.trim();
+  if (!strain) { showToast('error', '✕', 'Strain name required'); return; }
+
+  const qty    = Math.min(25, Math.max(1, parseInt(document.getElementById('batch-qty').value) || 1));
+  const format = document.getElementById('batch-name-format').value;
+  const start  = Math.max(1, parseInt(document.getElementById('batch-start-num').value) || 1);
+  const notes  = document.getElementById('batch-notes').value.trim();
+  const names  = _batchNames(strain, qty, format, start);
+
+  if (_batchMode === 'clone') {
+    const status   = document.getElementById('batch-clone-status').value;
+    const tent     = document.getElementById('batch-clone-tent').value || null;
+    const startDate= document.getElementById('batch-clone-date').value || null;
+    const method   = document.getElementById('batch-clone-method').value || null;
+    const mother   = document.getElementById('batch-clone-mother').value.trim() || null;
+    const location = document.getElementById('batch-clone-location').value.trim() || 'Unknown';
+    const breedStock = document.getElementById('batch-clone-breed').checked;
+
+    const now = Date.now();
+    names.forEach((name, i) => {
+      clones.push({
+        id: `clone-${now}-${i}`,
+        strain: name,
+        status,
+        tent,
+        startDate,
+        daysIn: 1,
+        method,
+        mother,
+        location,
+        breedStock,
+        notes,
+        _hidden: false,
+        _batchId: `batch-${now}`, // tag so you can identify the batch later
+      });
+    });
+    localStorage.setItem('growops-clones', JSON.stringify(clones));
+
+  } else {
+    // Plants
+    const tentVal    = document.getElementById('batch-plant-tent').value;
+    const stage      = document.getElementById('batch-plant-stage').value;
+    const dayInStage = parseInt(document.getElementById('batch-plant-day').value) || 1;
+    const flowerLen  = parseInt(document.getElementById('batch-plant-flowerlen').value) || 63;
+
+    const now = Date.now();
+    names.forEach((name, i) => {
+      customPlants.push({
+        id: `custom-${now}-${i}`,
+        strain: name,
+        tent: tentVal,
+        stage,
+        dayInStage,
+        flowerLen,
+        notes,
+        stageStartDate: null,
+        _batchId: `batch-${now}`,
+      });
+    });
+    localStorage.setItem('growops-plants', JSON.stringify(customPlants));
+    allPlants = resolvePlants();
+  }
+
+  closeModal('modal-batch-add');
+  refreshAllActivePages();
+  showToast('success', '✓', `${qty} ${_batchMode}${qty !== 1 ? 's' : ''} added — "${strain}"`);
+}
+
+// Live preview on strain input too
+document.addEventListener('DOMContentLoaded', () => {
+  const strainInput = document.getElementById('batch-strain');
+  if (strainInput) strainInput.addEventListener('input', updateBatchPreview);
+});
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }

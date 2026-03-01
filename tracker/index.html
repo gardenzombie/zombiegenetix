@@ -3830,7 +3830,7 @@ async function sendChatMessage() {
       body: JSON.stringify({
         model,
         max_tokens: 1500,
-        system: 'You are an expert cannabis cultivation assistant integrated into GrowOps, a personal grow tracking app. You have deep knowledge of living soil methodology, organic amendments, terpene profiles, cannabinoid science, photoperiod and autoflower cultivation, cloning, and breeding. Keep responses practical and tailored to the grower\'s specific setup. Be concise but thorough. Format with markdown where helpful.',
+        system: 'You are an expert cannabis cultivation assistant integrated into Grow Tracker, a personal grow tracking app. You have deep knowledge of living soil methodology, organic amendments, terpene profiles, cannabinoid science, photoperiod and autoflower cultivation, cloning, and breeding. Keep responses practical and tailored to the grower\'s specific setup. Be concise but thorough. Format with markdown where helpful.',
         messages
       })
     });
@@ -4612,7 +4612,7 @@ function shareWithClaude() {
   const profileNames = Object.values(strainProfiles).map(function(s) { return s.name; }).join(', ') || 'None';
 
   const lines = [
-    '=== GrowOps Snapshot \u2014 ' + todayStr + ' ===',
+    '=== Grow Tracker Snapshot \u2014 ' + todayStr + ' ===',
     '',
     'TENTS',
     tentBlock,

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genetics — Zombie Genetix</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Unbounded:wght@300;400;600;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#060a06; --bg2:#0a0f0a; --card:#0d150d; --border:#1a2a1a;
+    --green:#4ade80; --green2:#22c55e; --green3:#16a34a;
+    --amber:#fbbf24; --purple:#c084fc;
+    --text:#e2ece2; --text2:#8aaa8a; --text3:#4a644a;
+    --mono:'Space Mono',monospace; --head:'Unbounded',sans-serif; --body:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.5}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;background:rgba(6,10,6,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(74,222,128,0.08)}
+  .nav-wordmark{text-decoration:none}
+  .nav-zombie{display:block;font-family:var(--head);font-weight:900;font-size:0.7rem;letter-spacing:0.25em;color:var(--green);text-transform:uppercase;line-height:1}
+  .nav-genetix{display:block;font-family:var(--head);font-weight:300;font-size:0.6rem;letter-spacing:0.4em;color:var(--text3);text-transform:uppercase;line-height:1}
+  .nav-back{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color 0.2s}
+  .nav-back:hover{color:var(--green)}
+
+  .page-wrap{padding:8rem 2rem 5rem;max-width:1100px;margin:0 auto}
+
+  .page-eyebrow{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;opacity:0;animation:fadeUp 0.7s ease 0.1s forwards}
+  .page-heading{font-family:var(--head);font-weight:900;font-size:clamp(2rem,6vw,4rem);letter-spacing:-0.02em;color:var(--text);margin-bottom:1.5rem;line-height:1.05;opacity:0;animation:fadeUp 0.8s ease 0.2s forwards}
+  .page-sub{font-size:0.9rem;color:var(--text2);line-height:1.8;max-width:560px;margin-bottom:4rem;opacity:0;animation:fadeUp 0.8s ease 0.3s forwards}
+
+  /* strain grid */
+  .strain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;opacity:0;animation:fadeUp 0.9s ease 0.45s forwards}
+
+  .strain-card{background:var(--card);border:1px solid var(--border);padding:0;overflow:hidden;transition:border-color 0.25s,transform 0.2s;cursor:default}
+  .strain-card:hover{transform:translateY(-2px)}
+  .strain-card.cinnabar:hover{border-color:rgba(251,191,36,0.3)}
+  .strain-card.brujo:hover{border-color:rgba(192,132,252,0.3)}
+  .strain-card.coming:hover{border-color:rgba(74,222,128,0.15)}
+
+  .strain-img-placeholder{height:200px;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;overflow:hidden}
+  .strain-card.cinnabar .strain-img-placeholder{background:linear-gradient(135deg,#1a1000 0%,#2a1800 50%,#1a0800 100%)}
+  .strain-card.brujo    .strain-img-placeholder{background:linear-gradient(135deg,#0f0a1a 0%,#1a0f2a 50%,#0a0818 100%)}
+  .strain-card.coming   .strain-img-placeholder{background:var(--bg2)}
+
+  .img-label{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;position:absolute;bottom:0.75rem;left:1rem;opacity:0.4}
+  .strain-card.cinnabar .img-label{color:var(--amber)}
+  .strain-card.brujo    .img-label{color:var(--purple)}
+
+  .strain-body{padding:1.5rem}
+  .strain-badge{display:inline-block;font-family:var(--mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:1px;margin-bottom:0.75rem}
+  .strain-card.cinnabar .strain-badge{background:rgba(251,191,36,0.1);color:var(--amber)}
+  .strain-card.brujo    .strain-badge{background:rgba(192,132,252,0.1);color:var(--purple)}
+  .strain-card.coming   .strain-badge{background:rgba(74,222,128,0.05);color:var(--text3)}
+
+  .strain-name{font-family:var(--head);font-weight:700;font-size:1.1rem;letter-spacing:-0.01em;color:var(--text);margin-bottom:0.35rem}
+  .strain-lineage{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--text3);margin-bottom:1rem}
+  .strain-desc{font-size:0.8rem;color:var(--text2);line-height:1.65;margin-bottom:1.25rem}
+
+  .strain-tags{display:flex;flex-wrap:wrap;gap:0.4rem}
+  .strain-tag{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.55rem;border:1px solid var(--border);color:var(--text3)}
+
+  /* coming soon placeholder */
+  .coming-soon-card{border:1px dashed var(--border);padding:2.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.75rem;min-height:200px}
+  .coming-soon-card .cs-icon{font-size:1.5rem;opacity:0.3}
+  .coming-soon-card .cs-label{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3)}
+
+  /* update callout */
+  .callout{margin-top:4rem;padding:2rem;background:var(--card);border:1px solid var(--border);border-left:2px solid var(--green3);display:flex;align-items:flex-start;gap:1.5rem;opacity:0;animation:fadeUp 0.8s ease 0.6s forwards}
+  .callout-icon{font-size:1.25rem;flex-shrink:0}
+  .callout-head{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:0.5rem}
+  .callout-body{font-size:0.82rem;color:var(--text2);line-height:1.7}
+
+  footer{margin-top:5rem;padding:2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+  .footer-left,.footer-right{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
+  .footer-right a{color:var(--text3);text-decoration:none}
+  .footer-right a:hover{color:var(--green)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:600px){nav{padding:0 1.5rem}.page-wrap{padding:6rem 1.5rem 4rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-wordmark" href="/">
+    <span class="nav-zombie">Zombie</span>
+    <span class="nav-genetix">Genetix</span>
+  </a>
+  <a class="nav-back" href="/">← Back to home</a>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-eyebrow">F1 Breeding Projects</div>
+  <h1 class="page-heading">Genetics<br>Showcase</h1>
+  <p class="page-sub">
+    All genetics documented here are personal F1 crosses developed under a Health Canada ACMPR licence. No seeds or plants are available for sale or trade. This is strictly a cultivation record.
+  </p>
+
+  <div class="strain-grid">
+
+    <!-- CinnaBar Dust -->
+    <div class="strain-card cinnabar">
+      <div class="strain-img-placeholder">
+        🌿
+        <span class="img-label">Photos coming</span>
+      </div>
+      <div class="strain-body">
+        <span class="strain-badge">F1 · In Development</span>
+        <div class="strain-name">CinnaBar Dust</div>
+        <div class="strain-lineage">CBD Runtz × Red Toba</div>
+        <p class="strain-desc">
+          A CBD-dominant F1 cross chasing warm spice terpene expression from the Red Toba heritage, grounded by the sweet resin profile of CBD Runtz. Still in early documentation phase.
+        </p>
+        <div class="strain-tags">
+          <span class="strain-tag">CBD-Dom</span>
+          <span class="strain-tag">F1</span>
+          <span class="strain-tag">Spice</span>
+          <span class="strain-tag">Living Soil</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brujo Dulce -->
+    <div class="strain-card brujo">
+      <div class="strain-img-placeholder">
+        🔮
+        <span class="img-label">Photos coming</span>
+      </div>
+      <div class="strain-body">
+        <span class="strain-badge">F1 · In Development</span>
+        <div class="strain-name">Brujo Dulce</div>
+        <div class="strain-lineage">CBD Runtz × Purple Mexican</div>
+        <p class="strain-desc">
+          Targeting the floral purple-fruit terpene expression of the Purple Mexican landrace against the sweet candy baseline of CBD Runtz. CBD-dominant with unique visual potential.
+        </p>
+        <div class="strain-tags">
+          <span class="strain-tag">CBD-Dom</span>
+          <span class="strain-tag">F1</span>
+          <span class="strain-tag">Floral</span>
+          <span class="strain-tag">Purple Phenos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder for more -->
+    <div class="coming-soon-card">
+      <div class="cs-icon">⚗️</div>
+      <div class="cs-label">More crosses in the lab</div>
+    </div>
+
+  </div>
+
+  <div class="callout">
+    <div class="callout-icon">📋</div>
+    <div>
+      <div class="callout-head">Documentation in Progress</div>
+      <p class="callout-body">
+        Strain cards will be updated with grow photos, pheno selection notes, terpene observations, and lineage charts as each cross matures through the breeding pipeline. Check back as the seasons progress.
+      </p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">© 2025 Zombie Genetix · No sales · HC Licensed</div>
+  <div class="footer-right">
+    <a href="/">Home</a> &nbsp;·&nbsp;
+    <a href="/tracker/">GrowOps</a>
+  </div>
+</footer>
+
+</body>
+</html>

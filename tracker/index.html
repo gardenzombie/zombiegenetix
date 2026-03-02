@@ -59,7 +59,7 @@
   nav {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200;
     background: rgba(10,15,10,0.92);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
@@ -108,6 +108,77 @@
   }
   .nav-tab:hover { color: var(--text2); }
   .nav-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  /* Hamburger button */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    background: none;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 3px;
+    transition: border-color 0.2s;
+  }
+  .nav-hamburger:hover { border-color: var(--green); }
+  .nav-hamburger span {
+    display: block;
+    height: 2px;
+    background: var(--text2);
+    border-radius: 1px;
+    transition: background 0.2s;
+  }
+  .nav-hamburger:hover span { background: var(--green); }
+
+  /* Mobile nav drawer */
+  .nav-drawer {
+    display: none;
+    position: fixed;
+    top: 56px;
+    left: 0; right: 0;
+    background: rgba(10,15,10,0.98);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 199;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .nav-drawer.open { display: flex; }
+  .nav-drawer-tab {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    border: none;
+    background: none;
+    color: var(--text3);
+    cursor: pointer;
+    text-align: left;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-drawer-tab:hover { color: var(--text2); background: var(--bg2); }
+  .nav-drawer-tab.active { color: var(--green); border-left-color: var(--green); background: var(--green-dim); }
+  .nav-drawer-divider { height: 1px; background: var(--border); margin: 0.4rem 0; }
+  .nav-drawer-actions { display: flex; gap: 0.5rem; padding: 0.75rem 2rem; flex-wrap: wrap; }
+
+  /* Responsive breakpoint */
+  @media (max-width: 900px) {
+    .nav-tabs { display: none; }
+    .nav-hamburger { display: flex; }
+    nav { gap: 1rem; }
+    .nav-actions { display: none; }
+  }
+  @media (min-width: 901px) {
+    .nav-drawer { display: none !important; }
+  }
 
   /* ── CALENDAR ───────────────────────────────────────────── */
   .cal-header-cell {
@@ -876,13 +947,37 @@
     <button class="nav-tab" onclick="showPage('retired')">Retired</button>
     <button class="nav-tab" onclick="showPage('claude')" style="color:var(--green2)">✦ Ask Claude</button>
   </div>
-  <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0">
+  <div class="nav-actions" style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0">
     <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem" onclick="exportData()">⬇ Export</button>
     <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem" onclick="openModal('modal-import')">⬆ Import</button>
     <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem;color:var(--green2);border-color:var(--green2)" onclick="shareWithClaude()">✦ Share with Claude</button>
   </div>
+  <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
   <div class="nav-date" id="nav-date"></div>
 </nav>
+
+<!-- Mobile nav drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <button class="nav-drawer-tab active" id="drawer-tab-dashboard" onclick="showPage('dashboard');closeNavDrawer()">Dashboard</button>
+  <button class="nav-drawer-tab" id="drawer-tab-tents" onclick="showPage('tents');closeNavDrawer()">Tents</button>
+  <button class="nav-drawer-tab" id="drawer-tab-plants" onclick="showPage('plants');closeNavDrawer()">Plants</button>
+  <button class="nav-drawer-tab" id="drawer-tab-log" onclick="showPage('log');closeNavDrawer()">Feed &amp; Water Log</button>
+  <button class="nav-drawer-tab" id="drawer-tab-teas" onclick="showPage('teas');closeNavDrawer()">Recipes</button>
+  <button class="nav-drawer-tab" id="drawer-tab-environment" onclick="showPage('environment');closeNavDrawer()">Environment</button>
+  <button class="nav-drawer-tab" id="drawer-tab-clones" onclick="showPage('clones');closeNavDrawer()">Clones</button>
+  <button class="nav-drawer-tab" id="drawer-tab-breeding" onclick="showPage('breeding');closeNavDrawer()">Breeding</button>
+  <button class="nav-drawer-tab" id="drawer-tab-timeline" onclick="showPage('timeline');closeNavDrawer()">Timeline</button>
+  <button class="nav-drawer-tab" id="drawer-tab-retired" onclick="showPage('retired');closeNavDrawer()">Retired</button>
+  <button class="nav-drawer-tab" id="drawer-tab-claude" onclick="showPage('claude');closeNavDrawer()" style="color:var(--green2)">✦ Ask Claude</button>
+  <div class="nav-drawer-divider"></div>
+  <div class="nav-drawer-actions">
+    <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem" onclick="exportData();closeNavDrawer()">⬇ Export</button>
+    <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem" onclick="openModal('modal-import');closeNavDrawer()">⬆ Import</button>
+    <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem;color:var(--green2);border-color:var(--green2)" onclick="shareWithClaude();closeNavDrawer()">✦ Share with Claude</button>
+  </div>
+</div>
 
 <main>
 
@@ -1956,10 +2051,11 @@
 <div class="modal-overlay" id="modal-breeding">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">New Breeding Project</div>
+      <div class="modal-title" id="breeding-modal-title">New Breeding Project</div>
       <button class="modal-close" onclick="closeModal('modal-breeding')">✕</button>
     </div>
     <div class="modal-body">
+      <input type="hidden" id="breed-edit-id">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Mother (♀)</label>
@@ -1999,8 +2095,9 @@
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-danger" id="breed-delete-btn" onclick="deleteBreedingFromModal()" style="margin-right:auto;display:none">Delete Project</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-breeding')">Cancel</button>
-      <button class="btn btn-primary" onclick="addBreeding()">Add Project</button>
+      <button class="btn btn-primary" id="breed-save-btn" onclick="saveBreeding()">Add Project</button>
     </div>
   </div>
 </div>
@@ -2537,11 +2634,14 @@ let allPlants = resolvePlants();
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-drawer-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   const tabMap = {
     dashboard: 0, tents: 1, plants: 2, log: 3, teas: 4, environment: 5, clones: 6, breeding: 7, timeline: 8, retired: 9
   };
   document.querySelectorAll('.nav-tab')[tabMap[id]]?.classList.add('active');
+  const drawerTab = document.getElementById('drawer-tab-' + id);
+  if (drawerTab) drawerTab.classList.add('active');
   if (id === 'dashboard') renderDashboard();
   if (id === 'tents') renderTents();
   if (id === 'plants') renderPlants();
@@ -2554,6 +2654,20 @@ function showPage(id) {
   if (id === 'retired') renderRetired();
   if (id === 'claude') renderClaudePage();
 }
+
+function toggleNavDrawer() {
+  document.getElementById('nav-drawer').classList.toggle('open');
+}
+function closeNavDrawer() {
+  document.getElementById('nav-drawer').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  const drawer = document.getElementById('nav-drawer');
+  const hamburger = document.getElementById('nav-hamburger');
+  if (drawer && hamburger && !drawer.contains(e.target) && !hamburger.contains(e.target)) {
+    drawer.classList.remove('open');
+  }
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // HELPERS
@@ -4220,7 +4334,10 @@ function renderBreeding() {
                 <div style="font-family:var(--head);font-size:0.8rem;font-weight:600;color:var(--amber)">${b.name}</div>
                 <div class="text-mono text-dim mt-sm">Created ${formatDateShort(b.created)}</div>
               </div>
-              <span class="stage-badge ${statusInfo.color}">${statusInfo.label}</span>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                <button onclick="openEditBreeding('${b.id}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.25rem 0.6rem;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:2px" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border2)'">✏ Edit</button>
+                <span class="stage-badge ${statusInfo.color}">${statusInfo.label}</span>
+              </div>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.75rem;padding:0.6rem 0.75rem;background:var(--bg3);border:1px solid var(--border);border-radius:5px">
@@ -4300,28 +4417,69 @@ function deleteBreeding(id) {
   renderBreeding();
 }
 
-function openAddBreeding() { openModal('modal-breeding'); }
+function openAddBreeding() {
+  document.getElementById('breed-edit-id').value = '';
+  document.getElementById('breed-mother').value = '';
+  document.getElementById('breed-father').value = '';
+  document.getElementById('breed-name').value = '';
+  document.getElementById('breed-status').value = 'planning';
+  document.getElementById('breed-seeds').value = '';
+  document.getElementById('breed-notes').value = '';
+  document.getElementById('breeding-modal-title').textContent = 'New Breeding Project';
+  document.getElementById('breed-save-btn').textContent = 'Add Project';
+  document.getElementById('breed-delete-btn').style.display = 'none';
+  openModal('modal-breeding');
+}
 
-function addBreeding() {
+function openEditBreeding(id) {
+  const b = breedingProjects.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('breed-edit-id').value = id;
+  document.getElementById('breed-mother').value = b.mother || '';
+  document.getElementById('breed-father').value = b.father || '';
+  document.getElementById('breed-name').value = b.name || '';
+  document.getElementById('breed-status').value = b.status || 'planning';
+  document.getElementById('breed-seeds').value = b.seeds ?? '';
+  document.getElementById('breed-notes').value = b.goal || '';
+  document.getElementById('breeding-modal-title').textContent = 'Edit — ' + b.name;
+  document.getElementById('breed-save-btn').textContent = 'Save Changes';
+  document.getElementById('breed-delete-btn').style.display = 'inline-flex';
+  openModal('modal-breeding');
+}
+
+function saveBreeding() {
+  const id = document.getElementById('breed-edit-id').value;
   const mother = document.getElementById('breed-mother').value.trim();
   const father = document.getElementById('breed-father').value.trim();
   const name = document.getElementById('breed-name').value.trim();
-  if (!name || !mother) return;
-  const project = {
-    id: 'b' + Date.now(),
-    name,
-    mother,
-    father,
+  if (!name || !mother) { showToast('error', '✕', 'Project name and mother required'); return; }
+  const data = {
+    name, mother, father,
     status: document.getElementById('breed-status').value,
     seeds: parseInt(document.getElementById('breed-seeds').value) || null,
-    goal: document.getElementById('breed-notes').value,
-    created: TODAY_STR,
-    log: []
+    goal: document.getElementById('breed-notes').value.trim(),
   };
-  breedingProjects.push(project);
+  if (id) {
+    breedingProjects = breedingProjects.map(b => b.id === id ? { ...b, ...data } : b);
+    showToast('success', '✓', 'Breeding project updated');
+  } else {
+    breedingProjects.push({ id: 'b' + Date.now(), ...data, created: TODAY_STR, log: [] });
+    showToast('success', '✓', 'Breeding project added');
+  }
   localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
   closeModal('modal-breeding');
   renderBreeding();
+}
+
+function deleteBreedingFromModal() {
+  const id = document.getElementById('breed-edit-id').value;
+  if (!id) return;
+  if (!confirm('Delete this breeding project? This cannot be undone.')) return;
+  breedingProjects = breedingProjects.filter(b => b.id !== id);
+  localStorage.setItem('growtracker-breeding', JSON.stringify(breedingProjects));
+  closeModal('modal-breeding');
+  renderBreeding();
+  showToast('info', '✕', 'Breeding project deleted');
 }
 
 // ═══════════════════════════════════════════════════════════════════

@@ -55,7 +55,7 @@
     opacity: 0.4;
   }
 
-  /* NAV */
+  /* NAV — hamburger is the DEFAULT, full tabs only on very wide screens */
   nav {
     position: sticky;
     top: 0;
@@ -66,7 +66,7 @@
     padding: 0 2rem;
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
     height: 56px;
   }
 
@@ -82,8 +82,9 @@
 
   .nav-logo span { color: var(--text3); font-weight: 300; }
 
+  /* Tabs hidden by default — only shown on very wide screens */
   .nav-tabs {
-    display: flex;
+    display: none;
     gap: 0;
     flex: 1;
     overflow-x: auto;
@@ -109,9 +110,9 @@
   .nav-tab:hover { color: var(--text2); }
   .nav-tab.active { color: var(--green); border-bottom-color: var(--green); }
 
-  /* Hamburger button */
+  /* Hamburger visible by default */
   .nav-hamburger {
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 5px;
@@ -169,16 +170,16 @@
   .nav-drawer-divider { height: 1px; background: var(--border); margin: 0.4rem 0; }
   .nav-drawer-actions { display: flex; gap: 0.5rem; padding: 0.75rem 2rem; flex-wrap: wrap; }
 
-  /* Responsive breakpoint */
-  @media (max-width: 2600px) {
-    .nav-tabs { display: none; }
-    .nav-hamburger { display: flex; }
-    nav { gap: 1rem; }
-    .nav-actions { display: none; }
-  }
-  @media (min-width: 2601px) {
+  /* Wide screen only — show full tab bar, hide hamburger */
+  @media (min-width: 1500px) {
+    .nav-tabs { display: flex; }
+    .nav-hamburger { display: none; }
+    nav { gap: 2rem; }
+    .nav-actions { display: flex !important; }
     .nav-drawer { display: none !important; }
   }
+  /* nav-actions hidden by default (mobile/mid), shown only on wide */
+  .nav-actions { display: none; }
 
   /* ── CALENDAR ───────────────────────────────────────────── */
   .cal-header-cell {

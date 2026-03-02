@@ -1321,6 +1321,15 @@
       <hr class="divider">
       <div class="section-title mb-md">Today's Tasks</div>
       <div id="dash-tasks"></div>
+      <hr class="divider">
+      <div class="section-title mb-md">Dry-back Status</div>
+      <div id="dash-dryback"></div>
+      <hr class="divider">
+      <div class="section-title mb-md" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Daily Top Water</span>
+        <button class="btn btn-ghost" style="font-size:0.55rem;height:26px;padding:0 0.6rem" onclick="resetTopWaterChecks()">Reset</button>
+      </div>
+      <div id="dash-topwater"></div>
     </div>
   </div>
 </div>
@@ -1370,13 +1379,15 @@
       </div>
       <div class="form-group">
         <label class="form-label">Type</label>
-        <select class="form-select" id="quick-type">
-          <option value="water">Water Only</option>
+        <select class="form-select" id="quick-type" onchange="updateQuickLogFields()">
+          <option value="reservoir">Reservoir Refill</option>
+          <option value="topwater">Top Water</option>
+          <option value="foliar">Foliar Spray</option>
           <option value="feed">Feed + Water</option>
           <option value="tea">Compost Tea</option>
+          <option value="water">Water Only</option>
           <option value="flush">Flush</option>
           <option value="topsoil">Top Dress</option>
-          <option value="foliar">Foliar Spray</option>
           <option value="ipm">IPM / Pest Control</option>
         </select>
       </div>
@@ -1389,9 +1400,40 @@
         <input class="form-input" type="number" id="quick-ph" placeholder="6.3" step="0.1" min="5" max="8">
       </div>
     </div>
+    <!-- Reservoir-specific fields -->
+    <div id="quick-reservoir-fields" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Dry-back Window (days)</label>
+          <input class="form-input" type="number" id="quick-dryback" placeholder="e.g. 3" min="1" max="14" step="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Base visual check</label>
+          <select class="form-select" id="quick-visual">
+            <option value="">— Select —</option>
+            <option value="dry">Dry — confirmed by lift</option>
+            <option value="dry-visual">Dry — visual only</option>
+            <option value="damp">Still damp</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- Foliar-specific fields -->
+    <div id="quick-foliar-fields" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Product / Solution</label>
+          <input class="form-input" type="text" id="quick-foliar-product" placeholder="e.g. Silicate, plain water, Cal/Mag">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dilution / Concentration</label>
+          <input class="form-input" type="text" id="quick-foliar-dilution" placeholder="e.g. 1ml/L, plain">
+        </div>
+      </div>
+    </div>
     <div class="form-group">
       <label class="form-label">Notes</label>
-      <input class="form-input" type="text" id="quick-notes" placeholder="Runoff pH, observations, amendments used...">
+      <input class="form-input" type="text" id="quick-notes" placeholder="Observations, amendments used...">
     </div>
     <button class="btn btn-primary" onclick="quickLog()">Log Now</button>
   </div>
@@ -1792,12 +1834,14 @@
         <div class="form-group">
           <label class="form-label">Type</label>
           <select class="form-select" id="edit-log-type">
-            <option value="water">Water Only</option>
+            <option value="reservoir">Reservoir Refill</option>
+            <option value="topwater">Top Water</option>
+            <option value="foliar">Foliar Spray</option>
             <option value="feed">Feed + Water</option>
             <option value="tea">Compost Tea</option>
+            <option value="water">Water Only</option>
             <option value="flush">Flush</option>
             <option value="topsoil">Top Dress</option>
-            <option value="foliar">Foliar Spray</option>
             <option value="ipm">IPM / Pest Control</option>
           </select>
         </div>
@@ -2918,6 +2962,9 @@ const DEFAULT_BREEDING = [
 ];
 
 let feedLog = JSON.parse(localStorage.getItem('growtracker-log') || '[]');
+let topWaterChecks = JSON.parse(localStorage.getItem('growtracker-topwater') || '{}');
+const _twDate = localStorage.getItem('growtracker-topwater-date');
+if (_twDate !== TODAY_STR) { topWaterChecks = {}; localStorage.setItem('growtracker-topwater-date', TODAY_STR); }
 let customPlants = JSON.parse(localStorage.getItem('growtracker-plants') || '[]');
 let breedingProjects = JSON.parse(localStorage.getItem('growtracker-breeding') || JSON.stringify(DEFAULT_BREEDING));
 
@@ -3178,6 +3225,7 @@ function renderDashboard() {
 
   // Tasks
   const tasks = document.getElementById('dash-tasks');
+  renderWateringWidgets();
   const waterTasks = allPlants.map(p => {
     const dsw = daysSinceWatered(p.id);
     if (dsw === null || dsw >= 2) {
@@ -3808,11 +3856,12 @@ function renderLogTable() {
   }
   empty.style.display = 'none';
   tbody.innerHTML = [...feedLog].reverse().map(e => {
-    const typeColors = { water: 'action-water', feed: 'action-feed', tea: 'action-feed', flush: 'action-flush', topsoil: 'action-check', foliar: 'action-water', ipm: 'action-check' };
+    const typeColors = { water: 'action-water', feed: 'action-feed', tea: 'action-feed', flush: 'action-flush', topsoil: 'action-check', foliar: 'action-water', ipm: 'action-check', reservoir: 'action-water', topwater: 'action-water' };
+    const typeLabels = { reservoir: 'Reservoir Refill', topwater: 'Top Water', foliar: 'Foliar Spray', feed: 'Feed + Water', tea: 'Compost Tea', water: 'Water Only', flush: 'Flush', topsoil: 'Top Dress', ipm: 'IPM' };
     return `<tr>
       <td>${formatDate(e.date)}</td>
       <td style="color:var(--text)">${e.plantName}</td>
-      <td><span class="plant-action ${typeColors[e.type] || 'action-check'}">${e.type}</span></td>
+      <td><span class="plant-action ${typeColors[e.type] || 'action-check'}">${typeLabels[e.type] || e.type}</span></td>
       <td class="text-mono">${e.vol ? e.vol + 'L' : '—'}</td>
       <td class="text-mono" style="color:${e.ph && (e.ph < 6.0 || e.ph > 7.0) ? 'var(--amber)' : 'var(--green)'}">${e.ph || '—'}</td>
       <td style="max-width:180px;word-break:break-word">${e.notes || '—'}</td>
@@ -3883,26 +3932,164 @@ function deleteLogEntry(id) {
   showToast('info', '✕', 'Entry deleted');
 }
 
+function updateQuickLogFields() {
+  const type = document.getElementById('quick-type').value;
+  document.getElementById('quick-reservoir-fields').style.display = type === 'reservoir' ? '' : 'none';
+  document.getElementById('quick-foliar-fields').style.display   = type === 'foliar'    ? '' : 'none';
+}
+
 function quickLog() {
   allPlants = resolvePlants();
   const plantId = document.getElementById('quick-plant').value;
-  const plant = allPlants.find(p => p.id === plantId);
+  const plant   = allPlants.find(p => p.id === plantId);
+  const type    = document.getElementById('quick-type').value;
+  const extras  = {};
+  if (type === 'reservoir') {
+    extras.drybackDays = parseInt(document.getElementById('quick-dryback').value) || null;
+    extras.visualCheck = document.getElementById('quick-visual').value || null;
+  }
+  if (type === 'foliar') {
+    extras.foliarProduct  = document.getElementById('quick-foliar-product').value.trim() || null;
+    extras.foliarDilution = document.getElementById('quick-foliar-dilution').value.trim() || null;
+    if (extras.foliarProduct && /silicate/i.test(extras.foliarProduct) && plant) {
+      const stage = liveStage(plant);
+      if ((stage === 'flower' || stage === 'late') && plant.dayInStage >= 35) {
+        showToast('warn', '⚠', 'Silicate foliar after day 35 of flower may affect trichome development.');
+      }
+    }
+  }
   const entry = {
     id: Date.now(),
     date: new Date().toISOString(),
     plantId,
     plantName: plant ? plant.strain : plantId,
-    type: document.getElementById('quick-type').value,
-    vol: parseFloat(document.getElementById('quick-vol').value) || null,
-    ph: parseFloat(document.getElementById('quick-ph').value) || null,
-    notes: document.getElementById('quick-notes').value
+    type,
+    vol:   parseFloat(document.getElementById('quick-vol').value)  || null,
+    ph:    parseFloat(document.getElementById('quick-ph').value)   || null,
+    notes: document.getElementById('quick-notes').value,
+    ...extras
   };
   feedLog.push(entry);
   localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
   document.getElementById('quick-vol').value = '';
-  document.getElementById('quick-ph').value = '';
+  document.getElementById('quick-ph').value  = '';
   document.getElementById('quick-notes').value = '';
+  document.getElementById('quick-dryback').value = '';
+  document.getElementById('quick-visual').value  = '';
+  if (document.getElementById('quick-foliar-product')) document.getElementById('quick-foliar-product').value = '';
+  if (document.getElementById('quick-foliar-dilution')) document.getElementById('quick-foliar-dilution').value = '';
+  updateQuickLogFields();
   renderLogTable();
+  renderWateringWidgets();
+  showToast('success', '✓', type === 'reservoir' ? 'Reservoir refill logged' : type === 'topwater' ? 'Top water logged' : 'Logged');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// WATERING WIDGETS
+// ═══════════════════════════════════════════════════════════════════
+
+function getLastReservoirFill(plantId) {
+  const entries = [...feedLog].reverse().filter(e => e.plantId === plantId && e.type === 'reservoir');
+  return entries.length ? entries[0] : null;
+}
+
+function getDrybackStatus(plantId, targetDays) {
+  const last = getLastReservoirFill(plantId);
+  if (!last) return { status: 'unknown', days: null, target: targetDays || 3, pct: 0 };
+  const daysSince = (Date.now() - new Date(last.date)) / 864e5;
+  const target = last.drybackDays || targetDays || 3;
+  const pct = Math.min(100, Math.round((daysSince / target) * 100));
+  let status = daysSince >= target + 1 ? 'overdue' : daysSince >= target ? 'check' : 'filling';
+  return { status, days: Math.floor(daysSince), target, pct, lastFill: last.date, lastVol: last.vol };
+}
+
+function renderWateringWidgets() {
+  renderDrybackWidget();
+  renderTopWaterWidget();
+}
+
+function renderDrybackWidget() {
+  const el = document.getElementById('dash-dryback');
+  if (!el) return;
+  allPlants = resolvePlants();
+  if (!allPlants.length) { el.innerHTML = '<div class="text-sm text-dim">No active plants.</div>'; return; }
+  el.innerHTML = allPlants.map(p => {
+    const db = getDrybackStatus(p.id);
+    const colors = { filling: 'var(--blue)', check: 'var(--amber)', overdue: 'var(--red)', unknown: 'var(--text3)' };
+    const labels = {
+      filling: `Day ${db.days} of ${db.target} — dry-back in progress`,
+      check:   `Day ${db.days} — check base visually, then lift`,
+      overdue: `${db.days}d since fill — likely dry, refill soon`,
+      unknown: 'No reservoir fill logged yet'
+    };
+    const c = colors[db.status];
+    return `<div style="margin-bottom:0.6rem;padding:0.6rem 0.75rem;background:var(--bg3);border:1px solid var(--border);border-radius:4px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem">
+        <span style="font-family:var(--mono);font-size:0.58rem;color:var(--text2)">${p.strain} <span style="color:var(--text3);font-size:0.5rem">· ${tentName(p.tent)}</span></span>
+        <span style="font-family:var(--mono);font-size:0.5rem;color:${c}">${labels[db.status]}</span>
+      </div>
+      <div style="height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:0.35rem">
+        <div style="height:100%;width:${db.pct}%;background:${c};border-radius:2px;transition:width 0.4s"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        ${db.lastFill ? `<span style="font-family:var(--mono);font-size:0.46rem;color:var(--text3)">Last fill: ${formatDateShort(db.lastFill)}${db.lastVol ? ' · ' + db.lastVol + 'L' : ''}</span>` : '<span></span>'}
+        <button onclick="quickReservoirLog('${p.id}')" style="font-family:var(--mono);font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:2px" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border2)'">+ Log Refill</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTopWaterWidget() {
+  const el = document.getElementById('dash-topwater');
+  if (!el) return;
+  allPlants = resolvePlants();
+  const tentGroups = {};
+  allPlants.forEach(p => { if (!tentGroups[p.tent]) tentGroups[p.tent] = []; tentGroups[p.tent].push(p); });
+  if (!Object.keys(tentGroups).length) { el.innerHTML = '<div class="text-sm text-dim">No active plants.</div>'; return; }
+  el.innerHTML = TENTS.filter(t => tentGroups[t.id]?.length).map(tent => {
+    const checked = !!topWaterChecks[tent.id];
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--bg3);border:1px solid ${checked ? 'var(--green3)' : 'var(--border)'};border-radius:4px;margin-bottom:0.4rem;cursor:pointer;transition:border-color 0.15s" onclick="toggleTopWater('${tent.id}')">
+      <div>
+        <span style="font-family:var(--mono);font-size:0.58rem;color:${checked ? 'var(--green)' : 'var(--text2)'}">${tent.name}</span>
+        <span style="font-family:var(--mono);font-size:0.48rem;color:var(--text3);margin-left:0.5rem">${tentGroups[tent.id].length} plant${tentGroups[tent.id].length > 1 ? 's' : ''}</span>
+        ${checked ? `<span style="font-family:var(--mono);font-size:0.46rem;color:var(--green);margin-left:0.5rem">· done ${new Date(topWaterChecks[tent.id]).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})}</span>` : ''}
+      </div>
+      <div style="width:18px;height:18px;border:1px solid ${checked ? 'var(--green)' : 'var(--border2)'};background:${checked ? 'var(--green-dim)' : 'transparent'};border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--green);flex-shrink:0">${checked ? '✓' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTopWater(tentId) {
+  if (topWaterChecks[tentId]) {
+    delete topWaterChecks[tentId];
+  } else {
+    topWaterChecks[tentId] = new Date().toISOString();
+    allPlants = resolvePlants();
+    allPlants.filter(p => p.tent === tentId).forEach(p => {
+      feedLog.push({ id: Date.now() + Math.random(), date: new Date().toISOString(), plantId: p.id, plantName: p.strain, type: 'topwater', vol: null, ph: null, notes: 'Daily top water (dashboard)' });
+    });
+    localStorage.setItem('growtracker-log', JSON.stringify(feedLog));
+  }
+  localStorage.setItem('growtracker-topwater', JSON.stringify(topWaterChecks));
+  renderTopWaterWidget();
+}
+
+function resetTopWaterChecks() {
+  topWaterChecks = {};
+  localStorage.setItem('growtracker-topwater', JSON.stringify(topWaterChecks));
+  renderTopWaterWidget();
+}
+
+function quickReservoirLog(plantId) {
+  showPage('log');
+  setTimeout(() => {
+    const sel = document.getElementById('quick-plant');
+    if (sel) sel.value = plantId;
+    const type = document.getElementById('quick-type');
+    if (type) { type.value = 'reservoir'; updateQuickLogFields(); }
+    document.getElementById('quick-vol')?.focus();
+  }, 150);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -5868,6 +6055,7 @@ function buildPlantTimeline(p) {
 
 renderDashboard();
 updateSidebarBadges();
+renderWateringWidgets();
 </script>
 
 <script>

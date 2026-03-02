@@ -1153,6 +1153,8 @@
     <button class="nav-tab" onclick="showPage('claude')" style="color:var(--green2)">✦ Ask Claude</button>
   </div>
   <div class="nav-actions" style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0">
+    <a href="/" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:0 0.75rem;height:32px;display:flex;align-items:center;border:1px solid var(--border);transition:color 0.2s,border-color 0.2s" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">← Home</a>
+    <a href="/genetics/" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:0 0.75rem;height:32px;display:flex;align-items:center;border:1px solid var(--border);transition:color 0.2s,border-color 0.2s" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">Genetics</a>
     <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem" onclick="exportData()">⬇ Export</button>
     <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem" onclick="openModal('modal-import')">⬆ Import</button>
     <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem;color:var(--green2);border-color:var(--green2)" onclick="shareWithClaude()">✦ Share with Claude</button>
@@ -1176,6 +1178,10 @@
   <button class="nav-drawer-tab" id="drawer-tab-timeline" onclick="showPage('timeline');closeNavDrawer()">Timeline</button>
   <button class="nav-drawer-tab" id="drawer-tab-retired" onclick="showPage('retired');closeNavDrawer()">Retired</button>
   <button class="nav-drawer-tab" id="drawer-tab-claude" onclick="showPage('claude');closeNavDrawer()" style="color:var(--green2)">✦ Ask Claude</button>
+  <div class="nav-drawer-divider"></div>
+  <!-- Site navigation links -->
+  <a href="/" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.85rem 2rem;color:var(--text3);text-decoration:none;border-left:3px solid transparent;display:block" onmouseover="this.style.color='var(--text2)';this.style.background='var(--bg2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">← Zombie Genetix Home</a>
+  <a href="/genetics/" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.85rem 2rem;color:var(--text3);text-decoration:none;border-left:3px solid transparent;display:block" onmouseover="this.style.color='var(--text2)';this.style.background='var(--bg2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">🧬 Genetics Showcase</a>
   <div class="nav-drawer-divider"></div>
   <div class="nav-drawer-actions">
     <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem" onclick="exportData();closeNavDrawer()">⬇ Export</button>

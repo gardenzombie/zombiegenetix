@@ -42,6 +42,7 @@
     font-family: var(--body);
     min-height: 100vh;
     overflow-x: hidden;
+    display: flex;
   }
 
   /* Grain overlay */
@@ -55,131 +56,206 @@
     opacity: 0.4;
   }
 
-  /* NAV — hamburger is the DEFAULT, full tabs only on very wide screens */
-  nav {
-    position: sticky;
+  /* ── SIDEBAR ── */
+  :root { --sidebar-w: 220px; }
+
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
     top: 0;
     z-index: 200;
-    background: rgba(10,15,10,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 56px;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
   }
-
-  .nav-logo {
+  .sidebar-brand {
+    padding: 1.4rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sidebar-brand-name {
     font-family: var(--head);
     font-weight: 900;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
     color: var(--green);
     text-transform: uppercase;
-    white-space: nowrap;
+    line-height: 1;
   }
-
-  .nav-logo span { color: var(--text3); font-weight: 300; }
-
-  /* Tabs hidden by default — only shown on very wide screens */
-  .nav-tabs {
-    display: none;
-    gap: 0;
+  .sidebar-brand-sub {
+    font-family: var(--mono);
+    font-size: 0.46rem;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-top: 0.35rem;
+    display: block;
+  }
+  .sidebar-section-label {
+    font-family: var(--mono);
+    font-size: 0.44rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 1rem 1.25rem 0.35rem;
+    opacity: 0.6;
+  }
+  .sidebar-nav {
     flex: 1;
-    overflow-x: auto;
+    overflow-y: auto;
+    padding: 0.4rem 0;
     scrollbar-width: none;
   }
-  .nav-tabs::-webkit-scrollbar { display: none; }
-
-  .nav-tab {
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.58rem 1.25rem;
     font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding: 0 1.2rem;
-    height: 56px;
-    border: none;
-    background: none;
     color: var(--text3);
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
   }
-  .nav-tab:hover { color: var(--text2); }
-  .nav-tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .sidebar-item:hover { color: var(--text2); background: rgba(74,222,128,0.03); }
+  .sidebar-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-dim); }
+  .sidebar-badge {
+    font-family: var(--mono);
+    font-size: 0.48rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    background: var(--bg3);
+    color: var(--text3);
+    border: 1px solid var(--border);
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+  .sidebar-item.active .sidebar-badge {
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: var(--green3);
+  }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 0.5rem 1.25rem; }
+  .sidebar-bottom {
+    border-top: 1px solid var(--border);
+    padding: 0.6rem 0;
+    flex-shrink: 0;
+  }
+  .sidebar-action {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: color 0.15s;
+  }
+  .sidebar-action:hover { color: var(--text2); }
+  .sidebar-action.claude { color: var(--green2); }
+  .sidebar-action.claude:hover { color: var(--green); }
+  .sidebar-exit {
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0;
+  }
+  .sidebar-exit a {
+    display: block;
+    padding: 0.45rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    text-decoration: none;
+    opacity: 0.55;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .sidebar-exit a:hover { color: var(--green); opacity: 1; }
 
-  /* Hamburger visible by default */
-  .nav-hamburger {
+  /* ── TOPBAR (mobile only) ── */
+  .topbar {
+    display: none;
+    height: 52px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.25rem;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 190;
+    flex-shrink: 0;
+  }
+  .topbar-logo {
+    font-family: var(--head);
+    font-weight: 900;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--green);
+    text-transform: uppercase;
+  }
+  .topbar-hamburger {
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 5px;
-    width: 36px;
-    height: 36px;
+    width: 34px; height: 34px;
     padding: 6px;
     background: none;
     border: 1px solid var(--border);
     cursor: pointer;
-    flex-shrink: 0;
     border-radius: 3px;
     transition: border-color 0.2s;
+    flex-shrink: 0;
   }
-  .nav-hamburger:hover { border-color: var(--green); }
-  .nav-hamburger span {
-    display: block;
-    height: 2px;
-    background: var(--text2);
-    border-radius: 1px;
-    transition: background 0.2s;
-  }
-  .nav-hamburger:hover span { background: var(--green); }
-
-  /* Mobile nav drawer */
-  .nav-drawer {
+  .topbar-hamburger:hover { border-color: var(--green); }
+  .topbar-hamburger span { display: block; height: 2px; background: var(--text2); border-radius: 1px; }
+  .sidebar-overlay {
     display: none;
     position: fixed;
-    top: 56px;
-    left: 0; right: 0;
-    background: rgba(10,15,10,0.98);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
+    inset: 0;
+    background: rgba(0,0,0,0.55);
     z-index: 199;
-    flex-direction: column;
-    padding: 0.5rem 0;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   }
-  .nav-drawer.open { display: flex; }
-  .nav-drawer-tab {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.85rem 2rem;
-    border: none;
-    background: none;
-    color: var(--text3);
-    cursor: pointer;
-    text-align: left;
-    border-left: 3px solid transparent;
-    transition: all 0.15s;
-  }
-  .nav-drawer-tab:hover { color: var(--text2); background: var(--bg2); }
-  .nav-drawer-tab.active { color: var(--green); border-left-color: var(--green); background: var(--green-dim); }
-  .nav-drawer-divider { height: 1px; background: var(--border); margin: 0.4rem 0; }
-  .nav-drawer-actions { display: flex; gap: 0.5rem; padding: 0.75rem 2rem; flex-wrap: wrap; }
+  .sidebar-overlay.show { display: block; }
 
-  /* Wide screen only — show full tab bar, hide hamburger */
-  @media (min-width: 2200px) {
-    .nav-tabs { display: flex; }
-    .nav-hamburger { display: none; }
-    nav { gap: 2rem; }
-    .nav-actions { display: flex !important; }
-    .nav-drawer { display: none !important; }
+  /* ── MAIN CONTENT WRAPPER ── */
+  .app-main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
   }
-  /* nav-actions hidden by default (mobile/mid), shown only on wide */
-  .nav-actions { display: none; }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 40px rgba(0,0,0,0.5); }
+    .app-main { margin-left: 0; }
+    .topbar { display: flex; }
+  }
+
 
   /* ── CALENDAR ───────────────────────────────────────────── */
   .cal-header-cell {
@@ -1138,60 +1214,90 @@
 </div>
 <!-- ═══════════════════════════════════════════════════ END AUTH GATE -->
 
-<nav>
-  <div class="nav-logo">Grow Tracker <span>// v1</span></div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="nav-tab" onclick="showPage('tents')">Tents</button>
-    <button class="nav-tab" onclick="showPage('plants')">Plants</button>
-    <button class="nav-tab" onclick="showPage('log')">Feed & Water Log</button>
-    <button class="nav-tab" onclick="showPage('teas')">Recipes</button>
-    <button class="nav-tab" onclick="showPage('environment')">Environment</button>
-    <button class="nav-tab" onclick="showPage('clones')">Clones</button>
-    <button class="nav-tab" onclick="showPage('breeding')">Breeding</button>
-    <button class="nav-tab" onclick="showPage('timeline')">Timeline</button>
-    <button class="nav-tab" onclick="showPage('retired')">Retired</button>
-    <button class="nav-tab" onclick="showPage('claude')" style="color:var(--green2)">✦ Ask Claude</button>
-  </div>
-  <div class="nav-actions" style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0">
-    <a href="/" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:0 0.75rem;height:32px;display:flex;align-items:center;border:1px solid var(--border);transition:color 0.2s,border-color 0.2s" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">← Home</a>
-    <a href="/genetics/" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:0 0.75rem;height:32px;display:flex;align-items:center;border:1px solid var(--border);transition:color 0.2s,border-color 0.2s" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">Genetics</a>
-    <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem" onclick="exportData()">⬇ Export</button>
-    <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem" onclick="openModal('modal-import')">⬆ Import</button>
-    <button class="btn btn-ghost" style="height:32px;padding:0 0.75rem;font-size:0.6rem;color:var(--green2);border-color:var(--green2)" onclick="shareWithClaude()">✦ Share with Claude</button>
-  </div>
-  <button class="nav-hamburger" id="nav-hamburger" onclick="toggleNavDrawer()" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="nav-date" id="nav-date"></div>
-</nav>
+<!-- ── SIDEBAR OVERLAY (mobile) ── -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<!-- Mobile nav drawer -->
-<div class="nav-drawer" id="nav-drawer">
-  <button class="nav-drawer-tab active" id="drawer-tab-dashboard" onclick="showPage('dashboard');closeNavDrawer()">Dashboard</button>
-  <button class="nav-drawer-tab" id="drawer-tab-tents" onclick="showPage('tents');closeNavDrawer()">Tents</button>
-  <button class="nav-drawer-tab" id="drawer-tab-plants" onclick="showPage('plants');closeNavDrawer()">Plants</button>
-  <button class="nav-drawer-tab" id="drawer-tab-log" onclick="showPage('log');closeNavDrawer()">Feed &amp; Water Log</button>
-  <button class="nav-drawer-tab" id="drawer-tab-teas" onclick="showPage('teas');closeNavDrawer()">Recipes</button>
-  <button class="nav-drawer-tab" id="drawer-tab-environment" onclick="showPage('environment');closeNavDrawer()">Environment</button>
-  <button class="nav-drawer-tab" id="drawer-tab-clones" onclick="showPage('clones');closeNavDrawer()">Clones</button>
-  <button class="nav-drawer-tab" id="drawer-tab-breeding" onclick="showPage('breeding');closeNavDrawer()">Breeding</button>
-  <button class="nav-drawer-tab" id="drawer-tab-timeline" onclick="showPage('timeline');closeNavDrawer()">Timeline</button>
-  <button class="nav-drawer-tab" id="drawer-tab-retired" onclick="showPage('retired');closeNavDrawer()">Retired</button>
-  <button class="nav-drawer-tab" id="drawer-tab-claude" onclick="showPage('claude');closeNavDrawer()" style="color:var(--green2)">✦ Ask Claude</button>
-  <div class="nav-drawer-divider"></div>
-  <!-- Site navigation links -->
-  <a href="/" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.85rem 2rem;color:var(--text3);text-decoration:none;border-left:3px solid transparent;display:block" onmouseover="this.style.color='var(--text2)';this.style.background='var(--bg2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">← Zombie Genetix Home</a>
-  <a href="/genetics/" style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.85rem 2rem;color:var(--text3);text-decoration:none;border-left:3px solid transparent;display:block" onmouseover="this.style.color='var(--text2)';this.style.background='var(--bg2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">🧬 Genetics Showcase</a>
-  <div class="nav-drawer-divider"></div>
-  <div class="nav-drawer-actions">
-    <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem" onclick="exportData();closeNavDrawer()">⬇ Export</button>
-    <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem" onclick="openModal('modal-import');closeNavDrawer()">⬆ Import</button>
-    <button class="btn btn-ghost" style="font-size:0.6rem;height:30px;padding:0 0.75rem;color:var(--green2);border-color:var(--green2)" onclick="shareWithClaude();closeNavDrawer()">✦ Share with Claude</button>
-  </div>
-</div>
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
 
-<main>
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-name">Grow Tracker</div>
+    <span class="sidebar-brand-sub">Zombie Genetix · v1</span>
+  </div>
+
+  <nav class="sidebar-nav">
+
+    <div class="sidebar-section-label">Overview</div>
+    <button class="sidebar-item active" id="sidebar-tab-dashboard" onclick="showPage('dashboard')">
+      Dashboard
+    </button>
+
+    <div class="sidebar-section-label">Cultivation</div>
+    <button class="sidebar-item" id="sidebar-tab-tents" onclick="showPage('tents')">
+      Tents <span class="sidebar-badge" id="badge-tents">—</span>
+    </button>
+    <button class="sidebar-item" id="sidebar-tab-plants" onclick="showPage('plants')">
+      Plants <span class="sidebar-badge" id="badge-plants">—</span>
+    </button>
+    <button class="sidebar-item" id="sidebar-tab-clones" onclick="showPage('clones')">
+      Clones <span class="sidebar-badge" id="badge-clones">—</span>
+    </button>
+    <button class="sidebar-item" id="sidebar-tab-log" onclick="showPage('log')">
+      Feed &amp; Water Log
+    </button>
+    <button class="sidebar-item" id="sidebar-tab-teas" onclick="showPage('teas')">
+      Recipes
+    </button>
+    <button class="sidebar-item" id="sidebar-tab-environment" onclick="showPage('environment')">
+      Environment
+    </button>
+
+    <div class="sidebar-section-label">Genetics</div>
+    <button class="sidebar-item" id="sidebar-tab-breeding" onclick="showPage('breeding')">
+      Breeding <span class="sidebar-badge" id="badge-breeding">—</span>
+    </button>
+    <button class="sidebar-item" id="sidebar-tab-retired" onclick="showPage('retired')">
+      Retired <span class="sidebar-badge" id="badge-retired">—</span>
+    </button>
+
+    <div class="sidebar-section-label">Planning</div>
+    <button class="sidebar-item" id="sidebar-tab-timeline" onclick="showPage('timeline')">
+      Timeline
+    </button>
+
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="sidebar-action claude" onclick="showPage('claude')">
+      ✦ Ask Claude
+    </button>
+    <button class="sidebar-action" onclick="exportData()">⬇ Export</button>
+    <button class="sidebar-action" onclick="openModal('modal-import')">⬆ Import</button>
+    <button class="sidebar-action" onclick="shareWithClaude()">✦ Share with Claude</button>
+  </div>
+
+  <div class="sidebar-exit">
+    <a href="/">← Zombie Genetix Home</a>
+    <a href="/genetics/">🧬 Genetics Showcase</a>
+  </div>
+
+</aside>
+
+<!-- ── APP MAIN ── -->
+<div class="app-main">
+
+  <!-- Mobile topbar -->
+  <div class="topbar">
+    <div class="topbar-logo">Grow Tracker</div>
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <span style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.1em;color:var(--text3)" id="nav-date"></span>
+      <button class="topbar-hamburger" onclick="openSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+
 
 <!-- ═══════════════════════════════════════════════════ DASHBOARD -->
 <div class="page active" id="page-dashboard">
@@ -1620,7 +1726,6 @@
   <div id="clones-content"></div>
 </div>
 
-</main>
 
 <!-- ═══════════════════════════════════════════════════ BREEDING -->
 <div class="page" id="page-breeding">
@@ -2845,15 +2950,12 @@ let allPlants = resolvePlants();
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-drawer-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  const tabMap = {
-    dashboard: 0, tents: 1, plants: 2, log: 3, teas: 4, environment: 5, clones: 6, breeding: 7, timeline: 8, retired: 9
-  };
-  document.querySelectorAll('.nav-tab')[tabMap[id]]?.classList.add('active');
-  const drawerTab = document.getElementById('drawer-tab-' + id);
-  if (drawerTab) drawerTab.classList.add('active');
+  const sidebarTab = document.getElementById('sidebar-tab-' + id);
+  if (sidebarTab) sidebarTab.classList.add('active');
+  // Close sidebar on mobile after navigation
+  closeSidebar();
   if (id === 'dashboard') renderDashboard();
   if (id === 'tents') renderTents();
   if (id === 'plants') renderPlants();
@@ -2865,21 +2967,32 @@ function showPage(id) {
   if (id === 'timeline') renderCalendar();
   if (id === 'retired') renderRetired();
   if (id === 'claude') renderClaudePage();
+  updateSidebarBadges();
 }
 
-function toggleNavDrawer() {
-  document.getElementById('nav-drawer').classList.toggle('open');
+// ── SIDEBAR FUNCTIONS ──
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('show');
 }
-function closeNavDrawer() {
-  document.getElementById('nav-drawer').classList.remove('open');
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
 }
-document.addEventListener('click', e => {
-  const drawer = document.getElementById('nav-drawer');
-  const hamburger = document.getElementById('nav-hamburger');
-  if (drawer && hamburger && !drawer.contains(e.target) && !hamburger.contains(e.target)) {
-    drawer.classList.remove('open');
-  }
-});
+
+// Live badge counts in sidebar
+function updateSidebarBadges() {
+  const tentsEl   = document.getElementById('badge-tents');
+  const plantsEl  = document.getElementById('badge-plants');
+  const clonesEl  = document.getElementById('badge-clones');
+  const breedEl   = document.getElementById('badge-breeding');
+  const retiredEl = document.getElementById('badge-retired');
+  if (tentsEl)   tentsEl.textContent   = TENTS.length;
+  if (plantsEl)  plantsEl.textContent  = customPlants.filter(p => !p.retired).length;
+  if (clonesEl)  clonesEl.textContent  = clones.length;
+  if (breedEl)   breedEl.textContent   = breedingProjects.length;
+  if (retiredEl) retiredEl.textContent = customPlants.filter(p => p.retired).length;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // HELPERS
@@ -5754,6 +5867,7 @@ function buildPlantTimeline(p) {
 // ═══════════════════════════════════════════════════════════════════
 
 renderDashboard();
+updateSidebarBadges();
 </script>
 
 <script>
@@ -5848,5 +5962,6 @@ function authLogout() {
 
 authInit();
 </script>
+</div><!-- /.app-main -->
 </body>
 </html>

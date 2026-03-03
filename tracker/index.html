@@ -2871,6 +2871,255 @@ const TEA_RECIPES = [
       'Do not feed again for 4–5 days; watch how the medium dries.',
     ],
     note: 'This gentle first feed introduces microbial life and trace nutrients without overwhelming new roots. The molasses and kelp feed existing soil biology while the worm casting extract delivers humic acids and beneficial microbes. Aim for 25–30% of normal feed strength.'
+  // -- FOLIAR SPRAYS
+  {
+    name: 'Epsom Salt Magnesium Foliar',
+    category: 'foliar',
+    stage: 'Veg to Mid Flower (interveinal chlorosis on older leaves)',
+    ingredients: [
+      { name: 'Epsom salt (magnesium sulphate)', amount: '1/4 tsp per litre / 1 tsp per gallon' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Dissolve Epsom salt in room-temperature dechlorinated water.',
+      'pH to 6.0-6.2.',
+      'Apply during lights-on -- not at peak intensity (wait 1-2 hrs after lights on).',
+      'Mist leaves evenly, both tops and undersides.',
+      'Repeat every 3-4 days until symptoms stop progressing.',
+    ],
+    note: 'For interveinal chlorosis on mid and older leaves (magnesium is mobile -- deficiency hits old growth first). Do not combine with Cal-Mag in the same application -- apply on separate days.'
+  },
+  {
+    name: "Cal-Mag Foliar (Cronk's)",
+    category: 'foliar',
+    stage: 'Veg to Week 4 Flower (broad Ca/Mg deficiency)',
+    ingredients: [
+      { name: "Cronk's Cal-Mag", amount: 'Label rate' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Mix Cal-Mag at label rate into dechlorinated water.',
+      'pH to 6.0-6.2.',
+      'Apply during lights-on, not at peak intensity.',
+      'Mist leaves evenly, tops and undersides.',
+    ],
+    note: "Contains 2-0-0 N, 3.2% Ca, 1.2% Mg, and chelated iron at 0.1%. Avoid heavy use after Week 4 flower -- the N content can delay ripening. Do not combine with Epsom salt in the same application."
+  },
+  {
+    name: 'Aloe Vera Foliar (Stress and Immune Support)',
+    category: 'foliar',
+    stage: 'Any stage including early flower',
+    ingredients: [
+      { name: 'Pure aloe vera gel', amount: '1 tbsp per litre' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Mix aloe gel into water until fully dissolved.',
+      'pH to 6.0-6.2.',
+      'Mist leaves evenly during lights-on.',
+      'Safe after topping, transplant, or light stress.',
+    ],
+    note: 'Auxins and enzymes in aloe support cell repair and stress recovery. One of the safest, most broadly applicable foliars. Stop all foliars by Week 4 flower to avoid bud moisture issues.'
+  },
+  {
+    name: 'Aloe + Kelp Foliar (Veg / Early Flower)',
+    category: 'foliar',
+    stage: 'Veg to Week 3 Flower',
+    ingredients: [
+      { name: 'Pure aloe vera gel', amount: '1 tbsp per litre' },
+      { name: 'Liquid kelp', amount: '1 ml per litre' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Mix aloe and kelp into dechlorinated water.',
+      'pH to 6.0-6.2.',
+      'Mist evenly during lights-on.',
+      'Use every 7-10 days through veg and into early flower.',
+      'Stop all foliars after Week 4 to avoid bud moisture issues.',
+    ],
+    note: 'Kelp adds cytokinins for growth regulation. Good general maintenance spray during veg and early flower. A low-cost, high-impact preventive spray for healthy tissue and stress resilience.'
+  },
+  {
+    name: 'Silica Foliar (Structural / IPM Support)',
+    category: 'foliar',
+    stage: 'Veg to Early Flower only -- stop before Week 3',
+    ingredients: [
+      { name: 'Potassium silicate', amount: '1-2 ml/L (label rate)' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Add silica to water FIRST -- before any other amendments. Silica raises pH significantly.',
+      'Let mix for 2-3 minutes, then check pH.',
+      'Adjust down to 6.0-6.5.',
+      'Mist evenly during lights-on.',
+      'Use in veg and early flower only -- stop by Week 3 of flower.',
+    ],
+    note: 'Strengthens cell walls and improves resistance to pests and environmental stress. Always add silica first -- it raises pH dramatically and precipitates with other compounds. Do not combine with Cal-Mag in the same solution -- silica and calcium precipitate together.'
+  },
+  // -- COMPOST TEAS AND DRENCHES
+  {
+    name: 'Basic Recharge / Microbial Drench',
+    category: 'tea',
+    stage: 'Post-transplant, post-stress, or monthly maintenance',
+    ingredients: [
+      { name: 'Recharge (or similar microbial inoculant)', amount: '1 tsp per gallon' },
+      { name: 'Dechlorinated or RO water (room temperature)', amount: '1 gallon / 3.8L' },
+    ],
+    steps: [
+      'Use room temperature dechlorinated or RO water.',
+      'Mix in Recharge -- stir gently until dissolved.',
+      'pH to 6.3-6.8.',
+      'Apply immediately as a soil drench -- do not aerate.',
+      'Water in at base of plant to field capacity.',
+    ],
+    note: 'Use after transplant, after stress events, or as a monthly maintenance drench in living soil. Do not aerate -- Recharge contains living microbes and spores that need no brewing time. Just mix and apply immediately.'
+  },
+  {
+    name: 'AACT -- Veg (Actively Aerated Compost Tea)',
+    category: 'tea',
+    stage: 'Early-Mid Veg (every 2-3 weeks)',
+    ingredients: [
+      { name: 'Unsulfured molasses', amount: '1 tbsp per gallon' },
+      { name: 'Worm castings (in a mesh bag)', amount: '1 tbsp per gallon' },
+      { name: 'Kelp meal', amount: '1 tsp per gallon' },
+      { name: 'Dechlorinated water', amount: '1 gallon / 3.8L' },
+    ],
+    steps: [
+      'Fill a clean bucket with dechlorinated room-temperature water.',
+      'Add molasses and stir to dissolve.',
+      'Place worm castings in a mesh bag and submerge.',
+      'Add kelp meal directly to the water.',
+      'Drop in an airstone connected to an air pump. Brew vigorously for 24-36 hours.',
+      'pH to 6.3-6.8 just before use.',
+      'Apply immediately -- do not store finished tea.',
+    ],
+    note: 'Feeds fungal and bacterial populations in living soil. Apply every 2-3 weeks during veg. The tea should smell earthy and sweet when ready -- a sour or putrid smell means something went wrong; discard and brew fresh.'
+  },
+  {
+    name: 'AACT -- Flower Transition',
+    category: 'tea',
+    stage: 'At flip and Week 2 of Flower',
+    ingredients: [
+      { name: 'Unsulfured molasses', amount: '1 tbsp per gallon' },
+      { name: 'Worm castings (in a mesh bag)', amount: '1 tbsp per gallon' },
+      { name: 'Fish hydrolysate', amount: '1 tsp per gallon' },
+      { name: 'Liquid kelp', amount: '1 tsp per gallon' },
+      { name: 'Dechlorinated water', amount: '1 gallon / 3.8L' },
+    ],
+    steps: [
+      'Fill bucket with dechlorinated room-temperature water.',
+      'Add molasses first and stir to dissolve.',
+      'Place worm castings in a mesh bag, submerge.',
+      'Add fish hydrolysate and kelp directly.',
+      'Aerate vigorously for 24-36 hours.',
+      'pH to 6.3-6.8 just before use.',
+      'Apply as a soil drench at flip and again at Week 2 of flower.',
+    ],
+    note: 'Higher P/K focus supports the transition to flower. Fish hydrolysate adds phosphorus and amino acids to prime your soil biology for bud development. Use at flip and again at Week 2.'
+  },
+  {
+    name: 'Aloe Vera Soil Drench (Clone / Transplant)',
+    category: 'water-mix',
+    stage: 'First watering after transplant or for struggling clones',
+    ingredients: [
+      { name: 'Pure aloe vera gel', amount: '2 tbsp per gallon' },
+      { name: 'Dechlorinated water', amount: '1 gallon / 3.8L' },
+    ],
+    steps: [
+      'Mix aloe gel into room-temperature dechlorinated water until fully dissolved.',
+      'pH to 6.3-6.5.',
+      'Use as the first watering after transplant -- apply gently at the base.',
+      'Also useful for struggling clones that have stalled or shown stress.',
+    ],
+    note: 'Saponins in aloe act as a natural rooting hormone stimulant. Very gentle -- safe for fresh and fragile roots. One of the most low-risk first waterings you can give a newly transplanted or stressed plant.'
+  },
+  {
+    name: 'BTI Fungus Gnat Drench (Mosquito Dunk)',
+    category: 'ipm',
+    stage: 'Any stage -- prevention or active infestation',
+    ingredients: [
+      { name: 'Mosquito Dunk (BTI)', amount: '1/4 dunk per 5 gallons / half dunk per 50L reservoir' },
+      { name: 'Dechlorinated water', amount: 'As needed' },
+    ],
+    steps: [
+      'Place dunk in a cheesecloth bag or mesh sock.',
+      'Steep in water for a minimum of 1 hour before use.',
+      'Use the BTI-treated water for your regular reservoir top-up or watering.',
+      'Replace the dunk every 3-4 weeks.',
+      'For Spider Farmer reservoir: drop a pre-soaked dunk piece in a mesh bag into the reservoir and replace monthly.',
+    ],
+    note: 'BTI (Bacillus thuringiensis israelensis) targets fungus gnat larvae in soil -- safe for living soil biology, earthworms, and mycorrhizae. Does not affect adults -- combine with yellow sticky traps. Takes 3-4 weeks (one full gnat life cycle) to see population decline -- be consistent.'
+  },
+  // -- DEFICIENCY-TARGETING DRENCHES
+  {
+    name: 'Calcium Deficiency Drench',
+    category: 'water-mix',
+    stage: 'Any stage -- active Ca deficiency',
+    ingredients: [
+      { name: "Cronk's Cal-Mag", amount: '1.5x label rate' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Check and correct soil pH first -- Ca lockout at low pH is more common than true deficiency.',
+      "Mix Cronk's Cal-Mag at 1.5x label rate into dechlorinated water.",
+      'pH to 6.3-6.8.',
+      'Apply as a soil drench to field capacity.',
+      'Monitor new growth over 5-7 days -- calcium is immobile, correction shows in new leaves first.',
+    ],
+    note: 'Symptoms: tip curl, brown leaf edges on new growth, blossom end issues. Calcium is immobile -- deficiency always shows in new growth first. Correct soil pH before adding more calcium; lockout below pH 6.0 is more common than true Ca deficiency.'
+  },
+  {
+    name: 'Magnesium Deficiency Drench',
+    category: 'water-mix',
+    stage: 'Any stage -- interveinal chlorosis on older leaves',
+    ingredients: [
+      { name: 'Epsom salt (magnesium sulphate)', amount: '1 tsp per gallon / 1/4 tsp per litre' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Dissolve Epsom salt in dechlorinated water.',
+      'pH to 6.3-6.8.',
+      'Apply as soil drench -- or see Epsom Salt Magnesium Foliar for faster uptake.',
+      "If using alongside Cronk's Cal-Mag, apply on separate days.",
+      'Reassess after 5-7 days.',
+    ],
+    note: 'Magnesium is mobile -- interveinal chlorosis on older and mid leaves is the classic symptom. Foliar shows faster results than a drench. Do not apply in the same session as Cal-Mag.'
+  },
+  {
+    name: 'Iron Deficiency Drench',
+    category: 'water-mix',
+    stage: 'Any stage -- interveinal chlorosis on NEW/young growth',
+    ingredients: [
+      { name: 'Chelated iron (EDTA or EDDHA)', amount: 'Label rate' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Check and correct pH FIRST -- iron availability drops sharply above pH 6.5.',
+      'Mix chelated iron at label rate into dechlorinated water.',
+      'pH to 6.0-6.5.',
+      'Apply as a soil drench.',
+      "Note: Cronk's Cal-Mag contains chelated iron at 0.1% -- a drench at 1.5x rate may be sufficient for mild cases.",
+    ],
+    note: 'Key distinction from Mg deficiency: iron shows on NEW and young growth, not old leaves. Almost always a pH lockout issue -- correct pH before adding chelated iron. Availability drops sharply above pH 6.5 in soil.'
+  },
+  {
+    name: 'General Deficiency Triage Drench',
+    category: 'water-mix',
+    stage: 'Any stage -- ambiguous or early symptoms',
+    ingredients: [
+      { name: "Cronk's Cal-Mag", amount: 'Label rate' },
+      { name: 'Unsulfured molasses', amount: '1 tsp per gallon' },
+      { name: 'Dechlorinated water', amount: '1L' },
+    ],
+    steps: [
+      'Check and correct pH first -- always step one.',
+      "Mix Cronk's Cal-Mag at label rate and molasses into dechlorinated water.",
+      'pH to 6.3-6.5.',
+      'Apply as a soil drench.',
+      'Reassess after 5-7 days before targeting a specific deficiency.',
+    ],
+    note: 'First-response drench when symptoms are ambiguous. Molasses feeds soil biology and provides trace minerals. After 5-7 days: new growth symptoms = Ca or Fe; old/mid growth = Mg or N.'
+  },
   },
   {
     name: 'Clone Yellowing Rescue Watering',
@@ -4108,6 +4357,7 @@ const CATEGORY_META = {
   feed:         { label: 'Feed Mix',       color: 'var(--purple)', badge: 'stage-flower' },
   'soil-mix':   { label: 'Soil Mix',       color: 'var(--amber)',  badge: 'stage-late'   },
   'water-mix':  { label: 'Watering Mix',   color: 'var(--blue)',   badge: 'stage-clone'  },
+  ipm:          { label: 'IPM / Pest',     color: 'var(--red)',    badge: 'stage-late'   },
   other:        { label: 'Other',          color: 'var(--text3)',  badge: 'stage-clone'  },
 };
 

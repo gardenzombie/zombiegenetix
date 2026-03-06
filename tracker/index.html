@@ -2484,6 +2484,64 @@
       <button class="btn btn-ghost" onclick="closeModal('modal-assign-tent')">Cancel</button>
       <button class="btn btn-primary" onclick="confirmAssignToTent()">Assign</button>
     </div>
+
+<!-- EDIT TENT MODAL -->
+<div class="modal-overlay" id="modal-edit-tent">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Tent</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-tent')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-tent-id">
+      <div class="form-group">
+        <label class="form-label">Tent Name</label>
+        <input type="text" class="form-input" id="edit-tent-name" placeholder="e.g. Flower Tent">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Size</label>
+          <input type="text" class="form-input" id="edit-tent-size" placeholder="e.g. 4×4×6.5 ft">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Light Schedule</label>
+          <input type="text" class="form-input" id="edit-tent-schedule" placeholder="e.g. 12/12">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lights</label>
+        <input type="text" class="form-input" id="edit-tent-lights" placeholder="e.g. 2× LED 640W combined">
+      </div>
+      <div class="form-label" style="margin-bottom:0.5rem;margin-top:0.25rem;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)">Environment Targets</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Temp</label>
+          <input type="text" class="form-input" id="edit-tent-temp" placeholder="e.g. 20–24°C">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Humidity (RH)</label>
+          <input type="text" class="form-input" id="edit-tent-rh" placeholder="e.g. 40–50%">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">VPD</label>
+          <input type="text" class="form-input" id="edit-tent-vpd" placeholder="e.g. 1.4–1.8 kPa">
+        </div>
+        <div class="form-group">
+          <label class="form-label">eDLI</label>
+          <input type="text" class="form-input" id="edit-tent-edli" placeholder="e.g. 40–50 mol/m²/day">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="edit-tent-notes" rows="3" style="resize:vertical;min-height:4rem" placeholder="Current conditions, reminders, observations…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-tent')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditTent()">Save Changes</button>
+    </div>
   </div>
 </div>
 
@@ -3784,7 +3842,17 @@ function updateSidebarBadges() {
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════
 
-function tentName(id) { return TENTS.find(t => t.id === id)?.name || id; }
+function resolveTents() {
+  const overrides = JSON.parse(localStorage.getItem('growtracker-tent-overrides') || '{}');
+  return TENTS.map(t => {
+    const ov = overrides[t.id] || {};
+    return { ...t, ...ov, env: { ...t.env, ...(ov.env || {}) } };
+  });
+}
+function tentName(id) {
+  const overrides = JSON.parse(localStorage.getItem('growtracker-tent-overrides') || '{}');
+  return overrides[id]?.name || TENTS.find(t => t.id === id)?.name || id;
+}
 function formatDate(d) {
   return new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
@@ -3909,7 +3977,7 @@ function renderDashboard() {
 
   // Tent cards (compact)
   const dt = document.getElementById('dash-tents');
-  dt.innerHTML = TENTS.map(tent => {
+  dt.innerHTML = resolveTents().map(tent => {
     const plants = allPlants.filter(p => p.tent === tent.id);
     return `
       <div class="tent-card mb-md">
@@ -4134,20 +4202,71 @@ function deriveTentStage(tentId) {
   return { stage: topStage, stageName };
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// TENT EDITING
+// ═══════════════════════════════════════════════════════════════════
+
+function openEditTent(tentId) {
+  const tent = resolveTents().find(t => t.id === tentId);
+  if (!tent) return;
+  document.getElementById('edit-tent-id').value = tentId;
+  document.getElementById('edit-tent-name').value = tent.name || '';
+  document.getElementById('edit-tent-size').value = tent.size || '';
+  document.getElementById('edit-tent-schedule').value = tent.schedule || '';
+  document.getElementById('edit-tent-lights').value = tent.lights || '';
+  document.getElementById('edit-tent-temp').value = tent.env?.temp || '';
+  document.getElementById('edit-tent-rh').value = tent.env?.rh || '';
+  document.getElementById('edit-tent-vpd').value = tent.env?.vpd || '';
+  document.getElementById('edit-tent-edli').value = tent.env?.edli || '';
+  document.getElementById('edit-tent-notes').value = tent.notes || '';
+  openModal('modal-edit-tent');
+}
+
+function saveEditTent() {
+  const tentId = document.getElementById('edit-tent-id').value;
+  if (!tentId) return;
+  const overrides = JSON.parse(localStorage.getItem('growtracker-tent-overrides') || '{}');
+  overrides[tentId] = {
+    name:     document.getElementById('edit-tent-name').value.trim(),
+    size:     document.getElementById('edit-tent-size').value.trim(),
+    schedule: document.getElementById('edit-tent-schedule').value.trim(),
+    lights:   document.getElementById('edit-tent-lights').value.trim(),
+    env: {
+      temp: document.getElementById('edit-tent-temp').value.trim(),
+      rh:   document.getElementById('edit-tent-rh').value.trim(),
+      vpd:  document.getElementById('edit-tent-vpd').value.trim(),
+      edli: document.getElementById('edit-tent-edli').value.trim(),
+    },
+    notes: document.getElementById('edit-tent-notes').value.trim(),
+  };
+  localStorage.setItem('growtracker-tent-overrides', JSON.stringify(overrides));
+  closeModal('modal-edit-tent');
+  showToast('success', '✓', `${overrides[tentId].name || 'Tent'} updated`);
+  refreshAllActivePages();
+}
+
 function renderTents() {
   allPlants = resolvePlants();
   const grid = document.getElementById('tents-grid');
-  grid.innerHTML = TENTS.map(tent => {
+  grid.innerHTML = resolveTents().map(tent => {
     const plants = allPlants.filter(p => p.tent === tent.id);
     const tentClones = clones.filter(c => !c._hidden && c.tent === tent.id);
     return `
     <div class="tent-card">
       <div class="tent-header">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="tent-name">${tent.name}</div>
           <div class="tent-size">${tent.size}</div>
         </div>
-        <span class="stage-badge ${stageClass(deriveTentStage(tent.id).stage)}">${deriveTentStage(tent.id).stageName}</span>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0">
+          <span class="stage-badge ${stageClass(deriveTentStage(tent.id).stage)}">${deriveTentStage(tent.id).stageName}</span>
+          <button onclick="openEditTent('${tent.id}')"
+            style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap"
+            onmouseover="this.style.color='var(--cyan)';this.style.borderColor='rgba(34,211,238,0.4)'"
+            onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border2)'"
+            title="Edit tent settings">✎ Edit</button>
+        </div>
       </div>
       <div class="tent-body">
         <div class="tent-lights">${tent.lights}</div>
@@ -4212,10 +4331,10 @@ function renderPlants() {
   const container = document.getElementById('plants-list');
 
   const byTent = {};
-  TENTS.forEach(t => { byTent[t.id] = []; });
+  resolveTents().forEach(t => { byTent[t.id] = []; });
   allPlants.forEach(p => { if (byTent[p.tent]) byTent[p.tent].push(p); });
 
-  container.innerHTML = TENTS.map(tent => {
+  container.innerHTML = resolveTents().map(tent => {
     const plants = byTent[tent.id];
     if (!plants.length) return '';
     return `
@@ -4327,7 +4446,7 @@ function renderPlants() {
   }).join('');
 
   const tentSel = document.getElementById('new-tent');
-  if (tentSel) tentSel.innerHTML = TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  if (tentSel) tentSel.innerHTML = resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 }
 
 // ─── Edit Plant ────────────────────────────────────────────────────
@@ -4340,7 +4459,7 @@ function openEditPlant(plantId) {
   document.getElementById('edit-plant-id').value = plantId;
   document.getElementById('edit-plant-strain').value = p.strain;
   document.getElementById('edit-plant-type').value = p.type || 'photoperiod';
-  document.getElementById('edit-plant-tent').innerHTML = TENTS.map(t => `<option value="${t.id}" ${t.id===p.tent?'selected':''}>${t.name}</option>`).join('');
+  document.getElementById('edit-plant-tent').innerHTML = resolveTents().map(t => `<option value="${t.id}" ${t.id===p.tent?'selected':''}>${t.name}</option>`).join('');
   document.getElementById('edit-plant-stage').value = p.stage;
   document.getElementById('edit-plant-notes').value = p.notes || '';
   document.getElementById('edit-plant-veg-days').value = p.vegDays || '';
@@ -5574,7 +5693,7 @@ function buildGrowContext() {
 
   if (document.getElementById('ctx-tents')?.checked) {
     ctx += '### Tent Environments\n';
-    TENTS.forEach(t => {
+    resolveTents().forEach(t => {
       ctx += `- **${t.name}** (${t.size}): ${t.lights.split('—')[0].trim()}, ${t.schedule}, Temp ${t.env.temp}, RH ${t.env.rh}, VPD ${t.env.vpd}\n`;
     });
     ctx += '\n';
@@ -5919,7 +6038,7 @@ function promoteCloneToPlant(id) {
   document.getElementById('new-strain').value = c.strain;
   document.getElementById('new-stage').value = 'veg';
   document.getElementById('new-day').value = '1';
-  document.getElementById('new-tent').innerHTML = TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  document.getElementById('new-tent').innerHTML = resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
   // Mark clone as hidden
   clones = clones.map(x => x.id === id ? { ...x, _hidden: true } : x);
   localStorage.setItem('growtracker-clones', JSON.stringify(clones));
@@ -5942,7 +6061,7 @@ function openAddClone() {
   document.getElementById('clone-log-history').textContent = '';
   // Populate tent selector
   const ts = document.getElementById('clone-tent');
-  ts.innerHTML = '<option value="">— None / Unassigned —</option>' + TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  ts.innerHTML = '<option value="">— None / Unassigned —</option>' + resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
   document.getElementById('clone-delete-btn').style.display = 'none';
   document.getElementById('modal-clone-title').textContent = 'Add Clone';
   openModal('modal-edit-clone');
@@ -5953,7 +6072,7 @@ function openEditClone(id) {
   if (!c) return;
   // Populate tent selector
   const ts = document.getElementById('clone-tent');
-  ts.innerHTML = '<option value="">— None / Unassigned —</option>' + TENTS.map(t => `<option value="${t.id}"${t.id===c.tent?' selected':''}>${t.name}</option>`).join('');
+  ts.innerHTML = '<option value="">— None / Unassigned —</option>' + resolveTents().map(t => `<option value="${t.id}"${t.id===c.tent?' selected':''}>${t.name}</option>`).join('');
   document.getElementById('clone-edit-id').value = id;
   document.getElementById('clone-strain').value = c.strain;
   document.getElementById('clone-location').value = c.location || '';
@@ -6236,7 +6355,7 @@ function deleteBreedingFromModal() {
 
 function openAddPlant() {
   const tentSel = document.getElementById('new-tent');
-  tentSel.innerHTML = TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  tentSel.innerHTML = resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
   openModal('modal-plant');
 }
 
@@ -6287,7 +6406,7 @@ function openBatchAdd(mode) {
     // Populate tent selector
     const ts = document.getElementById('batch-clone-tent');
     ts.innerHTML = '<option value="">— None / Unassigned —</option>' +
-      TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
     document.getElementById('batch-clone-status').value = 'rooting';
     document.getElementById('batch-clone-date').value = new Date().toISOString().slice(0,10);
     document.getElementById('batch-clone-method').value = '';
@@ -6296,7 +6415,7 @@ function openBatchAdd(mode) {
     document.getElementById('batch-clone-breed').checked = false;
   } else {
     const ts = document.getElementById('batch-plant-tent');
-    ts.innerHTML = TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    ts.innerHTML = resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
     document.getElementById('batch-plant-stage').value = 'seedling';
     document.getElementById('batch-plant-day').value = '';
     document.getElementById('batch-plant-flowerlen').value = '';
@@ -6515,7 +6634,7 @@ function openBatchEdit(batchId) {
   // Populate tent selector
   const tentSel = document.getElementById('batch-edit-tent');
   tentSel.innerHTML = '<option value="">— No change —</option>' +
-    TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    resolveTents().map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 
   // Show/hide status field (only for clones)
   const statusRow = document.getElementById('batch-edit-status').closest('.form-group');
@@ -6631,7 +6750,7 @@ function shareWithClaude() {
   const todayStr = today.toLocaleDateString('en-CA', { year:'numeric', month:'long', day:'numeric' });
 
   // Plants by tent
-  const tentSections = TENTS.map(function(t) {
+  const tentSections = resolveTents().map(function(t) {
     const tentPlants = allPlants.filter(function(p) { return p.tent === t.id; });
     const tentCloneList = clones.filter(function(c) { return !c._hidden && c.tent === t.id; });
     if (!tentPlants.length && !tentCloneList.length) return '  ' + t.name + ' (' + t.size + '): Empty';

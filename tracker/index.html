@@ -1005,6 +1005,109 @@
   .text-mono { font-family: var(--mono); font-size: 0.7rem; }
   .w-full { width: 100%; }
   .italic { font-style: italic; }
+  /* ── GROW TIPS ── */
+  .tip-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    position: relative;
+  }
+  .tip-card.tip-sourced {
+    border-left: 3px solid var(--green);
+    background: linear-gradient(90deg, rgba(74,222,128,0.03) 0%, var(--card) 60%);
+  }
+  .tip-card.tip-personal {
+    border-left: 3px solid var(--blue);
+    background: linear-gradient(90deg, rgba(96,165,250,0.03) 0%, var(--card) 60%);
+  }
+  .tip-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .tip-title {
+    font-family: var(--body);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .tip-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+  .tip-badge {
+    font-family: var(--mono);
+    font-size: 0.46rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+  }
+  .tip-badge-cat  { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
+  .tip-badge-stage { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
+  .tip-badge-sourced { background: rgba(74,222,128,0.08); color: var(--green2); border: 1px solid rgba(74,222,128,0.2); }
+  .tip-badge-personal { background: rgba(96,165,250,0.08); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+  .tip-source-label {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 700;
+  }
+  .tip-personal-label {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+  .tip-body {
+    font-family: var(--body);
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 0.6rem;
+  }
+  .tip-notes {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--text3);
+    font-style: italic;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--border);
+  }
+  .tip-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .tip-filter-pill {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .tip-filter-pill:hover { color: var(--text2); border-color: var(--border); }
+  .tip-filter-pill.active { color: var(--green); border-color: var(--green3); background: var(--green-dim); }
+
+
 </style>
 </head>
 <body>
@@ -1260,6 +1363,11 @@
       Retired <span class="sidebar-badge" id="badge-retired">—</span>
     </button>
 
+    <div class="sidebar-section-label">Grow Tips</div>
+    <button class="sidebar-item" id="sidebar-tab-tips" onclick="showPage('tips')">
+      Grow Tips <span class="sidebar-badge" id="badge-tips">—</span>
+    </button>
+
     <div class="sidebar-section-label">Planning</div>
     <button class="sidebar-item" id="sidebar-tab-timeline" onclick="showPage('timeline')">
       Timeline
@@ -1353,7 +1461,7 @@
       <div class="section-desc">All active plants across your operation</div>
     </div>
     <div style="display:flex;gap:0.5rem">
-      <button class="btn btn-ghost" onclick="openBatchAdd('plant')" style="font-size:0.65rem">+ Batch Add</button>
+      <button class="btn btn-secondary" onclick="openBatchAdd('plant')" style="font-size:0.65rem;border-color:var(--green3);color:var(--green)">⊞ Batch Add</button>
       <button class="btn btn-primary" onclick="openAddPlant()">+ Add Plant</button>
     </div>
   </div>
@@ -1768,6 +1876,25 @@
   <div id="clones-content"></div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════ GROW TIPS -->
+<div class="page" id="page-tips">
+  <div class="section-header flex-between">
+    <div>
+      <div class="section-title">Grow Tips</div>
+      <div class="section-desc">Curated techniques from trusted sources — add any tip to your calendar</div>
+    </div>
+    <button class="btn btn-primary" onclick="openAddTip()">+ Add Tip</button>
+  </div>
+
+  <!-- Category filter -->
+  <div id="tips-filter" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.25rem"></div>
+
+  <!-- Tips grid -->
+  <div id="tips-grid" style="display:flex;flex-direction:column;gap:0.75rem"></div>
+  <div id="tips-empty" style="display:none" class="alert alert-info">No tips in this category yet. Add your first tip above.</div>
+</div>
+
+
 
 <!-- ═══════════════════════════════════════════════════ BREEDING -->
 <div class="page" id="page-breeding">
@@ -1785,6 +1912,193 @@
 <div class="toast" id="toast">
   <span class="toast-icon" id="toast-icon"></span>
   <span id="toast-msg"></span>
+</div>
+
+
+<!-- ── ADD / EDIT TIP MODAL ── -->
+<div class="modal-overlay" id="modal-tip">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="tip-modal-title">New Grow Tip</div>
+      <button class="modal-close" onclick="closeModal('modal-tip')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tip-edit-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="tip-category">
+            <option value="defoliation">Defoliation / Lollipopping</option>
+            <option value="training">Training (LST, Topping, Mainlining)</option>
+            <option value="environment">Environment (VPD, Temp, Humidity)</option>
+            <option value="feeding">Feeding / Amendment Timing</option>
+            <option value="ipm">IPM / Pest Prevention</option>
+            <option value="harvest">Harvest / Flush / Ripening</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stage</label>
+          <select class="form-select" id="tip-stage">
+            <option value="any">Any Stage</option>
+            <option value="seedling">Seedling</option>
+            <option value="veg">Veg</option>
+            <option value="early-flower">Early Flower (Wk 1–3)</option>
+            <option value="mid-flower">Mid Flower (Wk 4–6)</option>
+            <option value="late-flower">Late Flower (Wk 7+)</option>
+            <option value="harvest">Harvest / Flush</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tip Title</label>
+        <input class="form-input" type="text" id="tip-title" placeholder="e.g. Full leaf strip at Day 28–32">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tip Detail</label>
+        <textarea class="form-textarea" id="tip-body" style="height:100px" placeholder="Describe the technique, timing, rationale…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Source</label>
+          <input class="form-input" type="text" id="tip-source" placeholder="e.g. Mainely Genetics, BuildASoil, Bruce Bugbee">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Source Type</label>
+          <select class="form-select" id="tip-source-type">
+            <option value="personal">Personal / My own</option>
+            <option value="breeder">Breeder</option>
+            <option value="researcher">Researcher / Scientist</option>
+            <option value="educator">Educator / YouTuber</option>
+            <option value="community">Community / Forum</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Schedule Type</label>
+          <select class="form-select" id="tip-sched-type-new" onchange="updateTipSchedFields()">
+            <option value="any">No fixed date — manual</option>
+            <option value="flower-day">Specific flower day</option>
+            <option value="pre-flip">Days before flip</option>
+            <option value="pre-harvest">Days before harvest</option>
+            <option value="repeating">Repeating interval</option>
+          </select>
+        </div>
+        <div class="form-group" id="tip-sched-day-group" style="display:none">
+          <label class="form-label" id="tip-sched-day-label">Flower Day</label>
+          <input class="form-input" type="number" id="tip-cal-day" placeholder="e.g. 28" min="1" max="120">
+        </div>
+      </div>
+      <div id="tip-sched-repeat-group" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Every (days)</label>
+            <input class="form-input" type="number" id="tip-sched-interval-new" value="14" min="1" max="30">
+          </div>
+          <div class="form-group">
+            <label class="form-label">From Day</label>
+            <input class="form-input" type="number" id="tip-sched-from-new" value="1" min="1" max="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Until Day</label>
+            <input class="form-input" type="number" id="tip-sched-until-new" value="42" min="1" max="120">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Notes</label>
+        <input class="form-input" type="text" id="tip-notes" placeholder="Personal experience, modifications…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="margin-right:auto;color:var(--red);border-color:rgba(248,113,113,0.2);display:none" id="tip-delete-btn" onclick="deleteTip()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-tip')">Cancel</button>
+      <button class="btn btn-primary" id="tip-save-btn" onclick="saveTip()">Add Tip</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── SCHEDULE TIP TO CALENDAR MODAL ── -->
+<div class="modal-overlay" id="modal-tip-schedule">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div class="modal-title" id="tip-sched-title">Schedule to Calendar</div>
+      <button class="modal-close" onclick="closeModal('modal-tip-schedule')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Tip summary strip -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.9rem;margin-bottom:1rem">
+        <div id="tip-sched-summary" style="font-family:var(--mono);font-size:0.6rem;color:var(--text2);line-height:1.7"></div>
+      </div>
+
+      <!-- Plant selector -->
+      <div class="form-group">
+        <label class="form-label">Apply to Plant</label>
+        <select class="form-select" id="tip-sched-plant" onchange="renderTipSchedulePreview()">
+          <option value="">— Select a plant —</option>
+        </select>
+        <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);margin-top:0.3rem" id="tip-sched-plant-info"></div>
+      </div>
+
+      <!-- Recurrence options (shown for repeating tips) -->
+      <div id="tip-sched-recurrence" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Repeat Every (days)</label>
+            <input class="form-input" type="number" id="tip-sched-interval" value="14" min="1" max="30" oninput="renderTipSchedulePreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">From Flower Day</label>
+            <input class="form-input" type="number" id="tip-sched-from" value="1" min="1" max="100" oninput="renderTipSchedulePreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Until Flower Day</label>
+            <input class="form-input" type="number" id="tip-sched-until" value="42" min="1" max="120" oninput="renderTipSchedulePreview()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Event type override -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Event Type</label>
+          <select class="form-select" id="tip-sched-type">
+            <option value="note">📝 Note / Observation</option>
+            <option value="water">💧 Watering / Feeding</option>
+            <option value="milestone">🏆 Milestone</option>
+            <option value="ipm">🛡️ IPM / Pest Control</option>
+            <option value="environment">🌡️ Environment Reading</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Add as</label>
+          <select class="form-select" id="tip-sched-mode">
+            <option value="suggested">Suggested (dashed — confirm later)</option>
+            <option value="confirmed">Confirmed event</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Preview of events to be created -->
+      <div id="tip-sched-preview-wrap" style="display:none;margin-top:0.5rem">
+        <div style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:0.4rem">Events that will be added</div>
+        <div id="tip-sched-preview" style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;max-height:180px;overflow-y:auto"></div>
+      </div>
+
+      <div id="tip-sched-nodate-warn" style="display:none" class="alert alert-warn" style="margin-top:0.5rem">
+        This plant has no flower start date set — dates cannot be calculated. Set a flower start date in the Plant editor first.
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <div style="font-family:var(--mono);font-size:0.55rem;color:var(--text3);margin-right:auto" id="tip-sched-count"></div>
+      <button class="btn btn-ghost" onclick="closeModal('modal-tip-schedule')">Cancel</button>
+      <button class="btn btn-primary" id="tip-sched-save-btn" onclick="saveTipSchedule()">Add to Calendar</button>
+    </div>
+  </div>
 </div>
 
 <!-- IMPORT MODAL -->
@@ -2400,10 +2714,60 @@
       </div>
 
     </div>
+      <!-- Recent batches for duplicate / edit -->
+      <div id="batch-recent" style="margin-top:0.75rem;display:none">
+        <div style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text3);margin-bottom:0.4rem">Recent Batches</div>
+        <div id="batch-recent-list" style="display:flex;flex-direction:column;gap:0.3rem"></div>
+      </div>
+
+    </div>
     <div class="modal-footer">
       <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);margin-right:auto" id="batch-footer-count"></div>
       <button class="btn btn-ghost" onclick="closeModal('modal-batch-add')">Cancel</button>
       <button class="btn btn-primary" onclick="saveBatchAdd()" id="batch-save-btn">Add Batch</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── BATCH EDIT MODAL ── -->
+<div class="modal-overlay" id="modal-batch-edit">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="batch-edit-title">Edit Batch</div>
+      <button class="modal-close" onclick="closeModal('modal-batch-edit')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="batch-edit-id">
+      <div style="font-family:var(--mono);font-size:0.55rem;color:var(--text3);margin-bottom:1rem" id="batch-edit-desc"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status (all)</label>
+          <select class="form-select" id="batch-edit-status">
+            <option value="">— No change —</option>
+            <option value="rooting">Rooting (in dome)</option>
+            <option value="stasis">Stasis (solo cup)</option>
+            <option value="rooted">Rooted ✓</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tent (all)</label>
+          <select class="form-select" id="batch-edit-tent">
+            <option value="">— No change —</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (all — replaces existing)</label>
+        <textarea class="form-textarea" id="batch-edit-notes" style="height:60px" placeholder="Leave blank to keep existing notes"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:var(--red)">Danger Zone</label>
+        <button class="btn btn-ghost" style="border-color:rgba(248,113,113,0.3);color:var(--red);font-size:0.6rem;width:100%" onclick="deleteBatch()">Delete Entire Batch</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-batch-edit')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBatchEdit()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -3217,6 +3581,126 @@ if (_twDate !== TODAY_STR) { topWaterChecks = {}; localStorage.setItem('growtrac
 let customPlants = JSON.parse(localStorage.getItem('growtracker-plants') || '[]');
 let breedingProjects = JSON.parse(localStorage.getItem('growtracker-breeding') || JSON.stringify(DEFAULT_BREEDING));
 
+// ── GROW TIPS DATA ────────────────────────────────────────────
+const BUILTIN_TIPS = [
+  {
+    id: 'tip-builtin-0',
+    category: 'defoliation',
+    stage: 'early-flower',
+    title: 'Full Leaf Strip at Day 28–32 (One and Done)',
+    body: 'Day 15: lower canopy cleanup only. Days 28–32: full leaf strip — every fan, every branch, leaving only the top 3 leaves per branch. Pull only leaves with long petioles. Avoid stripping at days 21–25, which forces the plant to convert sugar and bud leaves into larger fans, requiring a second strip right as early bud swell should be happening. Waiting until 28–32 means one clean strip with full canopy done making leaf — then never again.',
+    source: 'Mainely Genetics',
+    sourceType: 'breeder',
+    calDay: 28,
+    schedule: { type: 'flower-day', day: 28, label: 'Day 28 of flower' },
+    notes: '',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-1',
+    category: 'environment',
+    stage: 'mid-flower',
+    title: 'VPD 1.4–1.8 kPa in Mid-Flower for Maximum Resin',
+    body: 'Elevating VPD through mid-flower (weeks 4–6) increases transpiration, which drives nutrient uptake and terpene/resin production. Target 1.4–1.8 kPa by keeping temps at 20–24°C and RH at 45–55%. Dropping below 1.2 kPa risks soft, airy buds; above 2.0 increases heat stress risk. Use a VPD chart and your tent hygrometer — do not chase numbers by adding heat without reducing RH simultaneously.',
+    source: 'Bruce Bugbee / Apogee',
+    sourceType: 'researcher',
+    calDay: null,
+    schedule: { type: 'any', label: 'Mid-flower (Wk 4–6)' },
+    notes: '',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-2',
+    category: 'feeding',
+    stage: 'veg',
+    title: 'Top-Dress Timing: Amend Before You See the Need',
+    body: 'In living soil with dry amendments, nutrients take 1–2 weeks to break down and become plant-available. Top-dress All-Purpose (4-4-4) in veg 2–3 weeks before you expect to need it, not when deficiency symptoms appear. By the time yellowing shows up, you are already behind. In flower, top-dress Bloom (2-8-4) at or just before flip — the soil needs the lead time. Water in amendments immediately after application and keep the top inch moist to activate microbial breakdown.',
+    source: 'BuildASoil',
+    sourceType: 'educator',
+    calDay: null,
+    schedule: { type: 'pre-flip', daysBefore: 21, label: '3 weeks before flip (veg top-dress)' },
+    notes: '',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-3',
+    category: 'ipm',
+    stage: 'any',
+    title: 'Fungus Gnat Prevention: BTI + Sticky Traps + Dry-Back',
+    body: 'Fungus gnats breed in the top inch of moist soil. Three-layer defence: (1) BTI dunks in reservoir water — targets larvae over 3–4 weeks, safe for living soil biology. (2) Yellow sticky traps at soil level — catches adults, doubles as early warning. (3) Dry-back discipline — let the top inch dry slightly between waterings where possible. In living soil keep the top moist for microbes but not saturated. BTI will not affect adult gnats — you need all three approaches working together.',
+    source: 'BuildASoil / General Best Practice',
+    sourceType: 'educator',
+    calDay: null,
+    schedule: { type: 'any', label: 'Ongoing — prevention' },
+    notes: '',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-4',
+    category: 'harvest',
+    stage: 'late-flower',
+    title: 'Harvest by Trichomes, Not the Calendar',
+    body: 'Breeder timelines are averages under their specific conditions. Watch trichomes: clear = immature, milky/cloudy = peak THC, amber = degrading to CBN (more sedative, less cerebral). For CBD strains, harvest at peak milky with minimal amber — CBD peaks slightly ahead of THC and holds longer. Use a 60–100× jeweller\'s loupe or digital microscope on a sugar leaf adjacent to the bud, not the bud itself (bract trichomes always amber faster). Check daily from Week 7 onward.',
+    source: 'Bruce Bugbee / General Best Practice',
+    sourceType: 'researcher',
+    calDay: null,
+    schedule: { type: 'flower-day', day: 49, label: 'From Day 49 of flower (Wk 7) — daily check' },
+    notes: 'Especially relevant for CBD Runtz — CBD strains often show amber earlier without being truly ready.',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-5',
+    category: 'training',
+    stage: 'veg',
+    title: 'LST: Start Early, Tie Often, Stop Before Flip',
+    body: 'Low-stress training is most effective in weeks 2–4 of veg when stems are still flexible. Bend the main stem to horizontal and secure with soft ties — it will knuckle and strengthen within 48–72 hours. Spread all main branches outward to open the canopy. Aim for an even, flat canopy — all bud sites at the same height. Stop LST 1–2 weeks before flip to let the plant settle and to avoid stressing into flower. Never LST in flower — you risk snapping branches when they are loaded with bud.',
+    source: 'Mr. Canucks Grow',
+    sourceType: 'educator',
+    calDay: null,
+    schedule: { type: 'any', label: 'Veg Wk 2–4' },
+    notes: '',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-6',
+    category: 'environment',
+    stage: 'late-flower',
+    title: 'Drop Temperature 2–4°C in Final 2 Weeks to Boost Colour and Resin',
+    body: 'Dropping night temps to 16–18°C in the final 2 weeks of flower triggers anthocyanin expression (purpling) in strains that carry that trait, and may improve terpene retention by slowing volatilisation. Do not drop below 15°C — this stresses the plant and can cause premature senescence. Maintain the day/night differential at no more than 10°C to avoid condensation and mould risk. Combined with slightly lower RH (40–45%) this mimics natural autumn conditions that many strains respond to.',
+    source: 'Umami Seed Co. / General Best Practice',
+    sourceType: 'breeder',
+    calDay: null,
+    schedule: { type: 'flower-day', day: 49, label: 'Final 2 weeks (from ~Day 49)' },
+    notes: '',
+    builtin: true,
+  },
+  {
+    id: 'tip-builtin-7',
+    category: 'harvest',
+    stage: 'harvest',
+    title: 'Living Soil Flush: 5–7 Days Plain Water, Not Aggressive Flushing',
+    body: 'In living soil, the biology continues feeding the plant even with plain water — the soil ecosystem does not simply "shut off". A 5–7 day plain water window before harvest allows the plant to use up stored nutrients naturally without the stress of aggressive high-volume flushing. Focus on trichome maturity, not a fixed flush duration. Avoid flushing with 2–3x pot volume repeatedly — this can disrupt the microbial population you have built across the entire grow.',
+    source: 'BuildASoil',
+    sourceType: 'educator',
+    calDay: null,
+    schedule: { type: 'pre-harvest', daysBefore: 7, label: '5–7 days before projected harvest' },
+    notes: 'Consistent with living soil philosophy — the soil is a living system, not a hydroponic medium.',
+    builtin: true,
+  },
+];
+
+let userTips = JSON.parse(localStorage.getItem('growtracker-tips') || '[]');
+const _deletedTipIds = JSON.parse(localStorage.getItem('growtracker-tips-deleted') || '[]');
+
+function allTips() {
+  return [
+    ...BUILTIN_TIPS.filter(t => !_deletedTipIds.includes(t.id)),
+    ...userTips
+  ];
+}
+
+
+
 // Resolve live dayInStage for all plants
 function resolvePlants() {
   const baseOverrides = JSON.parse(localStorage.getItem('growtracker-base-overrides') || '{}');
@@ -3262,6 +3746,7 @@ function showPage(id) {
   if (id === 'breeding') renderBreeding();
   if (id === 'timeline') renderCalendar();
   if (id === 'retired') renderRetired();
+  if (id === 'tips') renderTips();
   if (id === 'claude') renderClaudePage();
   updateSidebarBadges();
 }
@@ -3283,11 +3768,13 @@ function updateSidebarBadges() {
   const clonesEl  = document.getElementById('badge-clones');
   const breedEl   = document.getElementById('badge-breeding');
   const retiredEl = document.getElementById('badge-retired');
+  const tipsEl    = document.getElementById('badge-tips');
   if (tentsEl)   tentsEl.textContent   = TENTS.length;
   if (plantsEl)  plantsEl.textContent  = customPlants.filter(p => !p.retired).length;
   if (clonesEl)  clonesEl.textContent  = clones.length;
   if (breedEl)   breedEl.textContent   = breedingProjects.length;
   if (retiredEl) retiredEl.textContent = customPlants.filter(p => p.retired).length;
+  if (tipsEl)    tipsEl.textContent    = allTips().length;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -4341,6 +4828,502 @@ function quickReservoirLog(plantId) {
   }, 150);
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// GROW TIPS
+// ═══════════════════════════════════════════════════════════════════
+
+const TIP_CATEGORIES = {
+  defoliation: { label: 'Defoliation / Lollipopping', color: 'var(--amber)'  },
+  training:    { label: 'Training',                   color: 'var(--green)'  },
+  environment: { label: 'Environment / VPD',          color: 'var(--blue)'   },
+  feeding:     { label: 'Feeding / Amendments',       color: 'var(--green2)' },
+  ipm:         { label: 'IPM / Pest Prevention',      color: 'var(--red)'    },
+  harvest:     { label: 'Harvest / Flush',            color: 'var(--purple)' },
+  other:       { label: 'Other',                      color: 'var(--text3)'  },
+};
+
+const TIP_STAGE_LABELS = {
+  any:          'Any Stage',
+  seedling:     'Seedling',
+  veg:          'Veg',
+  'early-flower': 'Early Flower',
+  'mid-flower':   'Mid Flower',
+  'late-flower':  'Late Flower',
+  harvest:      'Harvest / Flush',
+};
+
+const SOURCE_TYPE_LABELS = {
+  personal:   'My Tip',
+  breeder:    'Breeder',
+  researcher: 'Researcher',
+  educator:   'Educator',
+  community:  'Community',
+};
+
+let _tipsFilter = 'all';
+
+function renderTips() {
+  const tips = allTips();
+  const filterEl = document.getElementById('tips-filter');
+  const gridEl   = document.getElementById('tips-grid');
+  const emptyEl  = document.getElementById('tips-empty');
+
+  // Build filter pills
+  const cats = ['all', ...Object.keys(TIP_CATEGORIES)];
+  filterEl.innerHTML = cats.map(c => {
+    const label = c === 'all'
+      ? `All <span style="opacity:0.6">(${tips.length})</span>`
+      : `${TIP_CATEGORIES[c].label} <span style="opacity:0.6">(${tips.filter(t=>t.category===c).length})</span>`;
+    return `<button class="tip-filter-pill${_tipsFilter===c?' active':''}" onclick="_setTipsFilter('${c}')">${label}</button>`;
+  }).join('');
+
+  // Filter
+  const filtered = _tipsFilter === 'all' ? tips : tips.filter(t => t.category === _tipsFilter);
+
+  if (!filtered.length) {
+    gridEl.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  gridEl.innerHTML = filtered.map(tip => {
+    const isSourced  = tip.sourceType && tip.sourceType !== 'personal';
+    const cat        = TIP_CATEGORIES[tip.category] || TIP_CATEGORIES.other;
+    const stageLabel = TIP_STAGE_LABELS[tip.stage] || tip.stage;
+    const srcTypeLabel = SOURCE_TYPE_LABELS[tip.sourceType] || tip.sourceType;
+
+    const sourceBadge = isSourced
+      ? `<span class="tip-badge tip-badge-sourced">⬡ ${srcTypeLabel}</span>`
+      : `<span class="tip-badge tip-badge-personal">◈ My Tip</span>`;
+
+    const sourceCredit = tip.source
+      ? (isSourced
+          ? `<span class="tip-source-label">↳ ${tip.source}</span>`
+          : '')
+      : '';
+
+    const schedLabel = tip.schedule
+      ? (tip.schedule.type === 'repeating' ? 'Schedule (repeating)' :
+         tip.schedule.type === 'any'       ? '+ Add to Calendar'    :
+         '+ Schedule (' + tip.schedule.label + ')')
+      : (tip.calDay ? '+ Day ' + tip.calDay + ' Calendar' : '+ Add to Calendar');
+    const calBtn = `<button onclick="tipToCalendar('${tip.id}')" style="font-family:var(--mono);font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.2rem 0.6rem;border:1px solid var(--border2);background:transparent;color:var(--purple);cursor:pointer;border-radius:2px;border-color:rgba(167,139,250,0.3)" onmouseover="this.style.borderColor='var(--purple)';this.style.background='rgba(167,139,250,0.07)'" onmouseout="this.style.borderColor='rgba(167,139,250,0.3)';this.style.background='transparent'">${schedLabel}</button>`;
+
+    const editBtn = `<button onclick="openEditTip('${tip.id}')" style="font-family:var(--mono);font-size:0.5rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.2rem 0.6rem;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:2px" onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'">${tip.builtin ? 'View / Note' : 'Edit'}</button>`;
+
+    return `
+    <div class="tip-card ${isSourced ? 'tip-sourced' : 'tip-personal'}">
+      <div class="tip-header">
+        <div class="tip-title">${tip.title}</div>
+        <div style="display:flex;gap:0.4rem;flex-shrink:0">${calBtn}${editBtn}</div>
+      </div>
+      <div class="tip-meta">
+        <span class="tip-badge tip-badge-cat" style="border-color:${cat.color}33;color:${cat.color}">${cat.label}</span>
+        <span class="tip-badge tip-badge-stage">${stageLabel}</span>
+        ${sourceBadge}
+        ${sourceCredit}
+      </div>
+      <div class="tip-body">${tip.body}</div>
+      ${tip.notes ? `<div class="tip-notes">📝 Your notes: ${tip.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Update sidebar badge
+  document.getElementById('badge-tips').textContent = tips.length;
+}
+
+function _setTipsFilter(cat) {
+  _tipsFilter = cat;
+  renderTips();
+}
+
+// ── ADD / EDIT ─────────────────────────────────────────────────────
+let _tipEditId = null;
+
+function openAddTip() {
+  _tipEditId = null;
+  document.getElementById('tip-modal-title').textContent = 'New Grow Tip';
+  document.getElementById('tip-save-btn').textContent    = 'Add Tip';
+  document.getElementById('tip-delete-btn').style.display = 'none';
+  // Clear fields
+  ['tip-edit-id','tip-title','tip-source','tip-cal-day','tip-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('tip-body').value      = '';
+  document.getElementById('tip-category').value  = 'defoliation';
+  document.getElementById('tip-stage').value     = 'any';
+  document.getElementById('tip-source-type').value = 'personal';
+  openModal('modal-tip');
+  setTimeout(() => document.getElementById('tip-title').focus(), 120);
+}
+
+function openEditTip(id) {
+  const tip = allTips().find(t => t.id === id);
+  if (!tip) return;
+  _tipEditId = id;
+
+  document.getElementById('tip-modal-title').textContent = tip.builtin ? 'View Tip / Add Notes' : 'Edit Tip';
+  document.getElementById('tip-save-btn').textContent    = tip.builtin ? 'Save Notes' : 'Save Changes';
+  document.getElementById('tip-delete-btn').style.display = tip.builtin ? 'none' : '';
+  document.getElementById('tip-edit-id').value    = id;
+  document.getElementById('tip-category').value   = tip.category || 'other';
+  document.getElementById('tip-stage').value      = tip.stage    || 'any';
+  document.getElementById('tip-title').value      = tip.title    || '';
+  document.getElementById('tip-body').value       = tip.body     || '';
+  document.getElementById('tip-source').value     = tip.source   || '';
+  document.getElementById('tip-source-type').value = tip.sourceType || 'personal';
+  document.getElementById('tip-cal-day').value    = tip.calDay   || '';
+  document.getElementById('tip-notes').value      = tip.notes    || '';
+
+  // Lock core fields on built-in tips
+  ['tip-category','tip-stage','tip-title','tip-body','tip-source','tip-source-type'].forEach(id => {
+    document.getElementById(id).disabled = !!tip.builtin;
+  });
+
+  openModal('modal-tip');
+}
+
+function saveTip() {
+  const title = document.getElementById('tip-title').value.trim();
+  const body  = document.getElementById('tip-body').value.trim();
+  if (!title) { showToast('error', '✕', 'Title required'); return; }
+
+  const calDayRaw = document.getElementById('tip-cal-day').value;
+  const calDay    = calDayRaw ? parseInt(calDayRaw) : null;
+  const notes     = document.getElementById('tip-notes').value.trim();
+
+  if (_tipEditId) {
+    // Editing built-in: only update notes + calDay
+    const builtinIdx = BUILTIN_TIPS.findIndex(t => t.id === _tipEditId);
+    if (builtinIdx !== -1) {
+      BUILTIN_TIPS[builtinIdx].notes  = notes;
+      BUILTIN_TIPS[builtinIdx].calDay = calDay;
+      // Persist notes override in localStorage
+      const overrides = JSON.parse(localStorage.getItem('growtracker-tip-overrides') || '{}');
+      overrides[_tipEditId] = { notes, calDay };
+      localStorage.setItem('growtracker-tip-overrides', JSON.stringify(overrides));
+    } else {
+      // Editing user tip
+      const idx = userTips.findIndex(t => t.id === _tipEditId);
+      if (idx !== -1) {
+        userTips[idx] = {
+          ...userTips[idx],
+          category:   document.getElementById('tip-category').value,
+          stage:      document.getElementById('tip-stage').value,
+          title, body, calDay, notes,
+          source:     document.getElementById('tip-source').value.trim(),
+          sourceType: document.getElementById('tip-source-type').value,
+          schedule:   _buildTipScheduleFromModal(),
+        };
+        localStorage.setItem('growtracker-tips', JSON.stringify(userTips));
+      }
+    }
+  } else {
+    // New user tip
+    userTips.push({
+      id:         'tip-user-' + Date.now(),
+      category:   document.getElementById('tip-category').value,
+      stage:      document.getElementById('tip-stage').value,
+      title, body, calDay, notes,
+      source:     document.getElementById('tip-source').value.trim(),
+      sourceType: document.getElementById('tip-source-type').value,
+      schedule:   _buildTipScheduleFromModal(),
+      builtin:    false,
+    });
+    localStorage.setItem('growtracker-tips', JSON.stringify(userTips));
+  }
+
+  // Re-enable fields (in case we locked them for built-in)
+  ['tip-category','tip-stage','tip-title','tip-body','tip-source','tip-source-type'].forEach(id => {
+    document.getElementById(id).disabled = false;
+  });
+
+  closeModal('modal-tip');
+  renderTips();
+  showToast('success', '✓', _tipEditId ? 'Tip updated' : 'Tip added');
+}
+
+function deleteTip() {
+  if (!_tipEditId) return;
+  if (!confirm('Delete this tip?')) return;
+  userTips = userTips.filter(t => t.id !== _tipEditId);
+  localStorage.setItem('growtracker-tips', JSON.stringify(userTips));
+  closeModal('modal-tip');
+  renderTips();
+  showToast('info', '✕', 'Tip deleted');
+}
+
+// ── SCHEDULE TIP TO CALENDAR ──────────────────────────────────────
+let _schedTipId = null;
+
+function tipToCalendar(tipId) {
+  const tip = allTips().find(t => t.id === tipId);
+  if (!tip) return;
+  _schedTipId = tipId;
+
+  // Populate modal header
+  document.getElementById('tip-sched-title').textContent = 'Schedule to Calendar';
+  document.getElementById('tip-sched-summary').innerHTML =
+    '<strong>' + tip.title + '</strong><br>' +
+    (tip.source ? '<span style="color:var(--green)">↳ ' + tip.source + '</span><br>' : '') +
+    (tip.schedule ? '<span>Timing: ' + tip.schedule.label + '</span>' : '');
+
+  // Show/hide recurrence fields
+  const isRepeating = tip.schedule && tip.schedule.type === 'repeating';
+  document.getElementById('tip-sched-recurrence').style.display = isRepeating ? '' : 'none';
+  if (isRepeating && tip.schedule.interval) {
+    document.getElementById('tip-sched-interval').value = tip.schedule.interval;
+    document.getElementById('tip-sched-from').value     = tip.schedule.fromDay || 1;
+    document.getElementById('tip-sched-until').value    = tip.schedule.untilDay || 42;
+  }
+
+  // Set sensible default event type from tip category
+  const catTypeMap = {
+    defoliation: 'note', training: 'note', environment: 'environment',
+    feeding: 'water', ipm: 'ipm', harvest: 'milestone', other: 'note'
+  };
+  document.getElementById('tip-sched-type').value = catTypeMap[tip.category] || 'note';
+  document.getElementById('tip-sched-mode').value = 'suggested';
+
+  // Populate plant selector — only plants with flower start dates where relevant
+  allPlants = resolvePlants();
+  const plantSel = document.getElementById('tip-sched-plant');
+  plantSel.innerHTML = '<option value="">— Select a plant —</option>' +
+    allPlants.map(p => {
+      const sd = plantStartDates[p.id];
+      const hasFlower = sd && (typeof sd === 'object' ? sd.flower : false);
+      const hasDates  = !!hasFlower || (sd && typeof sd === 'string');
+      return '<option value="' + p.id + '"' + (!hasDates ? ' style="opacity:0.5"' : '') + '>' +
+        p.strain + ' (' + tentName(p.tent) + ')' + (!hasDates ? ' — no dates set' : '') + '</option>';
+    }).join('');
+
+  renderTipSchedulePreview();
+  closeModal('modal-tip');
+  openModal('modal-tip-schedule');
+}
+
+function _getTipScheduleDates(tip, plantId) {
+  // Returns array of { date (YYYY-MM-DD), label } objects
+  if (!tip || !tip.schedule) return [];
+  const sd = plantStartDates[plantId];
+  const flowerStartStr = sd && typeof sd === 'object' ? sd.flower : null;
+  const vegStartStr    = sd && typeof sd === 'object' ? sd.veg : (typeof sd === 'string' ? sd : null);
+  const plant = (resolvePlants()).find(p => p.id === plantId);
+  const flowerLen = plant ? (plant.flowerLen || 63) : 63;
+
+  if (!flowerStartStr && !vegStartStr) return [];
+
+  const schedule = tip.schedule;
+  const dates = [];
+
+  if (schedule.type === 'flower-day') {
+    if (!flowerStartStr) return [];
+    const base = new Date(flowerStartStr);
+    const d = addDays(base, (schedule.day || 1) - 1);
+    dates.push({ date: dateStr(d), label: 'Day ' + schedule.day + ' of flower — ' + formatDateShort(dateStr(d)) });
+
+  } else if (schedule.type === 'pre-flip') {
+    if (!flowerStartStr) return [];
+    const base = new Date(flowerStartStr);
+    const d = addDays(base, -(schedule.daysBefore || 7));
+    dates.push({ date: dateStr(d), label: schedule.daysBefore + 'd before flip — ' + formatDateShort(dateStr(d)) });
+
+  } else if (schedule.type === 'pre-harvest') {
+    if (!flowerStartStr) return [];
+    const harvest = addDays(new Date(flowerStartStr), flowerLen);
+    const d = addDays(harvest, -(schedule.daysBefore || 7));
+    dates.push({ date: dateStr(d), label: schedule.daysBefore + 'd before projected harvest — ' + formatDateShort(dateStr(d)) });
+
+  } else if (schedule.type === 'repeating') {
+    if (!flowerStartStr) return [];
+    const base     = new Date(flowerStartStr);
+    const fromDay  = parseInt(document.getElementById('tip-sched-from')?.value  || schedule.fromDay  || 1);
+    const untilDay = parseInt(document.getElementById('tip-sched-until')?.value || schedule.untilDay || 42);
+    const interval = parseInt(document.getElementById('tip-sched-interval')?.value || schedule.interval || 14);
+    for (let day = fromDay; day <= untilDay; day += interval) {
+      const d = addDays(base, day - 1);
+      dates.push({ date: dateStr(d), label: 'Flower day ' + day + ' — ' + formatDateShort(dateStr(d)) });
+    }
+
+  } else if (schedule.type === 'any') {
+    // No date calc — fall back to simple add-event modal
+    return null;
+  }
+
+  return dates;
+}
+
+function renderTipSchedulePreview() {
+  const plantId = document.getElementById('tip-sched-plant').value;
+  const previewWrap = document.getElementById('tip-sched-preview-wrap');
+  const previewEl   = document.getElementById('tip-sched-preview');
+  const warnEl      = document.getElementById('tip-sched-nodate-warn');
+  const countEl     = document.getElementById('tip-sched-count');
+  const saveBtn     = document.getElementById('tip-sched-save-btn');
+  const infoEl      = document.getElementById('tip-sched-plant-info');
+
+  if (!plantId) {
+    previewWrap.style.display = 'none';
+    warnEl.style.display = 'none';
+    countEl.textContent = '';
+    saveBtn.disabled = true;
+    infoEl.textContent = '';
+    return;
+  }
+
+  const tip = allTips().find(t => t.id === _schedTipId);
+  if (!tip) return;
+
+  // Show plant date info
+  const sd = plantStartDates[plantId];
+  const flowerStart = sd && typeof sd === 'object' ? sd.flower : null;
+  const plant = resolvePlants().find(p => p.id === plantId);
+  infoEl.textContent = flowerStart
+    ? 'Flower started: ' + formatDateShort(flowerStart) + (plant ? ' · ' + plant.flowerLen + 'd cycle' : '')
+    : 'No flower start date set';
+
+  // 'any' type — skip preview, just open basic modal
+  if (tip.schedule && tip.schedule.type === 'any') {
+    previewWrap.style.display = 'none';
+    warnEl.style.display = 'none';
+    countEl.textContent = 'Will open add-event modal';
+    saveBtn.disabled = false;
+    return;
+  }
+
+  if (!flowerStart) {
+    previewWrap.style.display = 'none';
+    warnEl.style.display = '';
+    countEl.textContent = '';
+    saveBtn.disabled = true;
+    return;
+  }
+  warnEl.style.display = 'none';
+
+  const dates = _getTipScheduleDates(tip, plantId);
+  if (!dates || !dates.length) {
+    previewWrap.style.display = 'none';
+    countEl.textContent = 'No events to add';
+    saveBtn.disabled = true;
+    return;
+  }
+
+  previewWrap.style.display = '';
+  saveBtn.disabled = false;
+  countEl.textContent = dates.length + ' event' + (dates.length > 1 ? 's' : '') + ' will be added';
+  previewEl.innerHTML = dates.map(d =>
+    '<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text2);padding:0.2rem 0;border-bottom:1px solid var(--border);display:flex;gap:0.5rem">' +
+    '<span style="color:var(--green);min-width:90px">' + d.date + '</span>' +
+    '<span>' + d.label + '</span></div>'
+  ).join('');
+}
+
+function saveTipSchedule() {
+  const plantId = document.getElementById('tip-sched-plant').value;
+  const tip     = allTips().find(t => t.id === _schedTipId);
+  if (!tip || !plantId) { showToast('error','✕','Select a plant first'); return; }
+
+  const eventType = document.getElementById('tip-sched-type').value;
+  const mode      = document.getElementById('tip-sched-mode').value;
+  const isSugg    = mode === 'suggested';
+  const plant     = resolvePlants().find(p => p.id === plantId);
+
+  // 'any' type → fall back to basic add-event modal prefilled
+  if (tip.schedule && tip.schedule.type === 'any') {
+    closeModal('modal-tip-schedule');
+    openAddCalEvent(null);
+    setTimeout(() => {
+      document.getElementById('cal-event-type').value  = eventType;
+      document.getElementById('cal-event-title').value = tip.title;
+      const noteLines = [tip.body];
+      if (tip.source) noteLines.push('Source: ' + tip.source);
+      if (tip.notes)  noteLines.push('Your notes: ' + tip.notes);
+      document.getElementById('cal-event-notes').value = noteLines.join('\n\n');
+      populateCalPlantSelect(plantId);
+    }, 150);
+    return;
+  }
+
+  const dates = _getTipScheduleDates(tip, plantId);
+  if (!dates || !dates.length) { showToast('error','✕','No dates could be calculated'); return; }
+
+  const noteText = [tip.body, tip.source ? 'Source: ' + tip.source : '', tip.notes ? 'Notes: ' + tip.notes : ''].filter(Boolean).join('\n\n');
+  const now = Date.now();
+
+  dates.forEach((d, i) => {
+    const ev = {
+      id:          'tip-cal-' + now + '-' + i,
+      date:        d.date,
+      type:        eventType,
+      title:       tip.title,
+      notes:       noteText,
+      plantId:     plantId,
+      customColor: null,
+      completed:   false,
+      suggested:   isSugg,
+      fromTipId:   tip.id,
+      updatedAt:   new Date().toISOString(),
+    };
+    calEvents.push(ev);
+  });
+
+  saveCalEvents();
+  closeModal('modal-tip-schedule');
+  showToast('success', '✓', dates.length + ' event' + (dates.length > 1 ? 's' : '') + ' added to calendar for ' + (plant ? plant.strain : 'plant'));
+  // Navigate to timeline so user sees result
+  showPage('timeline');
+}
+
+// ── TIP MODAL SCHEDULE FIELD TOGGLE ──────────────────────────────
+function updateTipSchedFields() {
+  const type = document.getElementById('tip-sched-type-new')?.value;
+  if (!type) return;
+  const dayGroup    = document.getElementById('tip-sched-day-group');
+  const repeatGroup = document.getElementById('tip-sched-repeat-group');
+  const dayLabel    = document.getElementById('tip-sched-day-label');
+  dayGroup.style.display    = ['flower-day','pre-flip','pre-harvest'].includes(type) ? '' : 'none';
+  repeatGroup.style.display = type === 'repeating' ? '' : 'none';
+  if (type === 'flower-day')   dayLabel.textContent = 'Flower Day';
+  if (type === 'pre-flip')     dayLabel.textContent = 'Days Before Flip';
+  if (type === 'pre-harvest')  dayLabel.textContent = 'Days Before Harvest';
+}
+
+function _buildTipScheduleFromModal() {
+  const type = document.getElementById('tip-sched-type-new')?.value || 'any';
+  const day  = parseInt(document.getElementById('tip-cal-day')?.value) || null;
+  const labels = {
+    'flower-day':   day ? 'Day ' + day + ' of flower' : 'Specific flower day',
+    'pre-flip':     day ? day + 'd before flip' : 'Before flip',
+    'pre-harvest':  day ? day + 'd before harvest' : 'Before harvest',
+    'repeating':    'Every ' + (document.getElementById('tip-sched-interval-new')?.value || 14) + ' days',
+    'any':          'Manual — no fixed date',
+  };
+  const sched = { type, label: labels[type] || type };
+  if (type === 'flower-day')  { sched.day = day; }
+  if (type === 'pre-flip')    { sched.daysBefore = day; }
+  if (type === 'pre-harvest') { sched.daysBefore = day; }
+  if (type === 'repeating') {
+    sched.interval  = parseInt(document.getElementById('tip-sched-interval-new')?.value) || 14;
+    sched.fromDay   = parseInt(document.getElementById('tip-sched-from-new')?.value)     || 1;
+    sched.untilDay  = parseInt(document.getElementById('tip-sched-until-new')?.value)    || 42;
+  }
+  return sched;
+}
+
+// ── APPLY BUILT-IN TIP OVERRIDES FROM LOCALSTORAGE ────────────────
+(function applyTipOverrides() {
+  const overrides = JSON.parse(localStorage.getItem('growtracker-tip-overrides') || '{}');
+  Object.entries(overrides).forEach(([id, vals]) => {
+    const tip = BUILTIN_TIPS.find(t => t.id === id);
+    if (tip) {
+      if (vals.notes  !== undefined) tip.notes  = vals.notes;
+      if (vals.calDay !== undefined) tip.calDay = vals.calDay;
+    }
+  });
+})();
+
 // ═══════════════════════════════════════════════════════════════════
 // TEAS
 // ═══════════════════════════════════════════════════════════════════
@@ -4827,7 +5810,7 @@ function renderClones() {
     <div class="flex-between mb-md">
       <div class="section-title">All Clones</div>
       <div style="display:flex;gap:0.5rem">
-        <button class="btn btn-ghost" onclick="openBatchAdd('clone')" style="font-size:0.6rem;padding:0.4rem 0.8rem">+ Batch Add</button>
+        <button class="btn btn-secondary" onclick="openBatchAdd('clone')" style="font-size:0.6rem;padding:0.4rem 0.8rem;border-color:var(--green3);color:var(--green)">⊞ Batch Add</button>
         <button class="btn btn-primary" onclick="openAddClone()" style="font-size:0.6rem;padding:0.4rem 0.8rem">+ Add Clone</button>
       </div>
     </div>
@@ -5317,6 +6300,7 @@ function openBatchAdd(mode) {
   }
 
   updateBatchPreview();
+  renderRecentBatches();
   openModal('modal-batch-add');
 
   // Focus strain input after open
@@ -5425,6 +6409,170 @@ function saveBatchAdd() {
   closeModal('modal-batch-add');
   refreshAllActivePages();
   showToast('success', '✓', `${qty} ${_batchMode}${qty !== 1 ? 's' : ''} added — "${strain}"`);
+}
+
+// ── RECENT BATCHES ────────────────────────────────────────────────
+function _getRecentBatches(mode) {
+  // Returns unique batches from clones or plants, newest first
+  const items = mode === 'clone' ? clones : customPlants;
+  const seen = new Map();
+  [...items].reverse().forEach(item => {
+    if (item._batchId && !seen.has(item._batchId)) {
+      const batchItems = items.filter(i => i._batchId === item._batchId);
+      seen.set(item._batchId, {
+        batchId:   item._batchId,
+        strain:    item.strain.replace(/ #\d+$/, '').replace(/ [A-Z]$/, ''),
+        count:     batchItems.length,
+        status:    item.status || null,
+        tent:      item.tent || null,
+        method:    item.method || null,
+        mother:    item.mother || null,
+        stage:     item.stage || null,
+        flowerLen: item.flowerLen || null,
+        mode,
+      });
+    }
+  });
+  return [...seen.values()].slice(0, 5);
+}
+
+function renderRecentBatches() {
+  const recentEl = document.getElementById('batch-recent');
+  const listEl   = document.getElementById('batch-recent-list');
+  const batches  = _getRecentBatches(_batchMode);
+  if (!batches.length) { recentEl.style.display = 'none'; return; }
+  recentEl.style.display = '';
+  listEl.innerHTML = batches.map(b => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0.65rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
+      <div>
+        <span style="font-family:var(--mono);font-size:0.58rem;color:var(--text2)">${b.strain}</span>
+        <span style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);margin-left:0.4rem">× ${b.count}</span>
+        ${b.status ? `<span style="font-family:var(--mono);font-size:0.46rem;color:var(--text3);margin-left:0.4rem">· ${b.status}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:0.4rem">
+        <button onclick="duplicateBatch('${b.batchId}')" style="font-family:var(--mono);font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border:1px solid var(--border2);background:transparent;color:var(--green);cursor:pointer;border-radius:2px;border-color:var(--green3)" onmouseover="this.style.background='var(--green-dim)'" onmouseout="this.style.background='transparent'">Duplicate</button>
+        <button onclick="openBatchEdit('${b.batchId}')" style="font-family:var(--mono);font-size:0.5rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:2px" onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'">Edit Batch</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function duplicateBatch(batchId) {
+  // Pre-fill the batch form with settings from an existing batch
+  const items = _batchMode === 'clone' ? clones : customPlants;
+  const batchItems = items.filter(i => i._batchId === batchId);
+  if (!batchItems.length) return;
+  const first = batchItems[0];
+  const rawStrain = first.strain.replace(/ #\d+$/, '').replace(/ [A-Z]$/, '');
+
+  document.getElementById('batch-strain').value = rawStrain;
+  document.getElementById('batch-qty').value = batchItems.length;
+  document.getElementById('batch-name-format').value = 'numbered';
+  document.getElementById('batch-notes').value = first.notes || '';
+
+  if (_batchMode === 'clone') {
+    if (first.status) document.getElementById('batch-clone-status').value = first.status;
+    if (first.tent)   document.getElementById('batch-clone-tent').value   = first.tent;
+    if (first.method) document.getElementById('batch-clone-method').value = first.method;
+    if (first.mother) document.getElementById('batch-clone-mother').value = first.mother;
+    document.getElementById('batch-clone-location').value = first.location || '';
+    document.getElementById('batch-clone-breed').checked  = !!first.breedStock;
+    // Set start number to continue from last batch
+    const maxNum = batchItems.reduce((max, item) => {
+      const m = item.strain.match(/#(\d+)$/);
+      return m ? Math.max(max, parseInt(m[1])) : max;
+    }, 0);
+    document.getElementById('batch-start-num').value = maxNum > 0 ? maxNum + 1 : 1;
+  } else {
+    if (first.tent)     document.getElementById('batch-plant-tent').value     = first.tent;
+    if (first.stage)    document.getElementById('batch-plant-stage').value    = first.stage;
+    if (first.flowerLen) document.getElementById('batch-plant-flowerlen').value = first.flowerLen;
+  }
+
+  updateBatchPreview();
+  showToast('info', '⊞', `Pre-filled from batch of ${batchItems.length} — adjust and confirm`);
+}
+
+// ── BATCH EDIT ────────────────────────────────────────────────────
+let _batchEditId = null;
+
+function openBatchEdit(batchId) {
+  _batchEditId = batchId;
+  const items     = _batchMode === 'clone' ? clones : customPlants;
+  const batchItems = items.filter(i => i._batchId === batchId);
+  if (!batchItems.length) return;
+  const first = batchItems[0];
+  const rawStrain = first.strain.replace(/ #\d+$/, '').replace(/ [A-Z]$/, '');
+
+  document.getElementById('batch-edit-id').value = batchId;
+  document.getElementById('batch-edit-title').textContent = `Edit Batch — ${rawStrain}`;
+  document.getElementById('batch-edit-desc').textContent =
+    `${batchItems.length} ${_batchMode}${batchItems.length > 1 ? 's' : ''} in this batch. Changes apply to all.`;
+
+  // Populate tent selector
+  const tentSel = document.getElementById('batch-edit-tent');
+  tentSel.innerHTML = '<option value="">— No change —</option>' +
+    TENTS.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+  // Show/hide status field (only for clones)
+  const statusRow = document.getElementById('batch-edit-status').closest('.form-group');
+  statusRow.style.display = _batchMode === 'clone' ? '' : 'none';
+
+  document.getElementById('batch-edit-status').value = '';
+  document.getElementById('batch-edit-tent').value   = '';
+  document.getElementById('batch-edit-notes').value  = '';
+
+  closeModal('modal-batch-add');
+  openModal('modal-batch-edit');
+}
+
+function saveBatchEdit() {
+  if (!_batchEditId) return;
+  const items = _batchMode === 'clone' ? clones : customPlants;
+  const newStatus = document.getElementById('batch-edit-status').value;
+  const newTent   = document.getElementById('batch-edit-tent').value;
+  const newNotes  = document.getElementById('batch-edit-notes').value.trim();
+  let changed = 0;
+
+  items.forEach((item, idx) => {
+    if (item._batchId !== _batchEditId) return;
+    if (newStatus && _batchMode === 'clone') items[idx].status = newStatus;
+    if (newTent)   items[idx].tent   = newTent;
+    if (newNotes)  items[idx].notes  = newNotes;
+    changed++;
+  });
+
+  if (_batchMode === 'clone') {
+    localStorage.setItem('growtracker-clones', JSON.stringify(clones));
+  } else {
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
+    allPlants = resolvePlants();
+  }
+
+  closeModal('modal-batch-edit');
+  refreshAllActivePages();
+  showToast('success', '✓', `Updated ${changed} ${_batchMode}${changed > 1 ? 's' : ''}`);
+}
+
+function deleteBatch() {
+  if (!_batchEditId) return;
+  const items = _batchMode === 'clone' ? clones : customPlants;
+  const batchItems = items.filter(i => i._batchId === _batchEditId);
+  if (!confirm(`Delete all ${batchItems.length} ${_batchMode}(s) in this batch? This cannot be undone.`)) return;
+
+  if (_batchMode === 'clone') {
+    clones = clones.filter(i => i._batchId !== _batchEditId);
+    localStorage.setItem('growtracker-clones', JSON.stringify(clones));
+  } else {
+    customPlants = customPlants.filter(i => i._batchId !== _batchEditId);
+    localStorage.setItem('growtracker-plants', JSON.stringify(customPlants));
+    allPlants = resolvePlants();
+  }
+
+  closeModal('modal-batch-edit');
+  refreshAllActivePages();
+  updateSidebarBadges();
+  showToast('info', '✕', `Batch of ${batchItems.length} deleted`);
 }
 
 // Live preview on strain input too

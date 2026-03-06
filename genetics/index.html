@@ -7,78 +7,161 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Unbounded:wght@300;400;600;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#060a06; --bg2:#0a0f0a; --card:#0d150d; --border:#1a2a1a;
-    --green:#4ade80; --green2:#22c55e; --green3:#16a34a;
-    --amber:#fbbf24; --purple:#c084fc;
+    --bg:#060a06; --bg2:#0a0f0a; --bg3:#0f160f;
+    --card:#0d150d; --border:#1a2a1a; --border2:#243424;
+    --green:#4ade80; --green2:#22c55e; --green3:#16a34a; --green-dim:#0d1f0d;
+    --amber:#fbbf24; --amber-dim:#1e1500;
+    --purple:#c084fc; --purple-dim:#1a0f2a;
+    --blue:#60a5fa;
     --text:#e2ece2; --text2:#8aaa8a; --text3:#4a644a;
     --mono:'Space Mono',monospace; --head:'Unbounded',sans-serif; --body:'DM Sans',sans-serif;
   }
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden}
   body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.5}
 
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;background:rgba(6,10,6,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(74,222,128,0.08)}
-  .nav-wordmark{text-decoration:none}
-  .nav-zombie{display:block;font-family:var(--head);font-weight:900;font-size:0.7rem;letter-spacing:0.25em;color:var(--green);text-transform:uppercase;line-height:1}
-  .nav-genetix{display:block;font-family:var(--head);font-weight:300;font-size:0.6rem;letter-spacing:0.4em;color:var(--text3);text-transform:uppercase;line-height:1}
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;background:rgba(6,10,6,0.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(74,222,128,0.08)}
+  .nav-wordmark{text-decoration:none;display:flex;flex-direction:column;gap:0}
+  .nav-zombie{font-family:var(--head);font-weight:900;font-size:0.7rem;letter-spacing:0.25em;color:var(--green);text-transform:uppercase;line-height:1}
+  .nav-genetix{font-family:var(--head);font-weight:300;font-size:0.6rem;letter-spacing:0.4em;color:var(--text3);text-transform:uppercase;line-height:1}
+  .nav-right{display:flex;align-items:center;gap:2rem}
   .nav-back{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color 0.2s}
   .nav-back:hover{color:var(--green)}
+  .nav-pill{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--bg);background:var(--green);padding:0.4rem 1rem;border-radius:2px;text-decoration:none;transition:background 0.2s,transform 0.1s;font-weight:700}
+  .nav-pill:hover{background:var(--green2);transform:translateY(-1px)}
+  @media(max-width:600px){nav{padding:0 1.5rem}.nav-right .nav-pill{display:none}}
 
-  .page-wrap{padding:8rem 2rem 5rem;max-width:1100px;margin:0 auto}
+  /* PAGE */
+  .page-wrap{padding:8rem 2rem 5rem;max-width:1200px;margin:0 auto}
 
   .page-eyebrow{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;opacity:0;animation:fadeUp 0.7s ease 0.1s forwards}
-  .page-heading{font-family:var(--head);font-weight:900;font-size:clamp(2rem,6vw,4rem);letter-spacing:-0.02em;color:var(--text);margin-bottom:1.5rem;line-height:1.05;opacity:0;animation:fadeUp 0.8s ease 0.2s forwards}
-  .page-sub{font-size:0.9rem;color:var(--text2);line-height:1.8;max-width:560px;margin-bottom:4rem;opacity:0;animation:fadeUp 0.8s ease 0.3s forwards}
+  .page-heading{font-family:var(--head);font-weight:900;font-size:clamp(2rem,6vw,4rem);letter-spacing:-0.02em;color:var(--text);margin-bottom:1rem;line-height:1.05;opacity:0;animation:fadeUp 0.8s ease 0.2s forwards}
+  .page-sub{font-size:0.88rem;color:var(--text2);line-height:1.8;max-width:580px;margin-bottom:0.5rem;opacity:0;animation:fadeUp 0.8s ease 0.3s forwards}
 
-  /* strain grid */
-  .strain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;opacity:0;animation:fadeUp 0.9s ease 0.45s forwards}
+  /* STAT BAR */
+  .stat-bar{display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:3rem;opacity:0;animation:fadeUp 0.8s ease 0.4s forwards}
+  .stat-item{display:flex;align-items:baseline;gap:0.5rem}
+  .stat-num{font-family:var(--head);font-weight:700;font-size:1.1rem;color:var(--green);letter-spacing:-0.02em}
+  .stat-label{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
 
-  .strain-card{background:var(--card);border:1px solid var(--border);padding:0;overflow:hidden;transition:border-color 0.25s,transform 0.2s;cursor:default}
-  .strain-card:hover{transform:translateY(-2px)}
-  .strain-card.cinnabar:hover{border-color:rgba(251,191,36,0.3)}
-  .strain-card.brujo:hover{border-color:rgba(192,132,252,0.3)}
-  .strain-card.coming:hover{border-color:rgba(74,222,128,0.15)}
+  /* CONTROLS */
+  .controls{display:flex;flex-direction:column;gap:1rem;margin-bottom:2.5rem;opacity:0;animation:fadeUp 0.8s ease 0.45s forwards}
 
-  .strain-img-placeholder{height:200px;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;overflow:hidden}
-  .strain-card.cinnabar .strain-img-placeholder{background:linear-gradient(135deg,#1a1000 0%,#2a1800 50%,#1a0800 100%)}
-  .strain-card.brujo    .strain-img-placeholder{background:linear-gradient(135deg,#0f0a1a 0%,#1a0f2a 50%,#0a0818 100%)}
-  .strain-card.coming   .strain-img-placeholder{background:var(--bg2)}
+  .search-wrap{position:relative}
+  .search-input{
+    width:100%;padding:0.75rem 1rem 0.75rem 2.75rem;
+    background:var(--card);border:1px solid var(--border);
+    color:var(--text);font-family:var(--body);font-size:0.88rem;
+    outline:none;transition:border-color 0.2s;
+    border-radius:2px;
+  }
+  .search-input::placeholder{color:var(--text3)}
+  .search-input:focus{border-color:rgba(74,222,128,0.35)}
+  .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.85rem;pointer-events:none}
 
-  .img-label{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;position:absolute;bottom:0.75rem;left:1rem;opacity:0.4}
-  .strain-card.cinnabar .img-label{color:var(--amber)}
-  .strain-card.brujo    .img-label{color:var(--purple)}
+  .filter-row{display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center}
+  .filter-group{display:flex;gap:0.35rem;flex-wrap:wrap}
+  .filter-sep{width:1px;background:var(--border2);height:24px;align-self:center}
 
-  .strain-body{padding:1.5rem}
-  .strain-badge{display:inline-block;font-family:var(--mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:1px;margin-bottom:0.75rem}
-  .strain-card.cinnabar .strain-badge{background:rgba(251,191,36,0.1);color:var(--amber)}
-  .strain-card.brujo    .strain-badge{background:rgba(192,132,252,0.1);color:var(--purple)}
-  .strain-card.coming   .strain-badge{background:rgba(74,222,128,0.05);color:var(--text3)}
+  .filter-btn{
+    font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;
+    padding:0.35rem 0.75rem;border:1px solid var(--border2);background:transparent;
+    color:var(--text3);cursor:pointer;border-radius:1px;transition:all 0.18s;white-space:nowrap;
+  }
+  .filter-btn:hover{border-color:rgba(74,222,128,0.3);color:var(--text2)}
+  .filter-btn.active{background:var(--green-dim);border-color:rgba(74,222,128,0.4);color:var(--green)}
+  .filter-btn.auto-active{background:var(--amber-dim);border-color:rgba(251,191,36,0.35);color:var(--amber)}
+  .filter-btn.photo-active{background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.35);color:var(--blue)}
+  .filter-btn.reg-active{background:rgba(192,132,252,0.08);border-color:rgba(192,132,252,0.35);color:var(--purple)}
 
-  .strain-name{font-family:var(--head);font-weight:700;font-size:1.1rem;letter-spacing:-0.01em;color:var(--text);margin-bottom:0.35rem}
-  .strain-lineage{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--text3);margin-bottom:1rem}
-  .strain-desc{font-size:0.8rem;color:var(--text2);line-height:1.65;margin-bottom:1.25rem}
+  .breeder-select{
+    font-family:var(--mono);font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;
+    padding:0.35rem 2rem 0.35rem 0.75rem;border:1px solid var(--border2);background:var(--card);
+    color:var(--text2);cursor:pointer;border-radius:1px;outline:none;
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a644a'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 0.6rem center;
+    transition:border-color 0.2s;
+  }
+  .breeder-select:focus{border-color:rgba(74,222,128,0.35)}
+  .breeder-select option{background:var(--bg2);color:var(--text2)}
 
-  .strain-tags{display:flex;flex-wrap:wrap;gap:0.4rem}
-  .strain-tag{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.55rem;border:1px solid var(--border);color:var(--text3)}
+  .results-count{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.12em;color:var(--text3);text-transform:uppercase;margin-left:auto;align-self:center}
 
-  /* coming soon placeholder */
-  .coming-soon-card{border:1px dashed var(--border);padding:2.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.75rem;min-height:200px}
-  .coming-soon-card .cs-icon{font-size:1.5rem;opacity:0.3}
-  .coming-soon-card .cs-label{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3)}
+  /* GRID */
+  .strain-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    opacity:0;animation:fadeUp 0.9s ease 0.55s forwards;
+  }
 
-  /* update callout */
-  .callout{margin-top:4rem;padding:2rem;background:var(--card);border:1px solid var(--border);border-left:2px solid var(--green3);display:flex;align-items:flex-start;gap:1.5rem;opacity:0;animation:fadeUp 0.8s ease 0.6s forwards}
-  .callout-icon{font-size:1.25rem;flex-shrink:0}
-  .callout-head{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:0.5rem}
-  .callout-body{font-size:0.82rem;color:var(--text2);line-height:1.7}
+  .strain-card{
+    background:var(--card);
+    padding:1.5rem;
+    display:flex;flex-direction:column;gap:0.6rem;
+    transition:background 0.2s;
+    position:relative;overflow:hidden;
+  }
+  .strain-card::after{
+    content:'';position:absolute;inset:0;
+    opacity:0;transition:opacity 0.25s;
+    pointer-events:none;
+  }
+  .strain-card:hover{background:var(--bg3)}
+  .strain-card:hover::after{opacity:1}
 
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.25rem}
+  .card-badges{display:flex;gap:0.35rem;flex-wrap:wrap}
+
+  .badge{
+    font-family:var(--mono);font-size:0.45rem;letter-spacing:0.15em;text-transform:uppercase;
+    padding:0.2rem 0.5rem;border-radius:1px;
+  }
+  .badge-auto{background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
+  .badge-photo{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+  .badge-fem{background:rgba(74,222,128,0.08);color:var(--green);border:1px solid rgba(74,222,128,0.18)}
+  .badge-reg{background:rgba(192,132,252,0.08);color:var(--purple);border:1px solid rgba(192,132,252,0.18)}
+  .badge-indica{background:rgba(192,132,252,0.08);color:var(--purple);border:1px solid rgba(192,132,252,0.18)}
+  .badge-sativa{background:rgba(96,165,250,0.08);color:var(--blue);border:1px solid rgba(96,165,250,0.18)}
+  .badge-hybrid{background:rgba(74,222,128,0.06);color:var(--text3);border:1px solid rgba(74,222,128,0.12)}
+  .badge-self{background:rgba(74,222,128,0.15);color:var(--green);border:1px solid rgba(74,222,128,0.35);font-weight:700}
+
+  .card-strain{font-family:var(--head);font-weight:700;font-size:0.95rem;letter-spacing:-0.01em;color:var(--text);line-height:1.2}
+  .card-breeder{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
+  .card-lineage{font-size:0.75rem;color:var(--text2);font-style:italic;line-height:1.4}
+  
+  .card-meta{display:flex;flex-direction:column;gap:0.3rem;margin-top:0.25rem}
+  .card-meta-row{display:flex;gap:0.5rem;align-items:baseline}
+  .meta-label{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);flex-shrink:0;width:4.5rem}
+  .meta-val{font-size:0.75rem;color:var(--text2);line-height:1.4}
+  
+  .card-notes{
+    font-size:0.72rem;color:var(--text3);line-height:1.55;
+    padding-top:0.5rem;border-top:1px solid var(--border);
+    margin-top:auto;
+  }
+
+  /* EMPTY STATE */
+  .empty-state{
+    grid-column:1/-1;
+    padding:4rem 2rem;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:0.75rem;
+  }
+  .empty-icon{font-size:1.5rem;opacity:0.3}
+  .empty-msg{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3)}
+
+  /* FOOTER */
   footer{margin-top:5rem;padding:2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
   .footer-left,.footer-right{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
-  .footer-right a{color:var(--text3);text-decoration:none}
-  .footer-right a:hover{color:var(--green)}
+  .footer-right a{color:var(--text3);text-decoration:none}.footer-right a:hover{color:var(--green)}
 
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-  @media(max-width:600px){nav{padding:0 1.5rem}.page-wrap{padding:6rem 1.5rem 4rem}}
+  @media(max-width:680px){.page-wrap{padding:6rem 1.25rem 4rem}.filter-row{gap:0.5rem}.stat-bar{gap:1.25rem}}
 </style>
 </head>
 <body>
@@ -88,88 +171,202 @@
     <span class="nav-zombie">Zombie</span>
     <span class="nav-genetix">Genetix</span>
   </a>
-  <a class="nav-back" href="/">← Back to home</a>
+  <div class="nav-right">
+    <a class="nav-back" href="/">← Home</a>
+    <a class="nav-pill" href="/tracker/">Grow Tracker ↗</a>
+  </div>
 </nav>
 
 <div class="page-wrap">
-  <div class="page-eyebrow">F1 Breeding Projects</div>
+  <div class="page-eyebrow">Seed Collection · Documented</div>
   <h1 class="page-heading">Genetics<br>Showcase</h1>
   <p class="page-sub">
-    All genetics documented here are personal F1 crosses developed under a Health Canada ACMPR licence. No seeds or plants are available for sale or trade. This is strictly a cultivation record.
+    Full seed library from the Zombie Genetix collection — F1 originals, curated breeders, and documented crosses. All cultivation is personal and conducted under a Health Canada ACMPR licence. No seeds or plants are available for sale or trade.
   </p>
 
-  <div class="strain-grid">
-
-    <!-- CinnaBar Dust -->
-    <div class="strain-card cinnabar">
-      <div class="strain-img-placeholder">
-        🌿
-        <span class="img-label">Photos coming</span>
-      </div>
-      <div class="strain-body">
-        <span class="strain-badge">F1 · In Development</span>
-        <div class="strain-name">CinnaBar Dust</div>
-        <div class="strain-lineage">CBD Runtz × Red Toba</div>
-        <p class="strain-desc">
-          A CBD-dominant F1 cross chasing warm spice terpene expression from the Red Toba heritage, grounded by the sweet resin profile of CBD Runtz. Still in early documentation phase.
-        </p>
-        <div class="strain-tags">
-          <span class="strain-tag">CBD-Dom</span>
-          <span class="strain-tag">F1</span>
-          <span class="strain-tag">Spice</span>
-          <span class="strain-tag">Living Soil</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Brujo Dulce -->
-    <div class="strain-card brujo">
-      <div class="strain-img-placeholder">
-        🔮
-        <span class="img-label">Photos coming</span>
-      </div>
-      <div class="strain-body">
-        <span class="strain-badge">F1 · In Development</span>
-        <div class="strain-name">Brujo Dulce</div>
-        <div class="strain-lineage">CBD Runtz × Purple Mexican</div>
-        <p class="strain-desc">
-          Targeting the floral purple-fruit terpene expression of the Purple Mexican landrace against the sweet candy baseline of CBD Runtz. CBD-dominant with unique visual potential.
-        </p>
-        <div class="strain-tags">
-          <span class="strain-tag">CBD-Dom</span>
-          <span class="strain-tag">F1</span>
-          <span class="strain-tag">Floral</span>
-          <span class="strain-tag">Purple Phenos</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Placeholder for more -->
-    <div class="coming-soon-card">
-      <div class="cs-icon">⚗️</div>
-      <div class="cs-label">More crosses in the lab</div>
-    </div>
-
+  <div class="stat-bar" id="statBar">
+    <div class="stat-item"><span class="stat-num" id="totalCount">119</span><span class="stat-label">Strains</span></div>
+    <div class="stat-item"><span class="stat-num" id="autoCount">—</span><span class="stat-label">Autoflower</span></div>
+    <div class="stat-item"><span class="stat-num" id="photoCount">—</span><span class="stat-label">Photoperiod</span></div>
+    <div class="stat-item"><span class="stat-num" id="breederCount">—</span><span class="stat-label">Breeders</span></div>
   </div>
 
-  <div class="callout">
-    <div class="callout-icon">📋</div>
-    <div>
-      <div class="callout-head">Documentation in Progress</div>
-      <p class="callout-body">
-        Strain cards will be updated with grow photos, pheno selection notes, terpene observations, and lineage charts as each cross matures through the breeding pipeline. Check back as the seasons progress.
-      </p>
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search by strain name, breeder, lineage, or notes…" autocomplete="off">
+    </div>
+    <div class="filter-row">
+      <div class="filter-group" id="typeFilters">
+        <button class="filter-btn active" data-filter="type" data-val="all">All Types</button>
+        <button class="filter-btn" data-filter="type" data-val="Auto">Autoflower</button>
+        <button class="filter-btn" data-filter="type" data-val="Photo">Photoperiod</button>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group" id="sexFilters">
+        <button class="filter-btn active" data-filter="sex" data-val="all">All</button>
+        <button class="filter-btn" data-filter="sex" data-val="Fem">Feminized</button>
+        <button class="filter-btn" data-filter="sex" data-val="Reg">Regular</button>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group" id="hybridFilters">
+        <button class="filter-btn active" data-filter="hybrid" data-val="all">All Types</button>
+        <button class="filter-btn" data-filter="hybrid" data-val="Indica">Indica</button>
+        <button class="filter-btn" data-filter="hybrid" data-val="Sativa">Sativa</button>
+        <button class="filter-btn" data-filter="hybrid" data-val="Hybrid">Hybrid</button>
+      </div>
+      <div class="filter-sep"></div>
+      <select class="breeder-select" id="breederSelect">
+        <option value="all">All Breeders</option>
+        <option value="Ace Seeds">Ace Seeds</option><option value="Aeque Genetics">Aeque Genetics</option><option value="Atlas Seed Co">Atlas Seed Co</option><option value="Autoflower Breeder's Club">Autoflower Breeder's Club</option><option value="Barney's Farm">Barney's Farm</option><option value="Bulk Seeds Guru">Bulk Seeds Guru</option><option value="Canuk Seeds">Canuk Seeds</option><option value="Crockett Family Farms">Crockett Family Farms</option><option value="DNA Genetics">DNA Genetics</option><option value="Dank Donkey">Dank Donkey</option><option value="Dimebag Seed Co">Dimebag Seed Co</option><option value="Dutch Passion">Dutch Passion</option><option value="Ethos Genetics">Ethos Genetics</option><option value="Exotic Genetix">Exotic Genetix</option><option value="FastBuds">FastBuds</option><option value="Force of Nature Genetics">Force of Nature Genetics</option><option value="Guilded Genetics">Guilded Genetics</option><option value="Hoku Seeds">Hoku Seeds</option><option value="Humboldt Seed Co">Humboldt Seed Co</option><option value="In  House Genetics">In  House Genetics</option><option value="JAH Seeds">JAH Seeds</option><option value="Kropduster">Kropduster</option><option value="Mephisto Genetics">Mephisto Genetics</option><option value="Multiverse Seeds">Multiverse Seeds</option><option value="Native Seed Co">Native Seed Co</option><option value="Oasis Genetics">Oasis Genetics</option><option value="QCS">QCS</option><option value="Reverse Genetics">Reverse Genetics</option><option value="Robinhood Seeds">Robinhood Seeds</option><option value="Seedsman Seeds">Seedsman Seeds</option><option value="Self">Self</option><option value="Sensi Seeds">Sensi Seeds</option><option value="Tastebudz Genetics">Tastebudz Genetics</option><option value="The Cali Connection">The Cali Connection</option><option value="The Seed Fair">The Seed Fair</option>
+      </select>
+      <span class="results-count" id="resultsCount"></span>
     </div>
   </div>
+
+  <div class="strain-grid" id="strainGrid"></div>
 </div>
 
 <footer>
-  <div class="footer-left">© 2025 Zombie Genetix · No sales · HC Licensed</div>
+  <div class="footer-left">© 2025 Zombie Genetix · Carleton Place, ON · No sales · HC Licensed</div>
   <div class="footer-right">
     <a href="/">Home</a> &nbsp;·&nbsp;
     <a href="/tracker/">Grow Tracker</a>
   </div>
 </footer>
 
+<script>
+const STRAINS = [{"breeder":"Ace Seeds","strain":"Hokkaido Japan Hemp","type":"Photo","sex":"Reg","thcCbd":">1% THC","hybridType":"Hybrid","hybridDetail":"balanced Hybrid","lineage":"2nd Gen pure hemp from Hokkaido Japan","notes":"","flowerTime":"6-8 weeks"},{"breeder":"Aeque Genetics","strain":"Cadillac Rainbow","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica Dom","lineage":"Runtz x Pure Michigan","notes":"LST for big yields - topping will lead to smaller plants","flowerTime":"75-80 days seed to harvest"},{"breeder":"Aeque Genetics","strain":"Forgotten Road Kill","type":"Auto","sex":"Fem","thcCbd":"24-27% THC","hybridType":"Hybrid","hybridDetail":"65/35 Indiac","lineage":"Forgotten Skunk x Pure Michigan","notes":"Larger sized plants - can be topped and LST'd - Doesn't need a lot of nutes","flowerTime":"75-90 days from seed to harevst"},{"breeder":"Aeque Genetics","strain":"Afgani Cappucino","type":"Auto","sex":"Fem","thcCbd":"23-26% THC","hybridType":"Indica","hybridDetail":"Indica Dom","lineage":"Afghan x Pure Michigan","notes":"Traits from afghan, top/lst after 4th node is ok.","flowerTime":"85-95 days seed to harvest"},{"breeder":"Aeque Genetics","strain":"CB Big D","type":"Auto","sex":"Fem","thcCbd":"0.5% THC / 16% THC","hybridType":"Hybrid","hybridDetail":"60/40 Ind","lineage":"Pure Love x CBD Diesel","notes":"Dark Purple almost black - lemon / lime / pepper / orange. 3Gal pot. Light LST.","flowerTime":"75 days seed to harvest"},{"breeder":"Atlas Seed Co","strain":"CBD Warlock","type":"Photo","sex":"Fem","thcCbd":"8% THC / 4% CBD","hybridType":"Indica","hybridDetail":"90% Indica","lineage":"Warlock X Cannatonic","notes":"caryophyllene, humulene, myrcene, cis-nerolidol","flowerTime":"7-9 Weeks"},{"breeder":"Atlas Seed Co","strain":"Face Fat","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"Sativa/Indica : 20/80","lineage":"GMO 8 x Fatso","notes":"F1 cross of backcrossed Fatso and GMO autos","flowerTime":"75 Days"},{"breeder":"Atlas Seed Co","strain":"GMO OG","type":"Auto","sex":"Fem","thcCbd":"20-28% THc","hybridType":"Indica","hybridDetail":"80% Indica","lineage":"GMO Auto x Mythic OG","notes":"","flowerTime":""},{"breeder":"Atlas Seed Co","strain":"Platinum Green Apple Candy","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"balanced Hybrid","lineage":"GAC 211 S1 #1 x Oreoz","notes":"","flowerTime":"12-13 weeks"},{"breeder":"Atlas Seed Co","strain":"Wedding Cake","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"80% Indica","lineage":"Wedding Cake Auto x Wedding Cake Auto","notes":"","flowerTime":"10-11 Weeks"},{"breeder":"Atlas Seed Co","strain":"White Widow","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"50/50","lineage":"White Widow x White Widow Auto","notes":"","flowerTime":"65 Days"},{"breeder":"Autoflower Breeder's Club","strain":"Afghani Caramel Cream","type":"Auto","sex":"Reg","thcCbd":"1:1 THC: CBD","hybridType":"Indica","hybridDetail":"100% Indica","lineage":"SFV OG Pink Kush is SFV OG x Pink","notes":"Myrcene, Terpenes May Vary","flowerTime":"8-10 weeks from seed"},{"breeder":"Barney's Farm","strain":"Runtz","type":"Photo","sex":"Fem","thcCbd":"0.29","hybridType":"Sativa","hybridDetail":"Sativa Hybrid","lineage":"Original Z x Gelato","notes":"","flowerTime":"55-60 Days (Sept/3rd week)"},{"breeder":"Bulk Seeds Guru","strain":"Gelato","type":"Auto","sex":"Fem","thcCbd":"20% THC","hybridType":"Indica","hybridDetail":"Mostly Indica","lineage":"Gelato x Canuk Cookies Auto","notes":"Freebies from Canuk Seeds (Bulk Seeds)","flowerTime":"8-9 Weeks from seed"},{"breeder":"Canuk Seeds","strain":"Banana Kush","type":"Photo","sex":"Fem","thcCbd":"THC 23%","hybridType":"Indica","hybridDetail":"Mostly Indica","lineage":"Ghost OG x Skunk Haze","notes":"","flowerTime":"7-9 Weeks"},{"breeder":"Canuk Seeds","strain":"Banana Punch","type":"Photo","sex":"Fem","thcCbd":"Up to 26%","hybridType":"Indica","hybridDetail":"Mostly Indica","lineage":"Banana OG x Purple Punch","notes":"","flowerTime":"8-9 Weeks"},{"breeder":"Canuk Seeds","strain":"CBDurban","type":"Photo","sex":"Fem","thcCbd":"8% thc / 8% cbd","hybridType":"Sativa","hybridDetail":"Mostly Sativa","lineage":"IBL Durban Poison","notes":"","flowerTime":"60-70"},{"breeder":"Canuk Seeds","strain":"Granddaddy Purple","type":"Photo","sex":"Fem","thcCbd":"25% THC","hybridType":"Indica","hybridDetail":"Indica","lineage":"Purple Urkel x Big Bud","notes":"","flowerTime":"65-70 days"},{"breeder":"Canuk Seeds","strain":"Mazar","type":"Photo","sex":"Fem","thcCbd":"Up to 20% THC","hybridType":"Indica","hybridDetail":"Indica","lineage":"Skunk #1 x Afghani","notes":"","flowerTime":"8-9 Weeks"},{"breeder":"Canuk Seeds","strain":"NYC Diesel","type":"Photo","sex":"Fem","thcCbd":"Up to 24%","hybridType":"Sativa","hybridDetail":"Mostly Sativa","lineage":"Afghani x Mexican Sativa","notes":"","flowerTime":"10-12 Weeks"},{"breeder":"Canuk Seeds","strain":"Original Skunk #1","type":"Photo","sex":"Reg","thcCbd":"19% THC","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Acapulco Gold x Mexican Sativa x Columbian Gold Sativa","notes":"","flowerTime":"63 Days"},{"breeder":"Canuk Seeds","strain":"Purpura Uno CBD","type":"Photo","sex":"Reg","thcCbd":"20% CBD / 0.8% THC","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Viente:Uno CBD x Purple Kush CBD","notes":"","flowerTime":"9-10 weeks"},{"breeder":"Canuk Seeds","strain":"Strawberry Banana","type":"Photo","sex":"Fem","thcCbd":"Up to 32% THC (?)","hybridType":"Indica","hybridDetail":"Indica Hybrid","lineage":"Strawberry Bubblegum x Banana Kush","notes":"","flowerTime":"9 Weeks"},{"breeder":"Canuk Seeds","strain":"Strawberry Banana Cheese","type":"Photo","sex":"Fem","thcCbd":"THC 26%","hybridType":"Indica","hybridDetail":"Indica Hybrid","lineage":"Strawberry Banana x Cheese","notes":"","flowerTime":"8 Weeks"},{"breeder":"Crockett Family Farms","strain":"Hell's Gold","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"24K x Hells Angels OG","notes":"","flowerTime":"60-65 Days"},{"breeder":"Crockett Family Farms","strain":"Kosher Berry","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"(Kosher Kush x Sour) x Strawnana Juice","notes":"Caryophyllene, myrcene, limonene","flowerTime":"60-65 Days"},{"breeder":"Crockett Family Farms","strain":"Kosher Cheese","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Kosher Kush x Cheese","notes":"","flowerTime":"60-65 Days"},{"breeder":"Crockett Family Farms","strain":"Kosher Flame","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Kosher Kush x Hells Angels OG","notes":"","flowerTime":"60-65 Days"},{"breeder":"Dank Donkey","strain":"GG's Cookies","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"50/50","lineage":"GG4 x Animal Cookies","notes":"","flowerTime":"8 - 9 Weeks"},{"breeder":"Dank Donkey","strain":"Grandi Long Legz","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Grandi Candi x Tagalongz","notes":"Grandi Candi from ( Grandiflora) and Tagalongz from (3rdcoastgenetics).","flowerTime":""},{"breeder":"Dank Donkey","strain":"Strawberry Frost","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Indica","hybridDetail":"80% Indica","lineage":"Strawberry Cough x Space Queen","notes":"14-20%","flowerTime":"8-9 Weeks"},{"breeder":"Dimebag Seed Co","strain":"True Spirit","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Grandpa\u2019s Stash R2 (Super Skunk, Afghan Kush, OG Kush) x Hawaiian Peaches (Black Bart\u2019s 80\u2019S Hawaiian x Tom Hill\u2019s North Indian \u2013 Tresdawg","notes":"Old School (pre-cookies) lineages","flowerTime":"56-60 days"},{"breeder":"DNA Genetics","strain":"Challah Cake","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica dominant hybrid","lineage":"DNA Cake (Gelato Sorbet x Lava Cake) x Challah Bread (Bakers Delight x Kosher Kush)","notes":"","flowerTime":"9 Weeks"},{"breeder":"Dutch Passion","strain":"Auto White Widow","type":"Auto","sex":"Fem","thcCbd":"THC 17%","hybridType":"Indica","hybridDetail":"Indica","lineage":"Brazilian and Indian strains","notes":"","flowerTime":"75 days"},{"breeder":"Ethos Genetics","strain":"Auto V5","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"","notes":"","flowerTime":""},{"breeder":"Ethos Genetics","strain":"Tropical Cookies x Grandpa's Cookies #10","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"","notes":"Could actually be fem auto :)","flowerTime":""},{"breeder":"Exotic Genetix","strain":"Mystic Magic","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"Sat 60%","lineage":"Magic Bullet (CBD) x Stawberries & Cream","notes":"Use to create CBD Runtz","flowerTime":"50-60 days"},{"breeder":"Exotic Genetix","strain":"Sleezy Rider","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Old Dirty Biker x Milk and Cookies","notes":"","flowerTime":"8-9 weeks"},{"breeder":"FastBuds","strain":"Cherry Cola Auto","type":"Auto","sex":"Fem","thcCbd":"THC 28%","hybridType":"Hybrid","hybridDetail":"Sativa 45%/Indica 55%","lineage":"Strawberry Pie reverse \"Cherry Cola\" phenotype, isolation line F3.","notes":"","flowerTime":"9-10 Weeks"},{"breeder":"FastBuds","strain":"Cherry Cola Auto RF3","type":"Auto","sex":"Fem","thcCbd":"THC 31%","hybridType":"Hybrid","hybridDetail":"45 / 55 Sativa / Indica","lineage":"Cherry Cola Auto F5 all the way down the line (8 Generations)","notes":"RF3 (F8) - Strawberry Fields x Original blueberry auto","flowerTime":"9-10 Weeks from seed"},{"breeder":"FastBuds","strain":"Gorilla Cookies","type":"Auto","sex":"Fem","thcCbd":"THC 28%","hybridType":"Hybrid","hybridDetail":"Sativa 45%/Indica 55%","lineage":"GG4 Auto F6 x Cookies Auto F5","notes":"","flowerTime":"10 Weeks"},{"breeder":"FastBuds","strain":"Gorilla Zkittlez Auto","type":"Auto","sex":"Fem","thcCbd":"THC 29%","hybridType":"Hybrid","hybridDetail":"70 / 30 Indica / Sativa","lineage":"GG4 Auto F6 x Z Auto","notes":"","flowerTime":"63 Days from seed"},{"breeder":"FastBuds","strain":"LSD-25 F5","type":"Auto","sex":"Fem","thcCbd":"THC 21%","hybridType":"Hybrid","hybridDetail":"65 / 35 Indica / Sativa","lineage":"Original Skunk #1 X Auto Purple Kush","notes":"f5","flowerTime":"9-10 Weeks from seed"},{"breeder":"FastBuds","strain":"Mexican Airlines","type":"Auto","sex":"Fem","thcCbd":"THC 19%","hybridType":"Hybrid","hybridDetail":"65 Sativa / 35 Indica","lineage":"Colombian x Mexican","notes":"","flowerTime":"10 Weeks"},{"breeder":"FastBuds","strain":"Original Afghan Kush","type":"Auto","sex":"Fem","thcCbd":"THC 22%","hybridType":"Hybrid","hybridDetail":"Sativa 15%/Indica 85%","lineage":"Afghan Auto","notes":"","flowerTime":"8-9 Weeks from seed"},{"breeder":"FastBuds","strain":"Original Cheese","type":"Auto","sex":"Fem","thcCbd":"THC 21%","hybridType":"Hybrid","hybridDetail":"Sativa 30%/Indica 70%","lineage":"Cheese Autoflowering","notes":"","flowerTime":"9 Weeks"},{"breeder":"FastBuds","strain":"Original Sour Diesel","type":"Auto","sex":"Fem","thcCbd":"THC 21%","hybridType":"Hybrid","hybridDetail":"Sativa 65%/Indica 35%","lineage":"Sour Diesel Cut x FB Auto #1","notes":"F4","flowerTime":"9-10 Weeks from seed"},{"breeder":"FastBuds","strain":"Tropicana Cookies Auto","type":"Auto","sex":"Fem","thcCbd":"THC 27%","hybridType":"Hybrid","hybridDetail":"40 / 60 Sativa / Indica","lineage":"Tropicana Cookies <Oni Seed Co> x Stawberry Banana Auto F5","notes":"F5","flowerTime":"8-9 Weeks from seed"},{"breeder":"Force of Nature Genetics","strain":"Dante's Inferno x Super Buff Cherry # 26","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"","notes":"","flowerTime":"8-9 weeks"},{"breeder":"Force of Nature Genetics","strain":"Pure Michigan (3rd Coast) x Super Buff Cherry #26","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"","notes":"","flowerTime":"8-9 weeks"},{"breeder":"Force of Nature Genetics","strain":"Super Buff Cherry # 26 S1","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"","notes":"","flowerTime":"7-8 Weeks"},{"breeder":"Force of Nature Genetics","strain":"Tagalongz #9 X Super Buff Cherry #26","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"","notes":"","flowerTime":"8-9 weeks"},{"breeder":"Guilded Genetics","strain":"CBD ConLui","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa Dominant Hybrid","lineage":"CBD Terra Italia F1 x Extreme Grandpas Meds F1","notes":"","flowerTime":"90 Days"},{"breeder":"Hoku Seeds","strain":"Chones V","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"GTR Seeds: Double Durban THCV (Durban Poision V1 x Auto Durban THCV)","notes":"THCV-Rich!","flowerTime":""},{"breeder":"Hoku Seeds","strain":"Critical Speed","type":"Photo","sex":"Fem","thcCbd":"1.25:1 thcv:thc","hybridType":"Hybrid","hybridDetail":"","lineage":"Critical Durb #13 x Full Throttle #20","notes":"Critical Durb: Critical Skunk V F2 x 1:1 Double \u2026 and \u2026 Full Throttle: Gas Cap x Double Durban 1:1 THCV","flowerTime":""},{"breeder":"Hoku Seeds","strain":"Medi V","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Dinamed (Dinafem) x Double Durban THCV (GTR)","notes":"Type II Feminized Line CBDV:THCV Rich (Durban Reversal)","flowerTime":"9 Weeks"},{"breeder":"Hoku Seeds","strain":"Mixed Type II Fem Autos","type":"Auto","sex":"Fem","thcCbd":"??","hybridType":"Hybrid","hybridDetail":"??","lineage":"Mix from all Dr. Chunk and Sour Chunk Auto Series. Sour Chunk: Dr. Chunk Auto x Sour Citron Auto","notes":"??","flowerTime":"??"},{"breeder":"Hoku Seeds","strain":"Sangoma","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"x","notes":"Type II CBD:CBDV:THC:THCV","flowerTime":"9 Weeks"},{"breeder":"Humboldt Seed Co","strain":"Banana OG","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa Dominant Hybrid","lineage":"Banana OG S1 #21 x Mint Jelly Auto x Banana OG Auto Bx3","notes":"THC 25%","flowerTime":"80 Days from seed"},{"breeder":"Humboldt Seed Co","strain":"California Sour Diesel","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"80 / 20 Sativa / Indica","lineage":"California Sour Diesel x California Sour Diesel Auto x OG Kush Auto","notes":"21% THC","flowerTime":"70 days"},{"breeder":"Humboldt Seed Co","strain":"Caramel Cream","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"Caramel Cream x Caramel Cream Auto x Sour Apple Auto","notes":"25% THC","flowerTime":"70\u201390 days seed-to-harvest"},{"breeder":"Humboldt Seed Co","strain":"Emerald Fire OG","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"50/50 Hybrid","lineage":"Emerald Fire OG x Fire OG x OG Kush Auto","notes":"","flowerTime":"85 Days Seed->Harvest"},{"breeder":"Humboldt Seed Co","strain":"Fortune Cookie","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"Forum Cut x Caramel Cream","notes":"THC 22%","flowerTime":"55 Days"},{"breeder":"Humboldt Seed Co","strain":"Garlic Butter","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"GMO x Fortune Cookie","notes":"THC 28-32%","flowerTime":"70 Days"},{"breeder":"Humboldt Seed Co","strain":"Pineapple Muffin","type":"Auto","sex":"Fem","thcCbd":"THC 17-21%","hybridType":"Hybrid","hybridDetail":"balanced Hybrid","lineage":"Pineapple Train Wreck x Sour Apple x Blueberry Muffin","notes":"","flowerTime":"80-100 Days"},{"breeder":"Humboldt Seed Co","strain":"Squirt Auto","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"80 / 20 Sativa / Indica","lineage":"BBM x Tangie x BBM Auto","notes":"","flowerTime":"90 days"},{"breeder":"In  House Genetics","strain":"Slurricane #7 S1","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"Hybrid","lineage":"Slurricane #7 x Slurricane #7","notes":"Self-cross Slurricane #7 phenotype","flowerTime":"60-75"},{"breeder":"JAH Seeds","strain":"God ISS","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"God Bud x Island Sweet Skunk","notes":"Original God bud from before JOTI lost his genetics.","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sweet Lights","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"Northern Lights (Peak Seeds BC) x Island Sweet Skunk","notes":"","flowerTime":"8-9 Weeks"},{"breeder":"JAH Seeds","strain":"Sleeping Star","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Sensi Star x Crocketts Confidential","notes":"Low Yielding, Highly Resinous popcorn nugs","flowerTime":""},{"breeder":"JAH Seeds","strain":"Big Mother Skunker","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica Hybrid","lineage":"Wappa x Island Sweet Skunk","notes":"High yield, can do a short veg period.","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sweet Bangi 99","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa","lineage":"Island Sweet Skunk x Cinderella 99 IBL) x Bangi Haze F8","notes":"Purple leaves. Huge colas. Uplifting high. Huge yields.","flowerTime":""},{"breeder":"JAH Seeds","strain":"Burmese Shorty's Secret","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"Burmese Shorty x Crocketts Confidential","notes":"Dark green leaves, wide.","flowerTime":""},{"breeder":"JAH Seeds","strain":"Romulan Rocket","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Blurple Romulan x Island Sweet Skunk","notes":"Romulan + Blueberry + Island Sweet Skunk - Good yields with even short veg","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sensi Star Purps","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica Hybrid","lineage":"Sensi Star x The Purps","notes":"Limited Stretch during Flower!!!","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sweet PCK","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica Hybrid","lineage":"Pakistani Chitral Kush (Ace Seeds) x Island Sweet Skunk","notes":"Large Low bottom buds","flowerTime":""},{"breeder":"JAH Seeds","strain":"Dragon's Tail","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Dutch Dragon x JahBud (90s God Bud x Crocketts Confidential)","notes":"Dutch Dragon from Paradise seeds.","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sweet Durga","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"Hybrid","lineage":"Durga Mata x Island Sweet Skunk","notes":"Medicinal ;)","flowerTime":""},{"breeder":"JAH Seeds","strain":"Jahrora borealis","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Northern Lights IBL (PeakSeedsBC) x JahBud (God Bud x Crocketts Confidential)","notes":"","flowerTime":""},{"breeder":"JAH Seeds","strain":"Cinderella 99 IBL","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa Dominant Hybrid","lineage":"Bred from bagseed from Jack Herer from the Sensi Smile coffee shop.","notes":"IBL from peak seeds. Limonene, Caryophyllene, Myrcene","flowerTime":"8-9 Weeks Flower"},{"breeder":"JAH Seeds","strain":"Acid blue","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Acid x Blueberry","notes":"acid = nyc diesel x <dutch genetics>, likes to be topped, monster cropped.","flowerTime":"65-70 days"},{"breeder":"JAH Seeds","strain":"Blue Widow's Secret","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"(Jahbud f2 x White Widow) x blueberry","notes":"Big Buds apparently","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sweet Granddaddy","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Island Sweet Skunk x Granddaddy Purp","notes":"","flowerTime":""},{"breeder":"JAH Seeds","strain":"Chitral Cheese BX","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"(Cheese IBL x Pakistani Chitral Kush) x Cheese IBL","notes":"","flowerTime":""},{"breeder":"JAH Seeds","strain":"Sensi Starlights BX","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Sensi Star x Northern Lights IBL BX (Back-crossed to the Sensi Star)","notes":"","flowerTime":""},{"breeder":"JAH Seeds","strain":"Blue GodISS","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Blueberry x godbud x Island Sweet Skunk","notes":"","flowerTime":""},{"breeder":"JAH Seeds","strain":"Blue Hashplant","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Blueberry x hashplant","notes":"","flowerTime":""},{"breeder":"JAH Seeds","strain":"Star Hashplant","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"Sensi Star x HashPlant","notes":"S1 hashplant from Ace Seeds - Sensi Star from THC Biomed","flowerTime":""},{"breeder":"JAH Seeds","strain":"Shorty's Special","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Burmese Shorty x Jah Bud f1","notes":"","flowerTime":"55-60 Days"},{"breeder":"JAH Seeds","strain":"Blue Cheese","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Blueberry x (Original) Cheese","notes":"","flowerTime":""},{"breeder":"Kropduster","strain":"Purple Takato Kush","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Landrace - From Taden Khan in Afghanistan","notes":"","flowerTime":"10-12 Weeks"},{"breeder":"Mephisto Genetics","strain":"The Wedding Strikes Bear","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Mephisto Wedding x ManBearAlienPig","notes":"","flowerTime":"No Data"},{"breeder":"Mephisto Genetics","strain":"Mephisto's Wedding x 4 Assed Monkey","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"60/40 Ind/Sat","lineage":"4 Assed Monkey: GG%4 x Grape Crinkle. Mephisto's Wedding: (Wedding Cake x Double Grape) x Cr\u00e8me de la Chem","notes":"Freebie - no breeder info re: specific cross.","flowerTime":"65-85 days (no breeder info)"},{"breeder":"Mephisto Genetics","strain":"Jacob's Remedy","type":"Auto","sex":"Fem","thcCbd":"1:1 THC: CBD","hybridType":"Hybrid","hybridDetail":"55/45 Ind/Sat","lineage":"Canna Cheese (0THC) x Sour Crack","notes":"F1 - Hawaiian punch, gassy fuel terps","flowerTime":"No Data"},{"breeder":"Mephisto Genetics","strain":"CBDank","type":"Auto","sex":"Fem","thcCbd":"1:1 THC: CBD","hybridType":"Hybrid","hybridDetail":"55/45 Ind/Sat","lineage":"Canna Cheese (0THC) x Mango Runtz","notes":"F1 - Hawaiian punch, gassy fuel terps","flowerTime":"No Data"},{"breeder":"Multiverse Seeds","strain":"Crimson Sun","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica","lineage":"ICC Auto x GSC Auto","notes":"","flowerTime":"65-75"},{"breeder":"Multiverse Seeds","strain":"Moonbeam","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"80% Indica","lineage":"","notes":"","flowerTime":"70-ish days"},{"breeder":"Multiverse Seeds","strain":"Blue Dream S1","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Blue Dream x Fatso 84","notes":"","flowerTime":"8-10 Weeks"},{"breeder":"Multiverse Seeds","strain":"Gelato 41 S1","type":"Photo","sex":"Fem","thcCbd":"19-25% THC","hybridType":"Indica","hybridDetail":"Indica","lineage":"Gelato 41 x Gelato 41","notes":"","flowerTime":""},{"breeder":"Multiverse Seeds","strain":"Gorilla Glue S1","type":"Photo","sex":"Fem","thcCbd":"19-25%","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Gorilla Glue x Gorilla Glue","notes":"","flowerTime":""},{"breeder":"Multiverse Seeds","strain":"Green Crack","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa 70%","lineage":"Skunk #1 x Afghani","notes":"Myrcene, Limonene, Caryophyllene, Linalool, Pinene","flowerTime":"8-10 Weeks"},{"breeder":"Multiverse Seeds","strain":"Mimosa","type":"Auto","sex":"Fem","thcCbd":"19-25%","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Mimosa Auto x Fatso 84","notes":"","flowerTime":"70 days"},{"breeder":"Multiverse Seeds","strain":"Strawberry Cough","type":"Photo","sex":"Fem","thcCbd":"19-25","hybridType":"Sativa","hybridDetail":"Sativa","lineage":"Haze x Strawberry Fields","notes":"","flowerTime":"8-10 Weeks"},{"breeder":"Multiverse Seeds","strain":"Sunday Driver","type":"Photo","sex":"Fem","thcCbd":"19-25%","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Fruity Pebbles x Grape Pie","notes":"","flowerTime":"8-10 Weeks"},{"breeder":"Multiverse Seeds","strain":"Titan 9","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Indica","hybridDetail":"Indica dominant hybrid","lineage":"Cheese auto x Haze Auto","notes":"","flowerTime":"60 days"},{"breeder":"Native Seed Co","strain":"Charlotte's Web","type":"Photo","sex":"Fem","thcCbd":"0.3% THc","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Not listed - not the best breeder","notes":"","flowerTime":"8-9 Weeks"},{"breeder":"Oasis Genetics","strain":"Auto AK47","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa","lineage":"AK x Low Ryder","notes":"","flowerTime":"8 Weeks"},{"breeder":"QCS","strain":"Northern Lights","type":"Auto","sex":"Fem","thcCbd":"THC","hybridType":"Indica","hybridDetail":"Indica 90%","lineage":"","notes":"","flowerTime":"8-9 Weeks"},{"breeder":"QCS","strain":"Super Skunk","type":"Auto","sex":"Fem","thcCbd":"THC","hybridType":"Hybrid","hybridDetail":"","lineage":"Skunk #1 x Afghani","notes":"","flowerTime":"60-65 Days"},{"breeder":"Reverse Genetics","strain":"Frozen Cherrycana","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"Frozen Bag x TC#11","notes":"Frozen Bag: B.A.G.-Michigan Gas Factory Cut x Banana Butter Cups (FEMS)\nTC#11: TROPICANA CHERRY #11 x TROPICANA CHERRY #11","flowerTime":"60-65 Days Flower"},{"breeder":"Robinhood Seeds","strain":"Frozen BAG","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"","lineage":"B.A.G.-Michigan Gas Factory Cut x Banana Butter Cups (FEMS)","notes":"Gas, Chemical Sour, Funk","flowerTime":"63-65 Days"},{"breeder":"Seedsman Seeds","strain":"Peyote Wi-Fi CBD","type":"Photo","sex":"Fem","thcCbd":"12-14% CBD : 6-8% THC","hybridType":"Hybrid","hybridDetail":"hybrid","lineage":"Peyote Purple x Wi-Fi OG x Seedsman CBD #2","notes":"","flowerTime":"8-10 Weeks flower"},{"breeder":"Self","strain":"Durban Poison","type":"Photo","sex":"Reg","thcCbd":"","hybridType":"Sativa","hybridDetail":"Sativa","lineage":"","notes":"From my Grow","flowerTime":"When it's done."},{"breeder":"Sensi Seeds","strain":"Skunk Dream CBD","type":"Photo","sex":"Fem","thcCbd":"THC/CBD - 1:26","hybridType":"Hybrid","hybridDetail":"70 Sativa / 30 Indica","lineage":"Sensi Skunk x Alpine Delight CBD","notes":"","flowerTime":"70-75 Days"},{"breeder":"Tastebudz Genetics","strain":"CRITICAL BANANA SMOOTHIE","type":"Photo","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"70 Indica / 30 Sativa","lineage":"Banana Punch x Critical","notes":"","flowerTime":"8-9 weeks"},{"breeder":"The Cali Connection","strain":"Island Punch","type":"Auto","sex":"Fem","thcCbd":"","hybridType":"Hybrid","hybridDetail":"55 Indica / 45 Sativa","lineage":"Gorilla Glue #4 x Purple Punch Reversed","notes":"","flowerTime":"100-112 Days"},{"breeder":"The Seed Fair","strain":"Afghan","type":"Auto","sex":"Fem","thcCbd":"THC","hybridType":"Indica","hybridDetail":"90% Indica","lineage":"Afghani Indica X Low Ryder","notes":"~18% THC","flowerTime":"9-10 weeks"},{"breeder":"The Seed Fair","strain":"CBD Kush","type":"Auto","sex":"Fem","thcCbd":"1:2 THC:CBD","hybridType":"Hybrid","hybridDetail":"60/40 Indica/sativa","lineage":"Kandy Kush","notes":"7%THC 14%CBD","flowerTime":"10-12 weeks"},{"breeder":"The Seed Fair","strain":"Pakistani Chitral Kush","type":"Auto","sex":"Fem","thcCbd":"THC","hybridType":"Indica","hybridDetail":"80% Indica","lineage":"Afghan Kush X Pakistani Chitrali","notes":"~12% THC","flowerTime":"50-60 days"}]
+;
+
+let activeType = 'all';
+let activeSex = 'all';
+let activeHybrid = 'all';
+let activeBreeder = 'all';
+let searchQuery = '';
+
+function badgeClass(strain) {
+  const classes = [];
+  classes.push(strain.type === 'Auto' ? 'badge-auto' : 'badge-photo');
+  classes.push(strain.sex === 'Fem' ? 'badge-fem' : 'badge-reg');
+  if (strain.hybridType === 'Indica') classes.push('badge-indica');
+  else if (strain.hybridType === 'Sativa') classes.push('badge-sativa');
+  else classes.push('badge-hybrid');
+  return classes;
+}
+
+function escape(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderCard(s) {
+  const isSelf = s.breeder.toLowerCase() === 'self';
+  const hybridLabel = s.hybridDetail || s.hybridType;
+  return `
+  <div class="strain-card">
+    <div class="card-top">
+      <div class="card-badges">
+        <span class="badge ${s.type === 'Auto' ? 'badge-auto' : 'badge-photo'}">${s.type}</span>
+        <span class="badge ${s.sex === 'Fem' ? 'badge-fem' : 'badge-reg'}">${s.sex}</span>
+        <span class="badge ${s.hybridType === 'Indica' ? 'badge-indica' : s.hybridType === 'Sativa' ? 'badge-sativa' : 'badge-hybrid'}">${hybridLabel || s.hybridType}</span>
+        ${isSelf ? '<span class="badge badge-self">House</span>' : ''}
+      </div>
+    </div>
+    <div class="card-strain">${escape(s.strain)}</div>
+    <div class="card-breeder">${escape(s.breeder)}</div>
+    ${s.lineage ? `<div class="card-lineage">${escape(s.lineage)}</div>` : ''}
+    <div class="card-meta">
+      ${s.thcCbd ? `<div class="card-meta-row"><span class="meta-label">THC/CBD</span><span class="meta-val">${escape(s.thcCbd)}</span></div>` : ''}
+      ${s.flowerTime ? `<div class="card-meta-row"><span class="meta-label">Flower</span><span class="meta-val">${escape(s.flowerTime)}</span></div>` : ''}
+    </div>
+    ${s.notes ? `<div class="card-notes">${escape(s.notes)}</div>` : ''}
+  </div>`;
+}
+
+function filterAndRender() {
+  const q = searchQuery.toLowerCase().trim();
+  const filtered = STRAINS.filter(s => {
+    if (activeType !== 'all' && s.type !== activeType) return false;
+    if (activeSex !== 'all' && s.sex !== activeSex) return false;
+    if (activeHybrid !== 'all' && s.hybridType !== activeHybrid) return false;
+    if (activeBreeder !== 'all' && s.breeder !== activeBreeder) return false;
+    if (q) {
+      const hay = [s.strain, s.breeder, s.lineage, s.notes, s.thcCbd, s.hybridDetail].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const grid = document.getElementById('strainGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🌿</div><div class="empty-msg">No strains match your filters</div></div>';
+  } else {
+    grid.innerHTML = filtered.map(renderCard).join('');
+  }
+
+  document.getElementById('resultsCount').textContent = filtered.length === STRAINS.length
+    ? '' : `${filtered.length} of ${STRAINS.length} shown`;
+
+  // Update stat bar
+  document.getElementById('totalCount').textContent = filtered.length;
+  document.getElementById('autoCount').textContent = filtered.filter(s => s.type === 'Auto').length;
+  document.getElementById('photoCount').textContent = filtered.filter(s => s.type === 'Photo').length;
+  document.getElementById('breederCount').textContent = new Set(filtered.map(s => s.breeder)).size;
+}
+
+// Type filters
+document.getElementById('typeFilters').addEventListener('click', e => {
+  const btn = e.target.closest('[data-filter="type"]');
+  if (!btn) return;
+  activeType = btn.dataset.val;
+  document.querySelectorAll('[data-filter="type"]').forEach(b => {
+    b.classList.remove('active','auto-active','photo-active');
+  });
+  if (activeType === 'Auto') btn.classList.add('auto-active');
+  else if (activeType === 'Photo') btn.classList.add('photo-active');
+  else btn.classList.add('active');
+  filterAndRender();
+});
+
+// Sex filters
+document.getElementById('sexFilters').addEventListener('click', e => {
+  const btn = e.target.closest('[data-filter="sex"]');
+  if (!btn) return;
+  activeSex = btn.dataset.val;
+  document.querySelectorAll('[data-filter="sex"]').forEach(b => b.classList.remove('active','reg-active'));
+  if (activeSex === 'Reg') btn.classList.add('reg-active');
+  else btn.classList.add('active');
+  filterAndRender();
+});
+
+// Hybrid filters
+document.getElementById('hybridFilters').addEventListener('click', e => {
+  const btn = e.target.closest('[data-filter="hybrid"]');
+  if (!btn) return;
+  activeHybrid = btn.dataset.val;
+  document.querySelectorAll('[data-filter="hybrid"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterAndRender();
+});
+
+// Breeder select
+document.getElementById('breederSelect').addEventListener('change', e => {
+  activeBreeder = e.target.value;
+  filterAndRender();
+});
+
+// Search
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchQuery = e.target.value;
+    filterAndRender();
+  }, 150);
+});
+
+// Initial render
+filterAndRender();
+</script>
 </body>
 </html>

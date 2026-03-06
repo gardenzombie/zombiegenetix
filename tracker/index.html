@@ -7,17 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@300;400;600;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0f0a;
-    --bg2: #0f160f;
-    --bg3: #141e14;
-    --card: #111a11;
-    --card2: #162016;
-    --border: #1e2e1e;
-    --border2: #243424;
-    --green: #4ade80;
-    --green2: #22c55e;
-    --green3: #16a34a;
-    --green-dim: #1a3a1a;
+    --bg: #0c0905;
+    --bg2: #110d08;
+    --bg3: #17120c;
+    --card: #140f09;
+    --card2: #1a1410;
+    --border: #2a1f14;
+    --border2: #3a2c1e;
+    --cream: #f0ead8;
+    --cream2: #ddd5be;
+    --gold: #c8a96e;
+    --gold2: #a8885a;
+    --gold-dim: #1e1608;
     --amber: #fbbf24;
     --amber-dim: #3a2a0a;
     --red: #f87171;
@@ -26,9 +27,9 @@
     --blue-dim: #0f1e3a;
     --purple: #c084fc;
     --purple-dim: #1e0f3a;
-    --text: #e8f0e8;
-    --text2: #9ab09a;
-    --text3: #5a705a;
+    --text: #ede8dc;
+    --text2: #9a8f7c;
+    --text3: #5c5044;
     --mono: 'Space Mono', monospace;
     --head: 'Unbounded', sans-serif;
     --body: 'DM Sans', sans-serif;
@@ -130,7 +131,7 @@
     border-left: 2px solid transparent;
     transition: all 0.15s;
   }
-  .sidebar-item:hover { color: var(--text2); background: rgba(74,222,128,0.03); }
+  .sidebar-item:hover { color: var(--text2); background: rgba(200,169,110,0.03); }
   .sidebar-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-dim); }
   .sidebar-badge {
     font-family: var(--mono);
@@ -277,7 +278,7 @@
     position: relative;
   }
   .cal-day:hover { background: var(--bg3); }
-  .cal-day.today { background: rgba(74,222,128,0.06); outline: 1px solid rgba(74,222,128,0.3); outline-offset: -1px; }
+  .cal-day.today { background: rgba(200,169,110,0.06); outline: 1px solid rgba(200,169,110,0.3); outline-offset: -1px; }
   .cal-day.other-month { opacity: 0.4; }
   .cal-day.selected { outline: 2px solid var(--green); outline-offset: -2px; }
   .cal-day-num {
@@ -375,7 +376,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(74,222,128,0.03) 0%, transparent 60%);
+    background: linear-gradient(135deg, rgba(200,169,110,0.03) 0%, transparent 60%);
     pointer-events: none;
   }
 
@@ -453,7 +454,7 @@
     white-space: nowrap;
   }
   .stage-flower { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(192,132,252,0.2); }
-  .stage-veg { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+  .stage-veg { background: var(--green-dim); color: var(--green); border: 1px solid rgba(200,169,110,0.2); }
   .stage-clone { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
   .stage-late { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
 
@@ -496,7 +497,7 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .dot-green { background: var(--green); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+  .dot-green { background: var(--green); box-shadow: 0 0 6px rgba(200,169,110,0.5); }
   .dot-amber { background: var(--amber); box-shadow: 0 0 6px rgba(251,191,36,0.5); }
   .dot-purple { background: var(--purple); box-shadow: 0 0 6px rgba(192,132,252,0.5); }
   .dot-blue { background: var(--blue); box-shadow: 0 0 6px rgba(96,165,250,0.5); }
@@ -525,7 +526,7 @@
     white-space: nowrap;
   }
   .action-water { background: rgba(96,165,250,0.1); color: var(--blue); }
-  .action-feed { background: rgba(74,222,128,0.1); color: var(--green); }
+  .action-feed { background: rgba(200,169,110,0.1); color: var(--green); }
   .action-check { background: rgba(251,191,36,0.1); color: var(--amber); }
   .action-flush { background: rgba(248,113,113,0.1); color: var(--red); }
 
@@ -714,7 +715,7 @@
   .tea-header {
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(135deg, rgba(74,222,128,0.05), transparent);
+    background: linear-gradient(135deg, rgba(200,169,110,0.05), transparent);
   }
 
   .tea-name {
@@ -818,7 +819,7 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .status-ok { background: var(--green); box-shadow: 0 0 4px rgba(74,222,128,0.6); }
+  .status-ok { background: var(--green); box-shadow: 0 0 4px rgba(200,169,110,0.6); }
   .status-warn { background: var(--amber); box-shadow: 0 0 4px rgba(251,191,36,0.6); }
   .status-alert { background: var(--red); box-shadow: 0 0 4px rgba(248,113,113,0.6); }
 
@@ -940,7 +941,7 @@
   }
   .alert-warn { background: var(--amber-dim); border: 1px solid rgba(251,191,36,0.2); color: var(--amber); }
   .alert-info { background: var(--blue-dim); border: 1px solid rgba(96,165,250,0.2); color: var(--blue); }
-  .alert-success { background: var(--green-dim); border: 1px solid rgba(74,222,128,0.2); color: var(--green); }
+  .alert-success { background: var(--green-dim); border: 1px solid rgba(200,169,110,0.2); color: var(--green); }
 
   /* TOAST */
   .toast {
@@ -1015,7 +1016,7 @@
   }
   .tip-card.tip-sourced {
     border-left: 3px solid var(--green);
-    background: linear-gradient(90deg, rgba(74,222,128,0.03) 0%, var(--card) 60%);
+    background: linear-gradient(90deg, rgba(200,169,110,0.03) 0%, var(--card) 60%);
   }
   .tip-card.tip-personal {
     border-left: 3px solid var(--blue);
@@ -1052,7 +1053,7 @@
   }
   .tip-badge-cat  { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
   .tip-badge-stage { background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); }
-  .tip-badge-sourced { background: rgba(74,222,128,0.08); color: var(--green2); border: 1px solid rgba(74,222,128,0.2); }
+  .tip-badge-sourced { background: rgba(200,169,110,0.08); color: var(--green2); border: 1px solid rgba(200,169,110,0.2); }
   .tip-badge-personal { background: rgba(96,165,250,0.08); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
   .tip-source-label {
     font-family: var(--mono);
@@ -1119,7 +1120,7 @@
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: #060a06;
+      background: #0c0905;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1141,7 +1142,7 @@
       position: fixed;
       width: 500px;
       height: 500px;
-      background: #16a34a;
+      background: #c8a96e;
       border-radius: 50%;
       filter: blur(140px);
       opacity: 0.08;
@@ -1186,8 +1187,8 @@
     }
     .auth-card {
       width: 100%;
-      background: #0d150d;
-      border: 1px solid #1a2a1a;
+      background: #140f09;
+      border: 1px solid #2a1f14;
       padding: 2rem;
       display: flex;
       flex-direction: column;
@@ -1198,13 +1199,13 @@
       font-size: 0.55rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #4ade80;
+      color: #c8a96e;
       margin-bottom: 0.1rem;
     }
     .auth-input {
       width: 100%;
-      background: #060a06;
-      border: 1px solid #1a2a1a;
+      background: #0c0905;
+      border: 1px solid #2a1f14;
       color: #e2ece2;
       font-family: 'Space Mono', monospace;
       font-size: 0.85rem;
@@ -1214,12 +1215,12 @@
       transition: border-color 0.2s;
       -webkit-appearance: none;
     }
-    .auth-input:focus { border-color: #4ade80; }
+    .auth-input:focus { border-color: #c8a96e; }
     .auth-input::placeholder { color: #2a3a2a; }
     .auth-btn {
       width: 100%;
-      background: #4ade80;
-      color: #060a06;
+      background: #c8a96e;
+      color: #0c0905;
       font-family: 'Space Mono', monospace;
       font-weight: 700;
       font-size: 0.7rem;
@@ -1231,9 +1232,9 @@
       transition: background 0.2s, transform 0.1s;
       margin-top: 0.25rem;
     }
-    .auth-btn:hover { background: #22c55e; }
+    .auth-btn:hover { background: #a8885a; }
     .auth-btn:active { transform: scale(0.99); }
-    .auth-btn:disabled { background: #1a3a1a; color: #2a4a2a; cursor: not-allowed; }
+    .auth-btn:disabled { background: #1e1608; color: #2a4a2a; cursor: not-allowed; }
     .auth-error {
       font-family: 'Space Mono', monospace;
       font-size: 0.6rem;
@@ -1254,7 +1255,7 @@
     .auth-remember input {
       width: 14px;
       height: 14px;
-      accent-color: #4ade80;
+      accent-color: #c8a96e;
       cursor: pointer;
     }
     .auth-remember span {
@@ -3823,7 +3824,7 @@ function dotClass(stage) {
 function waterBadge(plantId) {
   const dsw = daysSinceWatered(plantId);
   if (dsw === null) return `<span class="plant-action action-check">never logged</span>`;
-  if (dsw === 0) return `<span class="plant-action action-water" style="background:rgba(74,222,128,0.15);color:var(--green)">watered today</span>`;
+  if (dsw === 0) return `<span class="plant-action action-water" style="background:rgba(200,169,110,0.15);color:var(--green)">watered today</span>`;
   if (dsw === 1) return `<span class="plant-action action-water">1 day ago</span>`;
   if (dsw >= 2 && dsw <= 3) return `<span class="plant-action action-check" style="background:rgba(251,191,36,0.12);color:var(--amber)">${dsw}d ago</span>`;
   return `<span class="plant-action action-flush">${dsw}d ago ⚠</span>`;
@@ -4182,8 +4183,8 @@ function renderTents() {
         </div>
         <div style="display:flex;gap:0.4rem;margin-bottom:0.75rem;flex-wrap:wrap">
           <button onclick="openAssignToTent('${tent.id}','plant')"
-            style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.25rem 0.55rem;border-radius:4px;border:1px solid rgba(74,222,128,0.3);background:rgba(74,222,128,0.06);color:var(--green2);cursor:pointer"
-            onmouseover="this.style.background='rgba(74,222,128,0.12)'" onmouseout="this.style.background='rgba(74,222,128,0.06)'">+ Add Plant</button>
+            style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.25rem 0.55rem;border-radius:4px;border:1px solid rgba(200,169,110,0.3);background:rgba(200,169,110,0.06);color:var(--green2);cursor:pointer"
+            onmouseover="this.style.background='rgba(200,169,110,0.12)'" onmouseout="this.style.background='rgba(200,169,110,0.06)'">+ Add Plant</button>
           <button onclick="openAssignToTent('${tent.id}','clone')"
             style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.25rem 0.55rem;border-radius:4px;border:1px solid rgba(96,165,250,0.3);background:rgba(96,165,250,0.06);color:var(--blue);cursor:pointer"
             onmouseover="this.style.background='rgba(96,165,250,0.12)'" onmouseout="this.style.background='rgba(96,165,250,0.06)'">+ Add Clone</button>
@@ -4285,7 +4286,7 @@ function renderPlants() {
 
                 <!-- Cannabinoid tags -->
                 ${cannTags.length ? `<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.6rem">
-                  ${cannTags.map(t => `<span style="font-family:var(--mono);font-size:0.55rem;padding:0.15rem 0.4rem;border-radius:3px;background:var(--green-dim);border:1px solid rgba(74,222,128,0.15);color:var(--green2)">${t}</span>`).join('')}
+                  ${cannTags.map(t => `<span style="font-family:var(--mono);font-size:0.55rem;padding:0.15rem 0.4rem;border-radius:3px;background:var(--green-dim);border:1px solid rgba(200,169,110,0.15);color:var(--green2)">${t}</span>`).join('')}
                 </div>` : ''}
 
                 <!-- Terpenes -->
@@ -5359,7 +5360,7 @@ function renderTeas() {
     const label = c === 'all' ? 'All Recipes' : meta.label;
     const active = activeRecipeFilter === c;
     return `<button onclick="setRecipeFilter('${c}')"
-      style="font-family:var(--mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.3rem 0.75rem;border-radius:20px;cursor:pointer;border:1px solid ${active ? meta.color || 'var(--green)' : 'var(--border2)'};background:${active ? 'rgba(74,222,128,0.1)' : 'transparent'};color:${active ? (meta.color || 'var(--green)') : 'var(--text3)'};transition:all 0.15s"
+      style="font-family:var(--mono);font-size:0.6rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.3rem 0.75rem;border-radius:20px;cursor:pointer;border:1px solid ${active ? meta.color || 'var(--green)' : 'var(--border2)'};background:${active ? 'rgba(200,169,110,0.1)' : 'transparent'};color:${active ? (meta.color || 'var(--green)') : 'var(--text3)'};transition:all 0.15s"
       onmouseover="this.style.color='${meta.color || 'var(--green)'}'" onmouseout="this.style.color='${active ? (meta.color||'var(--green)') : 'var(--text3)'}'">
       ${label} <span style="opacity:0.6">(${c === 'all' ? recipes.length : recipes.filter(r=>r.category===c).length})</span>
     </button>`;
@@ -5618,7 +5619,7 @@ function appendChatBubble(role, content, isLoading = false) {
   const msg = document.createElement('div');
   msg.style.cssText = `max-width:85%;padding:0.75rem 0.9rem;border-radius:8px;font-size:0.83rem;line-height:1.6;
     background:${isUser ? 'var(--green-dim)' : 'var(--bg3)'};
-    border:1px solid ${isUser ? 'rgba(74,222,128,0.2)' : 'var(--border)'};
+    border:1px solid ${isUser ? 'rgba(200,169,110,0.2)' : 'var(--border)'};
     color:${isUser ? 'var(--green)' : 'var(--text2)'};
     white-space:pre-wrap;word-break:break-word`;
 
@@ -5886,7 +5887,7 @@ function cloneCard(c) {
 
       <div style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-top:0.5rem">
         <button onclick="openEditClone('${c.id}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">Edit</button>
-        ${c.status === 'rooting' ? `<button onclick="markCloneRooted('${c.id}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(74,222,128,0.3);background:rgba(74,222,128,0.08);color:var(--green);cursor:pointer">✓ Mark Rooted</button>` : ''}
+        ${c.status === 'rooting' ? `<button onclick="markCloneRooted('${c.id}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(200,169,110,0.3);background:rgba(200,169,110,0.08);color:var(--green);cursor:pointer">✓ Mark Rooted</button>` : ''}
         ${c.status === 'rooted' ? `<button onclick="promoteCloneToPlant('${c.id}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(192,132,252,0.3);background:rgba(192,132,252,0.08);color:var(--purple);cursor:pointer">→ Promote to Plant</button>` : ''}
         <button onclick="quickLogClone('${c.id}','${c.strain}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(96,165,250,0.3);background:rgba(96,165,250,0.08);color:var(--blue);cursor:pointer">Log</button>
         <button onclick="removeClone('${c.id}')" style="font-family:var(--mono);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.45rem;border-radius:3px;border:1px solid rgba(248,113,113,0.2);background:transparent;color:var(--red);cursor:pointer;opacity:0.6" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✕</button>
@@ -7215,7 +7216,7 @@ function renderDayPanel(ds) {
 
 // ── Add / Edit event modal ────────────────────────────────────────
 const CAL_TYPE_COLORS = {
-  water:'#60a5fa', note:'#4ade80', ipm:'#f87171',
+  water:'#60a5fa', note:'#c8a96e', ipm:'#f87171',
   milestone:'#c084fc', photo:'#fbbf24', environment:'#86efac'
 };
 

@@ -9,22 +9,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@300;400;600;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:       #060a06;
-    --bg2:      #0a0f0a;
-    --bg3:      #0f160f;
-    --card:     #0d150d;
-    --border:   #1a2a1a;
-    --border2:  #243424;
-    --green:    #4ade80;
-    --green2:   #22c55e;
-    --green3:   #16a34a;
-    --green-dim:#122012;
+    --bg:       #0c0905;
+    --bg2:      #110d08;
+    --bg3:      #17120c;
+    --card:     #140f09;
+    --border:   #2a1f14;
+    --border2:  #3a2c1e;
+    --cream:    #f0ead8;
+    --cream2:   #ddd5be;
+    --gold:     #c8a96e;
+    --gold2:    #a8885a;
+    --gold-dim: #1e1608;
     --amber:    #fbbf24;
     --red:      #f87171;
     --purple:   #c084fc;
-    --text:     #e2ece2;
-    --text2:    #8aaa8a;
-    --text3:    #4a644a;
+    --text:     #ede8dc;
+    --text2:    #9a8f7c;
+    --text3:    #5c5044;
     --mono:     'Space Mono', monospace;
     --head:     'Unbounded', sans-serif;
     --body:     'DM Sans', sans-serif;
@@ -62,8 +63,8 @@
     z-index: 0;
     opacity: 0.12;
   }
-  .glow-orb.g1 { width: 600px; height: 600px; background: #16a34a; top: -200px; left: -100px; }
-  .glow-orb.g2 { width: 400px; height: 400px; background: #4ade80; bottom: 10%; right: -100px; opacity: 0.07; }
+  .glow-orb.g1 { width: 600px; height: 600px; background: #c8a96e; top: -200px; left: -100px; }
+  .glow-orb.g2 { width: 400px; height: 400px; background: #f0ead8; bottom: 10%; right: -100px; opacity: 0.07; }
   .glow-orb.g3 { width: 300px; height: 300px; background: #c084fc; top: 40%; left: 30%; opacity: 0.05; }
 
   /* ── NAV ── */
@@ -76,9 +77,9 @@
     justify-content: space-between;
     padding: 0 3rem;
     height: 64px;
-    background: rgba(6,10,6,0.8);
+    background: rgba(12,9,5,0.88);
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(74,222,128,0.08);
+    border-bottom: 1px solid rgba(200,169,110,0.12);
   }
 
   .nav-wordmark {
@@ -92,7 +93,7 @@
     font-weight: 900;
     font-size: 0.7rem;
     letter-spacing: 0.25em;
-    color: var(--green);
+    color: var(--cream);
     text-transform: uppercase;
     line-height: 1;
   }
@@ -121,7 +122,7 @@
     text-decoration: none;
     transition: color 0.2s;
   }
-  .nav-links a:hover { color: var(--green); }
+  .nav-links a:hover { color: var(--cream); }
 
   .nav-pill {
     font-family: var(--mono);
@@ -129,14 +130,14 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--bg);
-    background: var(--green);
+    background: var(--gold);
     padding: 0.4rem 1rem;
     border-radius: 2px;
     text-decoration: none;
     transition: background 0.2s, transform 0.1s;
     font-weight: 700;
   }
-  .nav-pill:hover { background: var(--green2); transform: translateY(-1px); }
+  .nav-pill:hover { background: var(--gold2); transform: translateY(-1px); }
 
   /* ── HERO ── */
   .hero {
@@ -156,7 +157,7 @@
     font-size: 0.6rem;
     letter-spacing: 0.35em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--cream2);
     margin-bottom: 2rem;
     opacity: 0;
     animation: fadeUp 0.8s ease 0.2s forwards;
@@ -196,7 +197,7 @@
     font-size: clamp(2rem, 7vw, 5.5rem);
     letter-spacing: 0.18em;
     line-height: 1;
-    color: var(--green);
+    color: var(--gold);
     text-transform: uppercase;
   }
 
@@ -257,11 +258,11 @@
     opacity: 0;
     transition: opacity 0.3s;
   }
-  .entry-card.public::before  { background: radial-gradient(ellipse at top left, rgba(74,222,128,0.06), transparent 70%); }
+  .entry-card.public::before  { background: radial-gradient(ellipse at top left, rgba(200,169,110,0.06), transparent 70%); }
   .entry-card.private::before { background: radial-gradient(ellipse at top left, rgba(251,191,36,0.06), transparent 70%); }
   .entry-card:hover::before { opacity: 1; }
   .entry-card:hover { transform: translateY(-3px); }
-  .entry-card.public:hover  { border-color: rgba(74,222,128,0.3); }
+  .entry-card.public:hover  { border-color: rgba(200,169,110,0.35); }
   .entry-card.private:hover { border-color: rgba(251,191,36,0.3); }
 
   .card-icon {
@@ -273,7 +274,7 @@
     justify-content: center;
     font-size: 1.2rem;
   }
-  .entry-card.public  .card-icon { background: rgba(74,222,128,0.1); }
+  .entry-card.public  .card-icon { background: rgba(200,169,110,0.1); }
   .entry-card.private .card-icon { background: rgba(251,191,36,0.1); }
 
   .card-label {
@@ -283,7 +284,7 @@
     text-transform: uppercase;
     color: var(--text3);
   }
-  .entry-card.public  .card-label { color: var(--green); }
+  .entry-card.public  .card-label { color: var(--cream); }
   .entry-card.private .card-label { color: var(--amber); }
 
   .card-title {
@@ -312,7 +313,7 @@
     gap: 0.5rem;
     transition: gap 0.2s;
   }
-  .entry-card.public  .card-arrow { color: var(--green); }
+  .entry-card.public  .card-arrow { color: var(--gold); }
   .entry-card.private .card-arrow { color: var(--amber); }
   .entry-card:hover .card-arrow { gap: 0.85rem; }
 
@@ -344,7 +345,7 @@
     font-family: var(--head);
     font-weight: 600;
     font-size: 1.4rem;
-    color: var(--green);
+    color: var(--gold);
     letter-spacing: -0.02em;
   }
   .prov-label {
@@ -374,7 +375,7 @@
     font-size: 0.55rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--cream2);
     margin-bottom: 1rem;
   }
   .about-heading {
@@ -404,9 +405,9 @@
     padding: 1rem 1.25rem;
     background: var(--card);
     border: 1px solid var(--border);
-    border-left: 2px solid var(--green3);
+    border-left: 2px solid var(--gold);
   }
-  .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
   .tag-text { font-size: 0.82rem; color: var(--text2); line-height: 1.5; }
   .tag-text strong { color: var(--text); font-weight: 500; }
 
@@ -437,7 +438,7 @@
     color: var(--text3);
   }
   .footer-right a { color: var(--text3); text-decoration: none; }
-  .footer-right a:hover { color: var(--green); }
+  .footer-right a:hover { color: var(--cream); }
 
   /* ── LEGAL BANNER ── */
   .legal-banner {
@@ -494,14 +495,14 @@
       <!-- Rx-style ix ligature: the dot of i connected by a descending stroke to the crossing of x -->
       <svg class="genetix-svg" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="ix">
         <!-- i stem -->
-        <line x1="18" y1="22" x2="18" y2="72" stroke="#4ade80" stroke-width="7" stroke-linecap="round"/>
+        <line x1="18" y1="22" x2="18" y2="72" stroke="#c8a96e" stroke-width="7" stroke-linecap="round"/>
         <!-- i dot — offset left, connected to x via descending diagonal (the Rx stroke) -->
-        <circle cx="18" cy="10" r="6" fill="#4ade80"/>
+        <circle cx="18" cy="10" r="6" fill="#c8a96e"/>
         <!-- Rx-style connecting stroke: from dot down-right into the x crossing point -->
-        <line x1="21" y1="15" x2="58" y2="52" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
+        <line x1="21" y1="15" x2="58" y2="52" stroke="#c8a96e" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
         <!-- x: two crossing strokes -->
-        <line x1="52" y1="22" x2="88" y2="72" stroke="#4ade80" stroke-width="7" stroke-linecap="round"/>
-        <line x1="88" y1="22" x2="52" y2="72" stroke="#4ade80" stroke-width="7" stroke-linecap="round"/>
+        <line x1="52" y1="22" x2="88" y2="72" stroke="#c8a96e" stroke-width="7" stroke-linecap="round"/>
+        <line x1="88" y1="22" x2="52" y2="72" stroke="#c8a96e" stroke-width="7" stroke-linecap="round"/>
       </svg>
     </div>
   </div>

@@ -7,14 +7,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Unbounded:wght@300;400;600;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#08070f; --bg2:#0d0c1a; --bg3:#121228;
-    --card:#0e0d1c; --border:#1e1d3a; --border2:#2c2a50;
-    --cyan:#22d3ee; --cyan2:#06b6d4; --cyan3:#0891b2; --cyan-dim:#041824;
+    --bg:#1a1742; --bg2:#201e50; --bg3:#282460;
+    --card:#1e1b4c; --border:#38346e; --border2:#4a4688;
+    --cyan:#22d3ee; --cyan2:#06b6d4; --cyan3:#0891b2; --cyan-dim:#0e1a3a;
     --magenta:#e879f9; --magenta2:#d946ef; --magenta-dim:#1f0728;
     --purple:#a78bfa;
     --amber:#fbbf24; --amber-dim:#1e1500;
     --blue:#60a5fa;
-    --text:#e8e6f4; --text2:#8f8aaf; --text3:#4a4670;
+    --text:#f0eeff; --text2:#b8b0d8; --text3:#6e68a0;
     --mono:'Space Mono',monospace; --head:'Unbounded',sans-serif; --body:'DM Sans',sans-serif;
   }
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -23,7 +23,7 @@
   body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.5}
 
   /* NAV */
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;background:rgba(8,7,15,0.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,0.15);box-shadow:0 1px 0 0 rgba(34,211,238,0.05)}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;background:rgba(26,23,66,0.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(34,211,238,0.15);box-shadow:0 1px 0 0 rgba(34,211,238,0.05)}
   .nav-wordmark{text-decoration:none;display:flex;flex-direction:column;gap:0}
   .nav-zombie{font-family:var(--head);font-weight:900;font-size:0.7rem;letter-spacing:0.25em;color:var(--cyan);text-transform:uppercase;line-height:1;text-shadow:0 0 12px rgba(34,211,238,0.5)}
   .nav-genetix{font-family:var(--head);font-weight:300;font-size:0.6rem;letter-spacing:0.4em;color:var(--text3);text-transform:uppercase;line-height:1}

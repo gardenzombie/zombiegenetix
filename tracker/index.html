@@ -1112,6 +1112,8 @@
 
 
 </style>
+  <!-- Supabase JS client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -1294,25 +1296,30 @@
     </div>
 
     <div class="auth-card" id="auth-card">
-      <div>
-        <div class="auth-label">Password</div>
-        <input
-          class="auth-input"
-          type="password"
-          id="auth-password"
-          placeholder="············"
-          autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')authSubmit()"
-        >
+      <!-- Email form panel -->
+      <div id="auth-form-panel">
+        <div>
+          <div class="auth-label">Email</div>
+          <input
+            class="auth-input"
+            type="email"
+            id="auth-email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            onkeydown="if(event.key==='Enter')authSubmit()"
+          >
+        </div>
+        <button class="auth-btn" id="auth-btn" onclick="authSubmit()">
+          Send Magic Link
+        </button>
+        <div class="auth-error" id="auth-error"></div>
       </div>
-      <label class="auth-remember">
-        <input type="checkbox" id="auth-remember" checked>
-        <span>Remember me for 30 days</span>
-      </label>
-      <button class="auth-btn" id="auth-btn" onclick="authSubmit()">
-        Enter
-      </button>
-      <div class="auth-error" id="auth-error">Incorrect password</div>
+      <!-- Sent confirmation panel -->
+      <div id="auth-sent-panel" style="display:none;text-align:center;padding:0.5rem 0">
+        <div style="font-family:'Space Mono',monospace;font-size:0.75rem;color:#22d3ee;letter-spacing:0.12em;margin-bottom:1rem">✓ Link Sent</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.875rem;color:#b8b0d8;line-height:1.6">Check your email and click the magic link to sign in. The link expires in 1 hour.</div>
+        <button class="auth-btn" style="margin-top:1.5rem;background:transparent;border:1px solid #38346e;color:#6e68a0;font-size:0.6rem" onclick="authShowForm()">← Use a different email</button>
+      </div>
     </div>
 
     <div class="auth-footer">zombiegenetix.com · licensed cultivator</div>
@@ -1390,6 +1397,10 @@
   <div class="sidebar-exit">
     <a href="/">← Zombie Genetix Home</a>
     <a href="/genetics/">🧬 Genetics Showcase</a>
+    <a href="#" onclick="authLogout();return false;"
+      style="color:var(--text3);margin-top:0.5rem;font-size:0.6rem;letter-spacing:0.08em;opacity:0.6"
+      onmouseover="this.style.opacity='1';this.style.color='var(--magenta)'"
+      onmouseout="this.style.opacity='0.6';this.style.color='var(--text3)'">⎋ Sign Out</a>
   </div>
 
 </aside>
@@ -7582,92 +7593,105 @@ renderWateringWidgets();
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// AUTH GATE
-// — Password is stored as a SHA-256 hash so it's not plain text
-//   in source. To change the password, run this in your browser
-//   console and replace HASH below:
-//     crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourpassword'))
-//       .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
+// AUTH GATE — Supabase magic link
 // ═══════════════════════════════════════════════════════════════════
 
-// !! CHANGE THIS to the hash of your chosen password !!
-// Current password is:  growops  (change immediately after setup)
-// To generate a new hash, open browser console and run:
-//   authHashPassword('yournewpassword').then(h => console.log(h))
-const AUTH_HASH = 'af03ad5d8ceb698cc96643a8f4e45b88dc86a55c1e1af890a8b78c07ff243df1';
+const SUPABASE_URL = 'https://wgtsjhcpxqgumsnuvzbb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_brbNCmPwcTyzb1EQiRfJ8g_h-E3KPSf';
+const TRACKER_URL  = 'https://zombiegenetix.com/tracker/';
 
-const AUTH_COOKIE = 'zg_auth';
-const AUTH_DAYS   = 30;
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function authHashPassword(pw) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+// ── UI helpers ───────────────────────────────────────────────────────
+
+function authShowGate() {
+  const gate = document.getElementById('auth-gate');
+  gate.style.display = 'flex';
+  gate.style.opacity = '1';
+  authShowForm();
+  setTimeout(() => document.getElementById('auth-email')?.focus(), 60);
 }
 
-function authGetCookie() {
-  const match = document.cookie.split('; ').find(r => r.startsWith(AUTH_COOKIE + '='));
-  return match ? match.split('=')[1] : null;
+function authHideGate() {
+  const gate = document.getElementById('auth-gate');
+  gate.style.transition = 'opacity 0.4s ease';
+  gate.style.opacity = '0';
+  setTimeout(() => { gate.style.display = 'none'; gate.style.transition = ''; }, 420);
 }
 
-function authSetCookie(days) {
-  const exp = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${AUTH_COOKIE}=${AUTH_HASH}; expires=${exp}; path=/; SameSite=Strict`;
+function authShowForm() {
+  document.getElementById('auth-form-panel').style.display = '';
+  document.getElementById('auth-sent-panel').style.display = 'none';
+  const btn = document.getElementById('auth-btn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Send Magic Link'; }
+  const err = document.getElementById('auth-error');
+  if (err) { err.textContent = ''; err.classList.remove('show'); }
 }
 
-function authClearCookie() {
-  document.cookie = `${AUTH_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-}
+// ── Send magic link ──────────────────────────────────────────────────
 
 async function authSubmit() {
   const btn   = document.getElementById('auth-btn');
-  const input = document.getElementById('auth-password');
+  const input = document.getElementById('auth-email');
   const error = document.getElementById('auth-error');
   const card  = document.getElementById('auth-card');
-  const remember = document.getElementById('auth-remember').checked;
+  const email = input.value.trim();
+
+  if (!email) {
+    error.textContent = 'Please enter your email address.';
+    error.classList.add('show');
+    return;
+  }
 
   btn.disabled = true;
-  btn.textContent = 'Checking…';
+  btn.textContent = 'Sending…';
   error.classList.remove('show');
 
-  const hash = await authHashPassword(input.value);
+  const { error: err } = await _sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: TRACKER_URL }
+  });
 
-  if (hash === AUTH_HASH) {
-    if (remember) authSetCookie(AUTH_DAYS);
-    // Fade out the gate smoothly
-    const gate = document.getElementById('auth-gate');
-    gate.style.transition = 'opacity 0.4s ease';
-    gate.style.opacity = '0';
-    setTimeout(() => gate.remove(), 420);
-  } else {
-    input.value = '';
+  if (err) {
     btn.disabled = false;
-    btn.textContent = 'Enter';
+    btn.textContent = 'Send Magic Link';
+    error.textContent = err.message || 'Something went wrong — try again.';
     error.classList.add('show');
     card.classList.remove('shake');
-    void card.offsetWidth; // force reflow so animation re-triggers
+    void card.offsetWidth;
     card.classList.add('shake');
-    input.focus();
-  }
-}
-
-function authInit() {
-  const gate = document.getElementById('auth-gate');
-  const cookie = authGetCookie();
-
-  if (cookie === AUTH_HASH) {
-    // Valid session — remove gate immediately, no flash
-    gate.remove();
   } else {
-    // Show gate
-    gate.style.display = 'flex';
-    setTimeout(() => document.getElementById('auth-password')?.focus(), 50);
+    document.getElementById('auth-form-panel').style.display = 'none';
+    document.getElementById('auth-sent-panel').style.display = '';
   }
 }
 
-// Expose logout function so you can call authLogout() from console or add a button later
-function authLogout() {
-  authClearCookie();
-  location.reload();
+// ── Sign out ─────────────────────────────────────────────────────────
+
+async function authLogout() {
+  await _sb.auth.signOut();
+  // onAuthStateChange will call authShowGate()
+}
+
+// ── Auth state listener ───────────────────────────────────────────────
+
+_sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    authHideGate();
+  } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+    authShowGate();
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+
+async function authInit() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session) {
+    document.getElementById('auth-gate').style.display = 'none';
+  } else {
+    authShowGate();
+  }
 }
 
 authInit();

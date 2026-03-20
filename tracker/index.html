@@ -1319,6 +1319,11 @@
         </button>
         <div class="auth-error" id="auth-error"></div>
       </div>
+      <!-- Loading / syncing panel -->
+      <div id="auth-loading-panel" style="display:none;text-align:center;padding:1rem 0">
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:#22d3ee;letter-spacing:0.15em;opacity:0.85">Syncing data…</div>
+        <div style="margin-top:0.75rem;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:#6e68a0">Loading your grow data</div>
+      </div>
       <!-- Sent confirmation panel -->
       <div id="auth-sent-panel" style="display:none;text-align:center;padding:0.5rem 0">
         <div style="font-family:'Space Mono',monospace;font-size:0.75rem;color:#22d3ee;letter-spacing:0.12em;margin-bottom:1rem">✓ Link Sent</div>
@@ -1402,8 +1407,9 @@
   <div class="sidebar-exit">
     <a href="/">← Zombie Genetix Home</a>
     <a href="/genetics/">🧬 Genetics Showcase</a>
+    <span id="sync-badge" style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.08em;color:var(--text3);margin-top:0.25rem;opacity:0.7"></span>
     <a href="#" onclick="authLogout();return false;"
-      style="color:var(--text3);margin-top:0.5rem;font-size:0.6rem;letter-spacing:0.08em;opacity:0.6"
+      style="color:var(--text3);margin-top:0.25rem;font-size:0.6rem;letter-spacing:0.08em;opacity:0.6"
       onmouseover="this.style.opacity='1';this.style.color='var(--magenta)'"
       onmouseout="this.style.opacity='0.6';this.style.color='var(--text3)'">⎋ Sign Out</a>
   </div>
@@ -7602,23 +7608,141 @@ renderWateringWidgets();
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// AUTH GATE — Supabase magic link
+// AUTH + SUPABASE SYNC
 // ═══════════════════════════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://wgtsjhcpxqgumsnuvzbb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_brbNCmPwcTyzb1EQiRfJ8g_h-E3KPSf';
 const TRACKER_URL  = 'https://zombiegenetix.com/tracker/';
+const SYNC_PREFIX  = 'growtracker-';
+// Keys excluded from sync (device-specific or session-only)
+const SYNC_EXCLUDE = new Set(['growtracker-api-key']);
 
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── UI helpers ───────────────────────────────────────────────────────
+// ── Sync layer ───────────────────────────────────────────────────────
 
-function authShowGate() {
+let _userId    = null;
+let _syncTimer = null;
+
+// Collect all growtracker-* keys from localStorage into one plain object
+function _gatherLocal() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(SYNC_PREFIX) && !SYNC_EXCLUDE.has(key)) {
+      try { data[key] = JSON.parse(localStorage.getItem(key)); }
+      catch { data[key] = localStorage.getItem(key); }
+    }
+  }
+  return data;
+}
+
+// Push local data to Supabase (called after debounce)
+async function _pushToSupabase() {
+  if (!_userId) return;
+  const data = _gatherLocal();
+  const { error } = await _sb
+    .from('tracker_data')
+    .upsert({ user_id: _userId, data, saved_at: new Date().toISOString() },
+            { onConflict: 'user_id' });
+  if (error) {
+    console.warn('[sync] push failed:', error.message);
+  } else {
+    _updateSyncBadge('saved');
+  }
+}
+
+// Schedule a debounced push (2 s after last write)
+function _scheduleSync() {
+  if (!_userId) return;
+  _updateSyncBadge('pending');
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(_pushToSupabase, 2000);
+}
+
+// Intercept every localStorage.setItem so writes auto-sync
+const _lsSet = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function (key, value) {
+  _lsSet(key, value);
+  if (key.startsWith(SYNC_PREFIX) && !SYNC_EXCLUDE.has(key)) _scheduleSync();
+};
+
+// Pull remote data → write to localStorage → reload if anything changed
+async function _pullFromSupabase(userId) {
+  _userId = userId;
+
+  // If we already reloaded once this session after a pull, skip
+  if (sessionStorage.getItem('zg-pulled') === '1') {
+    sessionStorage.removeItem('zg-pulled');
+    _updateSyncBadge('saved');
+    return false; // no reload needed
+  }
+
+  const { data: row, error } = await _sb
+    .from('tracker_data')
+    .select('data')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) { console.warn('[sync] pull failed:', error.message); return false; }
+
+  // No remote data yet → push current localStorage up (first-time migration)
+  if (!row || !row.data || Object.keys(row.data).length === 0) {
+    await _pushToSupabase();
+    _updateSyncBadge('saved');
+    return false;
+  }
+
+  // Write remote data into localStorage using the raw setter (bypass interceptor)
+  let changed = false;
+  for (const [key, value] of Object.entries(row.data)) {
+    if (!key.startsWith(SYNC_PREFIX) || SYNC_EXCLUDE.has(key)) continue;
+    const incoming = JSON.stringify(value);
+    if (localStorage.getItem(key) !== incoming) {
+      _lsSet(key, incoming);
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    sessionStorage.setItem('zg-pulled', '1');
+    location.reload(); // reload so in-memory variables pick up new data
+    return true;
+  }
+
+  _updateSyncBadge('saved');
+  return false;
+}
+
+// Update the sidebar sync indicator
+function _updateSyncBadge(state) {
+  const el = document.getElementById('sync-badge');
+  if (!el) return;
+  if (state === 'pending') {
+    el.textContent = '↑ syncing…';
+    el.style.color = 'var(--amber)';
+  } else {
+    const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    el.textContent = `✓ synced ${t}`;
+    el.style.color = 'var(--text3)';
+  }
+}
+
+// ── Auth UI helpers ──────────────────────────────────────────────────
+
+function authShowGate(loading) {
   const gate = document.getElementById('auth-gate');
   gate.style.display = 'flex';
   gate.style.opacity = '1';
-  authShowForm();
-  setTimeout(() => document.getElementById('auth-email')?.focus(), 60);
+  if (loading) {
+    document.getElementById('auth-form-panel').style.display = 'none';
+    document.getElementById('auth-sent-panel').style.display = 'none';
+    document.getElementById('auth-loading-panel').style.display = '';
+  } else {
+    authShowForm();
+    setTimeout(() => document.getElementById('auth-email')?.focus(), 60);
+  }
 }
 
 function authHideGate() {
@@ -7631,6 +7755,7 @@ function authHideGate() {
 function authShowForm() {
   document.getElementById('auth-form-panel').style.display = '';
   document.getElementById('auth-sent-panel').style.display = 'none';
+  document.getElementById('auth-loading-panel').style.display = 'none';
   const btn = document.getElementById('auth-btn');
   if (btn) { btn.disabled = false; btn.textContent = 'Send Magic Link'; }
   const err = document.getElementById('auth-error');
@@ -7671,6 +7796,8 @@ async function authSubmit() {
     card.classList.add('shake');
   } else {
     document.getElementById('auth-form-panel').style.display = 'none';
+    document.getElementById('auth-sent-panel').style.display = 'none';
+    document.getElementById('auth-loading-panel').style.display = 'none';
     document.getElementById('auth-sent-panel').style.display = '';
   }
 }
@@ -7678,17 +7805,22 @@ async function authSubmit() {
 // ── Sign out ─────────────────────────────────────────────────────────
 
 async function authLogout() {
+  clearTimeout(_syncTimer);
+  await _pushToSupabase(); // flush any pending writes before logout
+  _userId = null;
   await _sb.auth.signOut();
-  // onAuthStateChange will call authShowGate()
 }
 
 // ── Auth state listener ───────────────────────────────────────────────
 
-_sb.auth.onAuthStateChange((event, session) => {
+_sb.auth.onAuthStateChange(async (event, session) => {
   if (session) {
-    authHideGate();
-  } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
-    authShowGate();
+    authShowGate(true); // show loading spinner while syncing
+    const reloading = await _pullFromSupabase(session.user.id);
+    if (!reloading) authHideGate();
+  } else if (event === 'SIGNED_OUT') {
+    _userId = null;
+    authShowGate(false);
   }
 });
 
@@ -7697,9 +7829,11 @@ _sb.auth.onAuthStateChange((event, session) => {
 async function authInit() {
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
-    document.getElementById('auth-gate').style.display = 'none';
+    authShowGate(true); // show loading while we sync
+    const reloading = await _pullFromSupabase(session.user.id);
+    if (!reloading) authHideGate();
   } else {
-    authShowGate();
+    authShowGate(false);
   }
 }
 

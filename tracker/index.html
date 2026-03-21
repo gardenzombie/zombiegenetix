@@ -319,6 +319,83 @@
   .cal-event-dot.suggested-dot { border: 2px dashed; background: transparent !important; }
   .week-time-col { font-family: var(--mono); font-size: 0.58rem; color: var(--text3); width: 36px; flex-shrink: 0; padding-top: 0.4rem; text-align: right; }
 
+  /* Calendar layout with slide panel */
+  .cal-layout {
+    display: flex;
+    gap: 0;
+    position: relative;
+    min-height: 500px;
+  }
+  #cal-grid-wrap {
+    flex: 1;
+    min-width: 0;
+    transition: margin-right 0.3s ease;
+  }
+  #cal-side-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    overflow-y: auto;
+    max-height: 80vh;
+    transition: width 0.3s ease, opacity 0.3s ease, margin-left 0.3s ease;
+    margin-left: 0;
+  }
+  #cal-side-panel.cal-side-closed {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-left: 0;
+    border: none;
+  }
+  #cal-side-panel:not(.cal-side-closed) {
+    margin-left: 1rem;
+  }
+  /* Month grid always 7 columns */
+  #cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .cal-tent-tab {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cal-tent-tab.active {
+    background: rgba(34,211,238,0.1);
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .cal-rec-card {
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
+    border-left: 3px solid var(--cyan);
+    background: rgba(34,211,238,0.06);
+    margin-bottom: 0.5rem;
+  }
+  .cal-rec-card.urgent {
+    border-left-color: var(--amber);
+    background: rgba(251,191,36,0.07);
+  }
+  .cal-rec-card.harvest {
+    border-left-color: var(--magenta);
+    background: rgba(232,121,249,0.07);
+  }
+
   .nav-date {
     font-family: var(--mono);
     font-size: 0.65rem;
@@ -1390,7 +1467,7 @@
 
     <div class="sidebar-section-label">Planning</div>
     <button class="sidebar-item" id="sidebar-tab-timeline" onclick="showPage('timeline')">
-      Timeline
+      Calendar
     </button>
 
   </nav>
@@ -1612,43 +1689,34 @@
 <!-- ═══════════════════════════════════════════════════ CLAUDE AI -->
 <!-- ══════════════════════════════════════════════════════════ TIMELINE PAGE -->
 <div class="page" id="page-timeline">
-  <!-- CALENDAR HEADER -->
+  <!-- Header -->
   <div class="section-header flex-between" style="margin-bottom:1rem">
     <div>
       <div class="section-title">Grow Calendar</div>
-      <div class="section-desc" id="cal-range-label">Loading...</div>
+      <div class="section-desc" id="cal-month-label"></div>
     </div>
-    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
-      <!-- View toggle -->
-      <div style="display:flex;border:1px solid var(--border2);border-radius:5px;overflow:hidden">
-        <button id="cal-view-2w" onclick="setCalView('2w')" style="font-family:var(--mono);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.3rem 0.6rem;background:var(--green-dim);color:var(--green);border:none;cursor:pointer">2 Week</button>
-        <button id="cal-view-1w" onclick="setCalView('1w')" style="font-family:var(--mono);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.3rem 0.6rem;background:transparent;color:var(--text3);border:none;border-left:1px solid var(--border2);cursor:pointer">Week</button>
-        <button id="cal-view-1m" onclick="setCalView('1m')" style="font-family:var(--mono);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.3rem 0.6rem;background:transparent;color:var(--text3);border:none;border-left:1px solid var(--border2);cursor:pointer">Month</button>
-      </div>
-      <!-- Nav -->
+    <div style="display:flex;gap:0.5rem;align-items:center">
       <button onclick="calNav(-1)" style="font-family:var(--mono);font-size:0.7rem;padding:0.3rem 0.6rem;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">‹ Prev</button>
       <button onclick="calNavToday()" style="font-family:var(--mono);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.06em;padding:0.3rem 0.6rem;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer">Today</button>
       <button onclick="calNav(1)" style="font-family:var(--mono);font-size:0.7rem;padding:0.3rem 0.6rem;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer">Next ›</button>
-      <button onclick="openAddCalEvent(null)" class="btn btn-primary" style="font-size:0.6rem;padding:0.35rem 0.75rem">+ Add Event</button>
+      <button onclick="openAddCalEvent(calSelectedDate)" class="btn btn-primary" style="font-size:0.6rem">+ Add Event</button>
     </div>
   </div>
 
-  <!-- LEGEND -->
-  <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.75rem;padding:0.5rem 0.75rem;background:var(--bg2);border-radius:6px;border:1px solid var(--border)">
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Water / Feed</span></div>
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Note</span></div>
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">IPM</span></div>
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--purple)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Milestone</span></div>
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Photo</span></div>
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--green2)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Environment</span></div>
-    <div style="display:flex;align-items:center;gap:0.35rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--text3);border:1px dashed var(--text3)"></div><span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Suggested</span></div>
+  <!-- Tent filter tabs -->
+  <div id="cal-tent-tabs" style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+
+  <!-- Layout: grid + slide panel -->
+  <div class="cal-layout" id="cal-layout">
+    <!-- Month grid -->
+    <div id="cal-grid-wrap">
+      <div id="cal-grid"></div>
+    </div>
+    <!-- Slide-in day panel -->
+    <div id="cal-side-panel" class="cal-side-closed">
+      <div id="cal-side-inner"></div>
+    </div>
   </div>
-
-  <!-- CALENDAR GRID -->
-  <div id="cal-grid" style="display:grid;gap:1px;background:var(--border)"></div>
-
-  <!-- DAY DETAIL PANEL -->
-  <div id="cal-day-panel" style="display:none;margin-top:1rem"></div>
 </div>
 
 <!-- ADD/EDIT CALENDAR EVENT MODAL -->
@@ -7090,12 +7158,12 @@ function renderRetired() {
 // ═══════════════════════════════════════════════════════════════════
 
 // State
-let calView = '2w';          // '2w' | '1w' | '1m'
-let calAnchor = new Date();  // anchor date (start of current view window)
+let calAnchor = new Date();  // anchor date (current month being displayed)
 calAnchor.setHours(0,0,0,0);
 
-let calEvents = JSON.parse(localStorage.getItem('growtracker-cal-events') || '[]');
+let calEvents = JSON.parse(localStorage.getItem('growtracker-calendar') || '[]');
 let calSelectedDate = null;
+let calFilterTent = 'all'; // Current tent filter: 'all' or tent ID
 
 // Event type metadata
 const CAL_TYPE = {
@@ -7109,7 +7177,7 @@ const CAL_TYPE = {
 };
 
 function saveCalEvents() {
-  localStorage.setItem('growtracker-cal-events', JSON.stringify(calEvents));
+  localStorage.setItem('growtracker-calendar', JSON.stringify(calEvents));
 }
 
 // ── Date helpers ─────────────────────────────────────────────────
@@ -7187,33 +7255,11 @@ function eventsForDate(ds) {
   return { manual, suggested, all: [...manual, ...suggested] };
 }
 
-// ── View range ────────────────────────────────────────────────────
-function getViewRange() {
-  if (calView === '1w') {
-    const start = startOfWeek(calAnchor);
-    return { start, end: addDays(start, 6), days: 7, cols: 7 };
-  }
-  if (calView === '2w') {
-    const start = startOfWeek(calAnchor);
-    return { start, end: addDays(start, 13), days: 14, cols: 7 };
-  }
-  // Month view
-  const start = startOfMonth(calAnchor);
-  const end = new Date(calAnchor.getFullYear(), calAnchor.getMonth()+1, 0);
-  // Pad to full weeks
-  const padStart = startOfWeek(start);
-  const padEnd = addDays(startOfWeek(end), 6);
-  const days = Math.round((padEnd - padStart) / 86400000) + 1;
-  return { start: padStart, end: padEnd, days, cols: 7, monthStart: start, monthEnd: end };
-}
 
 // ── Navigation ────────────────────────────────────────────────────
 function calNav(dir) {
-  if (calView === '1w') calAnchor = addDays(calAnchor, dir * 7);
-  else if (calView === '2w') calAnchor = addDays(calAnchor, dir * 14);
-  else {
-    calAnchor = new Date(calAnchor.getFullYear(), calAnchor.getMonth() + dir, 1);
-  }
+  // Month-only navigation
+  calAnchor = new Date(calAnchor.getFullYear(), calAnchor.getMonth() + dir, 1);
   renderCalendar();
 }
 
@@ -7222,71 +7268,170 @@ function calNavToday() {
   renderCalendar();
 }
 
-function setCalView(v) {
-  calView = v;
-  ['2w','1w','1m'].forEach(k => {
-    const btn = document.getElementById('cal-view-'+k);
-    if (btn) {
-      btn.style.background = k===v ? 'var(--green-dim)' : 'transparent';
-      btn.style.color = k===v ? 'var(--green)' : 'var(--text3)';
+
+// ── Journal storage ───────────────────────────────────────────
+function loadJournal() {
+  return JSON.parse(localStorage.getItem('growtracker-journal') || '{}');
+}
+
+function saveJournalEntry(ds) {
+  const text = document.getElementById('cal-journal-text')?.value?.trim() || '';
+  const journal = loadJournal();
+  if (text) journal[ds] = text;
+  else delete journal[ds];
+  localStorage.setItem('growtracker-journal', JSON.stringify(journal));
+  showToast('success', '✓', 'Journal saved');
+  renderCalendar();
+}
+
+// ── Auto-generate recommendations ──────────────────────────────
+function getAutoRecommendations(ds) {
+  const recs = [];
+  const today = new Date(ds + 'T12:00:00');
+  const allP = resolvePlants();
+
+  allP.forEach(p => {
+    const stage = liveStage(p);
+    const tent = resolveTents().find(t => t.id === p.tent);
+    const tentLabel = tent ? tent.name : 'Unassigned';
+
+    // Harvest countdown for late/flower stage
+    if ((stage === 'late' || stage === 'flower') && p.flowerLen) {
+      const daysLeft = p.flowerLen - p.dayInStage;
+      if (daysLeft >= 0 && daysLeft <= 21) {
+        recs.push({
+          type: 'harvest',
+          label: `${p.strain} — ${daysLeft}d to harvest window`,
+          detail: `${tentLabel} · Day ${p.dayInStage}/${p.flowerLen} flower`,
+          urgent: daysLeft <= 7
+        });
+      }
+    }
+
+    // Trichome check reminder (last 3 weeks of flower)
+    if (stage === 'late') {
+      recs.push({
+        type: 'tip',
+        label: `Trichome check — ${p.strain}`,
+        detail: `Late flower in ${tentLabel}`
+      });
     }
   });
-  renderCalendar();
+
+  // Check rooted clones ready to pot up
+  const rootedClones = clones.filter(c => !c._hidden && c.status === 'rooted');
+  if (rootedClones.length) {
+    recs.push({
+      type: 'clone',
+      label: `${rootedClones.length} clone${rootedClones.length > 1 ? 's' : ''} ready to pot up`,
+      detail: rootedClones.map(c => c.strain).join(', ')
+    });
+  }
+
+  // Feed timing check — if feedLog has entries, check last feed per tent
+  const tentFeedMap = {};
+  feedLog.forEach(entry => {
+    if (!tentFeedMap[entry.tent] || entry.date > tentFeedMap[entry.tent]) {
+      tentFeedMap[entry.tent] = entry.date;
+    }
+  });
+  resolveTents().forEach(t => {
+    const lastFeed = tentFeedMap[t.id];
+    if (lastFeed) {
+      const daysSince = Math.floor((today - new Date(lastFeed + 'T12:00:00')) / 86400000);
+      if (daysSince >= 3) {
+        recs.push({
+          type: 'feed',
+          label: `${t.name} — ${daysSince}d since last feed`,
+          detail: 'Consider watering or feeding today'
+        });
+      }
+    }
+  });
+
+  return recs;
 }
 
 // ── Main render ───────────────────────────────────────────────────
 function renderTimeline() { renderCalendar(); }
 
 function renderCalendar() {
-  const range = getViewRange();
   const today = new Date(); today.setHours(0,0,0,0);
   const grid = document.getElementById('cal-grid');
-  if (!grid) return;
+  const tentTabsDiv = document.getElementById('cal-tent-tabs');
+  if (!grid || !tentTabsDiv) return;
 
-  // Update range label
-  const fmt = d => d.toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
-  document.getElementById('cal-range-label').textContent = `${fmt(range.start)} — ${fmt(range.end)}`;
+  // Always month view — first day of month containing calAnchor to last day
+  const monthStart = startOfMonth(calAnchor);
+  const monthEnd = new Date(calAnchor.getFullYear(), calAnchor.getMonth() + 1, 0);
+  const padStart = startOfWeek(monthStart);
+  const padEnd = addDays(startOfWeek(monthEnd), 6);
+  const days = Math.round((padEnd - padStart) / 86400000) + 1;
 
-  // Grid columns
-  grid.style.gridTemplateColumns = `repeat(${range.cols}, 1fr)`;
+  // Update month label
+  const monthLabel = monthStart.toLocaleDateString('en-CA', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-month-label').textContent = monthLabel;
 
-  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  // Build tent filter tabs
+  const tents = resolveTents();
+  let tabHTML = `<button class="cal-tent-tab${calFilterTent === 'all' ? ' active' : ''}" onclick="setCalFilterTent('all')">All Tents</button>`;
+  tents.forEach(t => {
+    tabHTML += `<button class="cal-tent-tab${calFilterTent === t.id ? ' active' : ''}" onclick="setCalFilterTent('${t.id}')">${t.name}</button>`;
+  });
+  tentTabsDiv.innerHTML = tabHTML;
+
+  // Journal and recommendations
+  const journal = loadJournal();
+
+  const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   let html = '';
 
-  // Header row
-  for (let i=0; i<range.cols; i++) {
+  // Header row (day names)
+  for (let i = 0; i < 7; i++) {
     html += `<div class="cal-header-cell">${DAY_NAMES[i]}</div>`;
   }
 
   // Day cells
-  for (let i=0; i<range.days; i++) {
-    const d = addDays(range.start, i);
+  for (let i = 0; i < days; i++) {
+    const d = addDays(padStart, i);
     const ds = dateStr(d);
     const isToday = isSameDay(d, today);
     const isSelected = calSelectedDate === ds;
-    const otherMonth = range.monthStart && (d < range.monthStart || d > range.monthEnd);
+    const otherMonth = d < monthStart || d > monthEnd;
     const { manual, suggested } = eventsForDate(ds);
 
-    // Build dots
+    // Filter events by tent if not 'all'
+    let filteredManual = manual;
+    if (calFilterTent !== 'all') {
+      filteredManual = manual.filter(e => !e.plantId || resolvePlants().find(p => p.id === e.plantId && p.tent === calFilterTent));
+    }
+
+    // Build dots — show dots for filtered events, journal entry, and suggested
     let dots = '';
     const dotColors = {};
-    manual.forEach(e => {
+    filteredManual.forEach(e => {
       const col = e.customColor || (CAL_TYPE[e.type]?.color) || 'var(--text3)';
-      dotColors[col] = (dotColors[col]||0)+1;
+      dotColors[col] = (dotColors[col] || 0) + 1;
     });
     Object.entries(dotColors).forEach(([col]) => {
       dots += `<div class="cal-dot" style="background:${col}"></div>`;
     });
+
+    // Journal entry indicator (small cyan dot)
+    if (journal[ds]) {
+      dots += `<div class="cal-dot" style="background:var(--cyan);width:5px;height:5px;margin-top:1px"></div>`;
+    }
+
     if (suggested.length) {
       dots += `<div class="cal-dot suggested" style="border-color:var(--amber)"></div>`;
     }
 
-    const total = manual.length + suggested.length;
-    const countBadge = total > 0 ? `<span class="cal-count">${total} event${total>1?'s':''}</span>` : '';
+    const total = filteredManual.length + suggested.length;
+    const countBadge = total > 0 ? `<span class="cal-count">${total}</span>` : '';
 
-    html += `<div class="cal-day${isToday?' today':''}${isSelected?' selected':''}${otherMonth?' other-month':''}"
+    html += `<div class="cal-day${isToday ? ' today' : ''}${isSelected ? ' selected' : ''}${otherMonth ? ' other-month' : ''}"
       onclick="selectCalDay('${ds}')">
-      <div class="cal-day-num${isToday?' today-num':''}">${d.getDate()}${isToday ? '<span style="font-size:0.5rem;background:var(--green);color:var(--bg);padding:1px 4px;border-radius:3px;margin-left:3px">TODAY</span>' : ''}
+      <div class="cal-day-num${isToday ? ' today-num' : ''}">${d.getDate()}${isToday ? '<span style="font-size:0.5rem;background:var(--green);color:var(--bg);padding:1px 4px;border-radius:3px;margin-left:3px">TODAY</span>' : ''}
       </div>
       <div class="cal-dots">${dots}</div>
       ${countBadge}
@@ -7295,72 +7440,118 @@ function renderCalendar() {
 
   grid.innerHTML = html;
 
-  // Re-render day panel if a date is selected
-  if (calSelectedDate) renderDayPanel(calSelectedDate);
+  // Re-render side panel if a date is selected
+  if (calSelectedDate) renderSidePanel(calSelectedDate);
 }
 
-// ── Day detail panel ─────────────────────────────────────────────
+// ── Tent filter ──────────────────────────────────────────────────
+function setCalFilterTent(tentId) {
+  calFilterTent = tentId;
+  renderCalendar();
+}
+
+// ── Side panel ────────────────────────────────────────────────────
 function selectCalDay(ds) {
   calSelectedDate = ds;
-  // Update selected highlight
-  document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
-  event?.target?.closest('.cal-day')?.classList.add('selected');
-  renderDayPanel(ds);
+  renderSidePanel(ds);
 }
 
-function renderDayPanel(ds) {
-  const panel = document.getElementById('cal-day-panel');
-  if (!panel) return;
-  panel.style.display = 'block';
+function closeSidePanel() {
+  calSelectedDate = null;
+  const panel = document.getElementById('cal-side-panel');
+  if (panel) panel.classList.add('cal-side-closed');
+}
+
+function renderSidePanel(ds) {
+  const panel = document.getElementById('cal-side-panel');
+  const inner = document.getElementById('cal-side-inner');
+  if (!panel || !inner) return;
+
+  // Open the panel
+  panel.classList.remove('cal-side-closed');
 
   const d = new Date(ds + 'T12:00:00');
+  const dayLabel = d.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const journal = loadJournal();
+  const journalText = journal[ds] || '';
+
+  // Get recommendations for this date
+  const recs = getAutoRecommendations(ds);
+
+  // Get events for this date
   const { manual, suggested } = eventsForDate(ds);
-  const dayLabel = d.toLocaleDateString('en-CA', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 
+  // Build recommendations HTML
+  let recHTML = '';
+  recs.forEach(rec => {
+    const urgent = rec.urgent ? ' urgent' : '';
+    const type = rec.type === 'harvest' ? ' harvest' : '';
+    recHTML += `<div class="cal-rec-card${urgent}${type}">
+      <div style="font-size:0.75rem;font-weight:500;color:var(--text)">${rec.label}</div>
+      <div style="font-size:0.65rem;color:var(--text2);margin-top:0.2rem">${rec.detail}</div>
+    </div>`;
+  });
+
+  // Build events HTML
   let evHTML = '';
-
-  // Manual events
   manual.forEach(e => {
     const meta = CAL_TYPE[e.type] || CAL_TYPE.note;
     const col = e.customColor || meta.color;
-    const plantName = e.plantId ? (allPlants.find(p=>p.id===e.plantId)?.strain || e.plantId) : '';
-    evHTML += `<div class="cal-event-row${e.completed?' completed-row':''}" onclick="openEditCalEvent('${e.id}')">
+    const plantName = e.plantId ? (allPlants.find(p => p.id === e.plantId)?.strain || e.plantId) : '';
+    evHTML += `<div class="cal-event-row${e.completed ? ' completed-row' : ''}" onclick="openEditCalEvent('${e.id}')">
       <div class="cal-event-dot" style="background:${col}"></div>
       <div style="flex:1">
-        <div style="font-size:0.82rem;color:var(--text);font-weight:500">${meta.icon} ${e.title || meta.label}</div>
-        ${plantName ? `<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">${plantName}</div>` : ''}
-        ${e.notes ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:0.2rem;line-height:1.4">${e.notes}</div>` : ''}
+        <div style="font-size:0.75rem;color:var(--text);font-weight:500">${meta.icon} ${e.title || meta.label}</div>
+        ${plantName ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text3)">${plantName}</div>` : ''}
+        ${e.notes ? `<div style="font-size:0.65rem;color:var(--text2);margin-top:0.15rem;line-height:1.4">${e.notes}</div>` : ''}
       </div>
-      ${e.completed ? '<span style="font-family:var(--mono);font-size:0.55rem;color:var(--green)">✓ done</span>' : ''}
+      ${e.completed ? '<span style="font-family:var(--mono);font-size:0.5rem;color:var(--green)">✓</span>' : ''}
     </div>`;
   });
 
-  // Suggested events
   suggested.forEach(s => {
     const col = s.color || 'var(--amber)';
-    const plantName = s.plantId ? (allPlants.find(p=>p.id===s.plantId)?.strain || s.plantId) : '';
+    const plantName = s.plantId ? (allPlants.find(p => p.id === s.plantId)?.strain || s.plantId) : '';
     evHTML += `<div class="cal-event-row suggested-row" onclick="openConvertSuggested('${s.id}','${ds}')">
       <div class="cal-event-dot suggested-dot" style="border-color:${col}"></div>
       <div style="flex:1">
-        <div style="font-size:0.82rem;color:var(--text2)">${s.icon || '⚡'} ${s.title}</div>
-        ${plantName ? `<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">${plantName}</div>` : ''}
-        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--amber);margin-top:0.15rem">Suggested — click to confirm / edit</div>
+        <div style="font-size:0.75rem;color:var(--text2)">${s.icon || '⚡'} ${s.title}</div>
+        ${plantName ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text3)">${plantName}</div>` : ''}
+        <div style="font-family:var(--mono);font-size:0.5rem;color:var(--amber);margin-top:0.1rem">Suggested</div>
       </div>
     </div>`;
   });
 
-  if (!manual.length && !suggested.length) {
-    evHTML = `<div style="padding:1.5rem;text-align:center;color:var(--text3);font-family:var(--mono);font-size:0.65rem">No events — click + Add Event to log something for this day</div>`;
-  }
-
-  panel.innerHTML = `
-    <div class="card">
-      <div class="flex-between mb-md">
-        <div style="font-size:0.88rem;font-weight:500;color:var(--text)">${dayLabel}</div>
-        <button onclick="openAddCalEvent('${ds}')" class="btn btn-primary" style="font-size:0.6rem;padding:0.3rem 0.65rem">+ Add Event</button>
+  inner.innerHTML = `
+    <div style="padding:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div style="font-size:0.85rem;font-weight:600;color:var(--text)">${dayLabel}</div>
+        <button onclick="closeSidePanel()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;padding:0">✕</button>
       </div>
-      ${evHTML}
-    </div>`;
+
+      <!-- Journal section -->
+      <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:0.5rem">Journal</div>
+        <textarea id="cal-journal-text" style="width:100%;min-height:60px;border:1px solid var(--border2);border-radius:4px;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:0.65rem;padding:0.5rem;box-sizing:border-box;resize:vertical">${journalText}</textarea>
+        <button onclick="saveJournalEntry('${ds}')" class="btn btn-primary" style="font-size:0.55rem;margin-top:0.5rem;width:100%">Save Journal</button>
+      </div>
+
+      <!-- Recommendations section -->
+      ${recs.length ? `<div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+        <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:0.5rem">Recommendations</div>
+        ${recHTML}
+      </div>` : ''}
+
+      <!-- Events section -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3)">Events</div>
+          <button onclick="openAddCalEvent('${ds}')" class="btn btn-primary" style="font-size:0.5rem;padding:0.2rem 0.5rem">+ Add</button>
+        </div>
+        ${evHTML ? evHTML : `<div style="padding:0.75rem;text-align:center;color:var(--text3);font-family:var(--mono);font-size:0.6rem">No events yet</div>`}
+      </div>
+    </div>
+  `;
 }
 
 // ── Add / Edit event modal ────────────────────────────────────────

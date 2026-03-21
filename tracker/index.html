@@ -7812,28 +7812,46 @@ async function authLogout() {
 }
 
 // ── Auth state listener ───────────────────────────────────────────────
+// Only handle SIGNED_IN (magic link click) and SIGNED_OUT here.
+// INITIAL_SESSION and TOKEN_REFRESHED are handled by authInit() to
+// avoid double-pulling on every page load.
 
 _sb.auth.onAuthStateChange(async (event, session) => {
-  if (session) {
-    authShowGate(true); // show loading spinner while syncing
+  if (event === 'SIGNED_IN' && session) {
+    // User just clicked a magic link — pull remote data then show tracker
+    authShowGate(true);
     const reloading = await _pullFromSupabase(session.user.id);
     if (!reloading) authHideGate();
   } else if (event === 'SIGNED_OUT') {
     _userId = null;
     authShowGate(false);
   }
+  // INITIAL_SESSION / TOKEN_REFRESHED: do nothing — authInit handles startup
 });
 
 // ── Init ──────────────────────────────────────────────────────────────
 
 async function authInit() {
-  const { data: { session } } = await _sb.auth.getSession();
-  if (session) {
-    authShowGate(true); // show loading while we sync
-    const reloading = await _pullFromSupabase(session.user.id);
-    if (!reloading) authHideGate();
-  } else {
-    authShowGate(false);
+  // Safety net: never leave the gate stuck for more than 8 seconds
+  const safetyTimer = setTimeout(() => {
+    console.warn('[sync] timeout — forcing gate hide');
+    authHideGate();
+  }, 8000);
+
+  try {
+    const { data: { session } } = await _sb.auth.getSession();
+    if (session) {
+      authShowGate(true);
+      const reloading = await _pullFromSupabase(session.user.id);
+      if (!reloading) authHideGate();
+    } else {
+      authShowGate(false);
+    }
+  } catch (e) {
+    console.warn('[auth] init error:', e);
+    authShowGate(false); // fall back to login screen on any error
+  } finally {
+    clearTimeout(safetyTimer);
   }
 }
 

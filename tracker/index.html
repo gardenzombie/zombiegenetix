@@ -1399,7 +1399,8 @@
       <!-- Loading / syncing panel -->
       <div id="auth-loading-panel" style="display:none;text-align:center;padding:1rem 0">
         <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:#22d3ee;letter-spacing:0.15em;opacity:0.85">Syncing data…</div>
-        <div style="margin-top:0.75rem;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:#6e68a0">Loading your grow data</div>
+        <div id="auth-loading-sub" style="margin-top:0.75rem;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:#6e68a0">Loading your grow data</div>
+        <button id="auth-skip-btn" onclick="authSkipSync()" style="display:none;margin-top:1.25rem;font-family:'Space Mono',monospace;font-size:0.55rem;text-transform:uppercase;letter-spacing:0.1em;padding:0.4rem 1rem;border-radius:4px;border:1px solid #38346e;background:transparent;color:#6e68a0;cursor:pointer">Skip sync &amp; use local data</button>
       </div>
       <!-- Sent confirmation panel -->
       <div id="auth-sent-panel" style="display:none;text-align:center;padding:0.5rem 0">
@@ -8022,12 +8023,32 @@ _sb.auth.onAuthStateChange(async (event, session) => {
 
 // ── Init ──────────────────────────────────────────────────────────────
 
+// Called if user taps "Skip sync" on slow connections
+function authSkipSync() {
+  clearTimeout(_authSafetyTimer);
+  clearTimeout(_authWakeTimer);
+  authHideGate();
+}
+
+let _authSafetyTimer = null;
+let _authWakeTimer   = null;
+
 async function authInit() {
-  // Safety net: never leave the gate stuck for more than 8 seconds
-  const safetyTimer = setTimeout(() => {
+  // After 7 s with no response, warn the user and show a Skip button
+  // (Supabase free tier cold-starts can take 10–20 s)
+  _authWakeTimer = setTimeout(() => {
+    const sub = document.getElementById('auth-loading-sub');
+    const btn = document.getElementById('auth-skip-btn');
+    if (sub) sub.textContent = 'Database waking up — this can take up to 20 s on first load…';
+    if (btn) btn.style.display = '';
+  }, 7000);
+
+  // Hard safety net at 30 s — never leave the screen stuck forever
+  _authSafetyTimer = setTimeout(() => {
     console.warn('[sync] timeout — forcing gate hide');
+    clearTimeout(_authWakeTimer);
     authHideGate();
-  }, 8000);
+  }, 30000);
 
   try {
     const { data: { session } } = await _sb.auth.getSession();
@@ -8040,9 +8061,10 @@ async function authInit() {
     }
   } catch (e) {
     console.warn('[auth] init error:', e);
-    authShowGate(false); // fall back to login screen on any error
+    authShowGate(false);
   } finally {
-    clearTimeout(safetyTimer);
+    clearTimeout(_authSafetyTimer);
+    clearTimeout(_authWakeTimer);
   }
 }
 

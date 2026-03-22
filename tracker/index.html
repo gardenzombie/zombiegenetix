@@ -7816,6 +7816,7 @@ const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let _userId    = null;
 let _syncTimer = null;
+let _isPulling = false; // mutex — prevent concurrent pulls
 
 // Collect all growtracker-* keys from localStorage into one plain object
 function _gatherLocal() {
@@ -7860,51 +7861,63 @@ localStorage.setItem = function (key, value) {
   if (key.startsWith(SYNC_PREFIX) && !SYNC_EXCLUDE.has(key)) _scheduleSync();
 };
 
-// Pull remote data → write to localStorage → reload if anything changed
+// Pull remote data → write to localStorage → navigate if anything changed
 async function _pullFromSupabase(userId) {
-  _userId = userId;
+  // Mutex: only one pull at a time — prevents concurrent auth events causing
+  // interleaved authShowGate(true)/authHideGate() calls (the phone flash bug)
+  if (_isPulling) return false;
+  _isPulling = true;
 
-  // If we already reloaded once this session after a pull, skip
-  if (sessionStorage.getItem('zg-pulled') === '1') {
-    sessionStorage.removeItem('zg-pulled');
-    _updateSyncBadge('saved');
-    return false; // no reload needed
-  }
+  try {
+    _userId = userId;
 
-  const { data: row, error } = await _sb
-    .from('tracker_data')
-    .select('data')
-    .eq('user_id', userId)
-    .maybeSingle();
+    // If we already navigated once this session after a pull, skip
+    if (sessionStorage.getItem('zg-pulled') === '1') {
+      sessionStorage.removeItem('zg-pulled');
+      _updateSyncBadge('saved');
+      return false; // no reload needed
+    }
 
-  if (error) { console.warn('[sync] pull failed:', error.message); return false; }
+    const { data: row, error } = await _sb
+      .from('tracker_data')
+      .select('data')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-  // No remote data yet → push current localStorage up (first-time migration)
-  if (!row || !row.data || Object.keys(row.data).length === 0) {
-    await _pushToSupabase();
+    if (error) { console.warn('[sync] pull failed:', error.message); return false; }
+
+    // No remote data yet → push current localStorage up (first-time migration)
+    if (!row || !row.data || Object.keys(row.data).length === 0) {
+      await _pushToSupabase();
+      _updateSyncBadge('saved');
+      return false;
+    }
+
+    // Write remote data into localStorage using the raw setter (bypass interceptor)
+    let changed = false;
+    for (const [key, value] of Object.entries(row.data)) {
+      if (!key.startsWith(SYNC_PREFIX) || SYNC_EXCLUDE.has(key)) continue;
+      const incoming = JSON.stringify(value);
+      if (localStorage.getItem(key) !== incoming) {
+        _lsSet(key, incoming);
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      sessionStorage.setItem('zg-pulled', '1');
+      // Use replace() instead of reload() — strips the URL hash so Supabase
+      // does NOT re-detect the magic link token on the reloaded page, which
+      // would re-fire SIGNED_IN and cause the concurrent show/hide flash loop.
+      window.location.replace(window.location.pathname + window.location.search);
+      return true;
+    }
+
     _updateSyncBadge('saved');
     return false;
+  } finally {
+    _isPulling = false;
   }
-
-  // Write remote data into localStorage using the raw setter (bypass interceptor)
-  let changed = false;
-  for (const [key, value] of Object.entries(row.data)) {
-    if (!key.startsWith(SYNC_PREFIX) || SYNC_EXCLUDE.has(key)) continue;
-    const incoming = JSON.stringify(value);
-    if (localStorage.getItem(key) !== incoming) {
-      _lsSet(key, incoming);
-      changed = true;
-    }
-  }
-
-  if (changed) {
-    sessionStorage.setItem('zg-pulled', '1');
-    location.reload(); // reload so in-memory variables pick up new data
-    return true;
-  }
-
-  _updateSyncBadge('saved');
-  return false;
 }
 
 // Update the sidebar sync indicator

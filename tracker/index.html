@@ -1550,7 +1550,10 @@
   <div class="section-header flex-between">
     <div>
       <div class="section-title">Grow Spaces</div>
-      <div class="section-desc">Your 4 active tent environments</div>
+      <div class="section-desc" id="tents-desc">Your active tent environments</div>
+    </div>
+    <div>
+      <button class="btn btn-primary" onclick="openCreateTent()">+ Add Tent</button>
     </div>
   </div>
   <div class="grid-2" id="tents-grid"></div>
@@ -2634,6 +2637,82 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-edit-tent')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditTent()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE TENT MODAL -->
+<div class="modal-overlay" id="modal-create-tent">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Create New Tent</div>
+      <button class="modal-close" onclick="closeModal('modal-create-tent')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tent Name</label>
+        <input type="text" class="form-input" id="create-tent-name" placeholder="e.g. Drying Tent">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Size</label>
+          <input type="text" class="form-input" id="create-tent-size" placeholder="e.g. 4×4×6.5 ft">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Light Schedule</label>
+          <input type="text" class="form-input" id="create-tent-schedule" placeholder="e.g. 18/6">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lights</label>
+        <input type="text" class="form-input" id="create-tent-lights" placeholder="e.g. 2× LED 640W combined">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Stage</label>
+          <select class="form-input" id="create-tent-stage">
+            <option value="veg">Veg</option>
+            <option value="flower">Flower</option>
+            <option value="clone">Clone / Prop</option>
+            <option value="dry">Drying</option>
+            <option value="cure">Curing</option>
+            <option value="mother">Mother</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stage Label</label>
+          <input type="text" class="form-input" id="create-tent-stagename" placeholder="e.g. Veg Wk 2">
+        </div>
+      </div>
+      <div class="form-label" style="margin-bottom:0.5rem;margin-top:0.25rem;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)">Environment Targets</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Temp</label>
+          <input type="text" class="form-input" id="create-tent-temp" placeholder="e.g. 22-26 C">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Humidity (RH)</label>
+          <input type="text" class="form-input" id="create-tent-rh" placeholder="e.g. 50-60%">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">VPD</label>
+          <input type="text" class="form-input" id="create-tent-vpd" placeholder="e.g. 1.0-1.4 kPa">
+        </div>
+        <div class="form-group">
+          <label class="form-label">eDLI</label>
+          <input type="text" class="form-input" id="create-tent-edli" placeholder="e.g. 25-40 mol/m2/day">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="create-tent-notes" rows="3" style="resize:vertical;min-height:4rem" placeholder="Current conditions, reminders, observations..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-create-tent')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewTent()">Create Tent</button>
     </div>
   </div>
 </div>
@@ -3937,14 +4016,26 @@ function updateSidebarBadges() {
 
 function resolveTents() {
   const overrides = JSON.parse(localStorage.getItem('growtracker-tent-overrides') || '{}');
-  return TENTS.map(t => {
+  const customTents = JSON.parse(localStorage.getItem('growtracker-custom-tents') || '[]');
+  const baseTents = TENTS.map(t => {
     const ov = overrides[t.id] || {};
     return { ...t, ...ov, env: { ...t.env, ...(ov.env || {}) } };
   });
+  const resolvedCustom = customTents.map(t => {
+    const ov = overrides[t.id] || {};
+    return { ...t, ...ov, env: { ...(t.env || {}), ...(ov.env || {}) }, _custom: true };
+  });
+  return [...baseTents, ...resolvedCustom];
 }
 function tentName(id) {
   const overrides = JSON.parse(localStorage.getItem('growtracker-tent-overrides') || '{}');
-  return overrides[id]?.name || TENTS.find(t => t.id === id)?.name || id;
+  if (overrides[id]?.name) return overrides[id].name;
+  const base = TENTS.find(t => t.id === id);
+  if (base) return base.name;
+  const customTents = JSON.parse(localStorage.getItem('growtracker-custom-tents') || '[]');
+  const custom = customTents.find(t => t.id === id);
+  if (custom) return custom.name;
+  return id;
 }
 function formatDate(d) {
   return new Date(d).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -4339,12 +4430,97 @@ function saveEditTent() {
   refreshAllActivePages();
 }
 
+function openCreateTent() {
+  document.getElementById('create-tent-name').value = '';
+  document.getElementById('create-tent-size').value = '';
+  document.getElementById('create-tent-schedule').value = '18/6';
+  document.getElementById('create-tent-lights').value = '';
+  document.getElementById('create-tent-stage').value = 'veg';
+  document.getElementById('create-tent-stagename').value = '';
+  document.getElementById('create-tent-temp').value = '';
+  document.getElementById('create-tent-rh').value = '';
+  document.getElementById('create-tent-vpd').value = '';
+  document.getElementById('create-tent-edli').value = '';
+  document.getElementById('create-tent-notes').value = '';
+  openModal('modal-create-tent');
+}
+
+function saveNewTent() {
+  const name = document.getElementById('create-tent-name').value.trim();
+  if (!name) { showToast('error', '!', 'Tent name is required'); return; }
+
+  const customTents = JSON.parse(localStorage.getItem('growtracker-custom-tents') || '[]');
+  const stage = document.getElementById('create-tent-stage').value;
+  const stageNames = { veg: 'Veg', flower: 'Flower', clone: 'Clone / Prop', dry: 'Drying', cure: 'Curing', mother: 'Mother' };
+
+  const newTent = {
+    id:        'tc' + Date.now(),
+    name:      name,
+    size:      document.getElementById('create-tent-size').value.trim(),
+    lights:    document.getElementById('create-tent-lights').value.trim(),
+    schedule:  document.getElementById('create-tent-schedule').value.trim(),
+    stage:     stage,
+    stageName: document.getElementById('create-tent-stagename').value.trim() || stageNames[stage] || stage,
+    env: {
+      temp: document.getElementById('create-tent-temp').value.trim(),
+      rh:   document.getElementById('create-tent-rh').value.trim(),
+      vpd:  document.getElementById('create-tent-vpd').value.trim(),
+      edli: document.getElementById('create-tent-edli').value.trim(),
+    },
+    notes:   document.getElementById('create-tent-notes').value.trim(),
+    _custom: true,
+  };
+
+  customTents.push(newTent);
+  localStorage.setItem('growtracker-custom-tents', JSON.stringify(customTents));
+  closeModal('modal-create-tent');
+  showToast('success', '✓', `${name} created`);
+  refreshAllActivePages();
+}
+
+function deleteCustomTent(tentId) {
+  const tent = resolveTents().find(t => t.id === tentId);
+  if (!tent) return;
+  if (!confirm(`Delete "${tent.name}"? Plants/clones assigned to it will become unassigned.`)) return;
+
+  // Remove from custom tents
+  let customTents = JSON.parse(localStorage.getItem('growtracker-custom-tents') || '[]');
+  customTents = customTents.filter(t => t.id !== tentId);
+  localStorage.setItem('growtracker-custom-tents', JSON.stringify(customTents));
+
+  // Remove any overrides for this tent
+  const overrides = JSON.parse(localStorage.getItem('growtracker-tent-overrides') || '{}');
+  if (overrides[tentId]) {
+    delete overrides[tentId];
+    localStorage.setItem('growtracker-tent-overrides', JSON.stringify(overrides));
+  }
+
+  // Unassign any plants/clones from this tent
+  const cp = JSON.parse(localStorage.getItem('growtracker-custom-plants') || '[]');
+  cp.forEach(p => { if (p.tent === tentId) p.tent = ''; });
+  localStorage.setItem('growtracker-custom-plants', JSON.stringify(cp));
+
+  const cl = JSON.parse(localStorage.getItem('growtracker-clones') || '[]');
+  cl.forEach(c => { if (c.tent === tentId) c.tent = ''; });
+  localStorage.setItem('growtracker-clones', JSON.stringify(cl));
+
+  showToast('success', '✓', `${tent.name} deleted`);
+  refreshAllActivePages();
+}
+
 function renderTents() {
   allPlants = resolvePlants();
+  const allTents = resolveTents();
   const grid = document.getElementById('tents-grid');
-  grid.innerHTML = resolveTents().map(tent => {
+  const descEl = document.getElementById('tents-desc');
+  if (descEl) descEl.textContent = `Your ${allTents.length} active tent environment${allTents.length !== 1 ? 's' : ''}`;
+  grid.innerHTML = allTents.map(tent => {
     const plants = allPlants.filter(p => p.tent === tent.id);
     const tentClones = clones.filter(c => !c._hidden && c.tent === tent.id);
+    const deleteBtn = tent._custom ? `<button onclick="deleteCustomTent('${tent.id}')"
+            style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:3px;border:1px solid rgba(248,113,113,0.2);background:transparent;color:var(--red);cursor:pointer;white-space:nowrap;opacity:0.7"
+            onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"
+            title="Delete this tent">✕ Del</button>` : '';
     return `
     <div class="tent-card">
       <div class="tent-header">
@@ -4359,6 +4535,7 @@ function renderTents() {
             onmouseover="this.style.color='var(--cyan)';this.style.borderColor='rgba(34,211,238,0.4)'"
             onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border2)'"
             title="Edit tent settings">✎ Edit</button>
+          ${deleteBtn}
         </div>
       </div>
       <div class="tent-body">

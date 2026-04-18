@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Genetics — Zombie Genetix</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Unbounded:wght@300;400;600;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg:#1a1742; --bg2:#201e50; --bg3:#282460;
@@ -161,6 +162,17 @@
   .footer-left,.footer-right{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
   .footer-right a{color:var(--text3);text-decoration:none}.footer-right a:hover{color:var(--cyan);text-shadow:0 0 8px rgba(34,211,238,0.4)}
 
+  /* EXPORT ROW */
+  .export-row{display:flex;align-items:center;gap:0.75rem;margin-bottom:2.5rem;flex-wrap:wrap}
+  .export-label{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text3)}
+  .export-btn{
+    font-family:var(--mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;
+    padding:0.35rem 0.85rem;border:1px solid var(--border2);background:transparent;
+    color:var(--text2);cursor:pointer;border-radius:1px;transition:all 0.18s;white-space:nowrap;
+  }
+  .export-btn:hover{border-color:rgba(34,211,238,0.4);color:var(--cyan);box-shadow:0 0 8px rgba(34,211,238,0.08)}
+  .export-btn:active{transform:translateY(1px)}
+
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   @media(max-width:680px){.page-wrap{padding:6rem 1.25rem 4rem}.filter-row{gap:0.5rem}.stat-bar{gap:1.25rem}}
 </style>
@@ -182,7 +194,7 @@
   <div class="page-eyebrow">Seed Collection · Documented</div>
   <h1 class="page-heading">Genetics<br>Showcase</h1>
   <p class="page-sub">
-    Full seed library from the Zombie Genetix collection — F1 originals, curated breeders, and documented crosses. All cultivation is personal and conducted under a Health Canada ACMPR licence. No seeds or plants are available for sale or trade.
+    Full seed library from the Zombie Genetix collection — F1 originals, curated breeders, and documented crosses. No seeds or plants are available for sale or trade.
   </p>
 
   <div class="stat-bar" id="statBar">
@@ -225,11 +237,19 @@
     </div>
   </div>
 
+  <div class="export-row">
+    <span class="export-label">Export:</span>
+    <button class="export-btn" id="exportCsvFiltered">CSV (filtered)</button>
+    <button class="export-btn" id="exportCsvAll">CSV (all)</button>
+    <button class="export-btn" id="exportXlsxFiltered">XLSX (filtered)</button>
+    <button class="export-btn" id="exportXlsxAll">XLSX (all)</button>
+  </div>
+
   <div class="strain-grid" id="strainGrid"></div>
 </div>
 
 <footer>
-  <div class="footer-left">© 2025 Zombie Genetix · Carleton Place, ON · No sales · HC Licensed</div>
+  <div class="footer-left">© 2025 Zombie Genetix · No sales</div>
   <div class="footer-right">
     <a href="/">Home</a> &nbsp;·&nbsp;
     <a href="/tracker/">Grow Tracker</a>
@@ -368,6 +388,68 @@ document.getElementById('searchInput').addEventListener('input', e => {
 
 // Initial render
 filterAndRender();
+
+// ── EXPORT ──
+const EXPORT_HEADERS = ['Breeder','Strain','Type','Sex','THC/CBD','Hybrid Type','Hybrid Detail','Lineage','Flower Time','Notes'];
+
+function strainsToRows(strains) {
+  return strains.map(s => [
+    s.breeder, s.strain, s.type, s.sex, s.thcCbd,
+    s.hybridType, s.hybridDetail, s.lineage, s.flowerTime, s.notes
+  ]);
+}
+
+function getFilteredStrains() {
+  const q = searchQuery.toLowerCase().trim();
+  return STRAINS.filter(s => {
+    if (activeType !== 'all' && s.type !== activeType) return false;
+    if (activeSex !== 'all' && s.sex !== activeSex) return false;
+    if (activeHybrid !== 'all' && s.hybridType !== activeHybrid) return false;
+    if (activeBreeder !== 'all' && s.breeder !== activeBreeder) return false;
+    if (q) {
+      const hay = [s.strain, s.breeder, s.lineage, s.notes, s.thcCbd, s.hybridDetail].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportCSV(strains, filename) {
+  const csvCell = v => {
+    const s = (v == null) ? '' : String(v);
+    return (s.includes(',') || s.includes('"') || s.includes('\n'))
+      ? '"' + s.replace(/"/g, '""') + '"'
+      : s;
+  };
+  const lines = [EXPORT_HEADERS.map(csvCell).join(',')];
+  strainsToRows(strains).forEach(row => lines.push(row.map(csvCell).join(',')));
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blob, filename);
+}
+
+function exportXLSX(strains, filename) {
+  const data = [EXPORT_HEADERS, ...strainsToRows(strains)];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Genetics');
+  XLSX.writeFile(wb, filename);
+}
+
+const dateStr = () => new Date().toISOString().split('T')[0];
+
+document.getElementById('exportCsvFiltered').addEventListener('click', () => exportCSV(getFilteredStrains(), `zombie-genetix-genetics-filtered-${dateStr()}.csv`));
+document.getElementById('exportCsvAll').addEventListener('click', () => exportCSV(STRAINS, `zombie-genetix-genetics-all-${dateStr()}.csv`));
+document.getElementById('exportXlsxFiltered').addEventListener('click', () => exportXLSX(getFilteredStrains(), `zombie-genetix-genetics-filtered-${dateStr()}.xlsx`));
+document.getElementById('exportXlsxAll').addEventListener('click', () => exportXLSX(STRAINS, `zombie-genetix-genetics-all-${dateStr()}.xlsx`));
 </script>
 </body>
 </html>

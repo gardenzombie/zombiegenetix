@@ -6,33 +6,29 @@
 <title>Zombie Genetix — Craft Cannabis Genetics</title>
 <meta name="description" content="Craft cannabis genetics from Zombie Genetix. F1 crosses, CBD-dominant strains, and living soil cultivation.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@300;400;600;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@300;400;600;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:          #1a1742;
-    --bg2:         #201e50;
-    --bg3:         #282460;
-    --card:        #1e1b4c;
-    --border:      #38346e;
-    --border2:     #4a4688;
-    --cyan:        #22d3ee;
-    --cyan2:       #06b6d4;
-    --cyan3:       #0891b2;
-    --cyan-dim:    #0e1a3a;
-    --cyan-glow:   rgba(34,211,238,0.12);
-    --magenta:     #e879f9;
-    --magenta2:    #d946ef;
-    --magenta-dim: #1f0728;
-    --magenta-glow:rgba(232,121,249,0.10);
-    --purple:      #a78bfa;
-    --amber:       #fbbf24;
-    --red:         #f87171;
-    --text:        #f0eeff;
-    --text2:       #b8b0d8;
-    --text3:       #6e68a0;
-    --mono:        'Space Mono', monospace;
-    --head:        'Unbounded', sans-serif;
-    --body:        'DM Sans', sans-serif;
+    --bg:      #0f1117;
+    --bg2:     #14171f;
+    --bg3:     #1a1e28;
+    --card:    #171b24;
+    --border:  #252b38;
+    --border2: #2f3747;
+    --teal:    #52c4a0;
+    --teal2:   #3da882;
+    --teal-dim:rgba(82,196,160,0.08);
+    --amber:   #d4a554;
+    --amber2:  #b88a38;
+    --amber-dim:rgba(212,165,84,0.08);
+    --purple:  #8b7ec4;
+    --text:    #edeae3;
+    --text2:   #8e95a3;
+    --text3:   #4e5564;
+    --mono:    'Space Mono', monospace;
+    --head:    'Unbounded', sans-serif;
+    --body:    'DM Sans', sans-serif;
+    --serif:   'DM Serif Display', serif;
   }
 
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,34 +53,6 @@
     opacity: 0.45;
   }
 
-  /* ── SCANLINES ── */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 3px,
-      rgba(0,0,0,0.04) 3px,
-      rgba(0,0,0,0.04) 4px
-    );
-    pointer-events: none;
-    z-index: 998;
-  }
-
-  /* ── AMBIENT GLOWS ── */
-  .glow-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(130px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .glow-orb.g1 { width: 700px; height: 700px; background: var(--cyan);    top: -250px; left: -150px; opacity: 0.14; }
-  .glow-orb.g2 { width: 500px; height: 500px; background: var(--magenta); bottom: 5%;  right: -150px; opacity: 0.13; }
-  .glow-orb.g3 { width: 350px; height: 350px; background: var(--purple);  top: 45%;   left: 35%;  opacity: 0.07; }
-
   /* ── NAV ── */
   nav {
     position: fixed;
@@ -95,10 +63,9 @@
     justify-content: space-between;
     padding: 0 3rem;
     height: 64px;
-    background: rgba(26,23,66,0.85);
+    background: rgba(15,17,23,0.92);
     backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(34,211,238,0.15);
-    box-shadow: 0 1px 0 0 rgba(34,211,238,0.05), 0 4px 24px rgba(0,0,0,0.4);
+    border-bottom: 1px solid var(--border);
   }
 
   .nav-wordmark {
@@ -112,10 +79,9 @@
     font-weight: 900;
     font-size: 0.7rem;
     letter-spacing: 0.25em;
-    color: var(--cyan);
+    color: var(--teal);
     text-transform: uppercase;
     line-height: 1;
-    text-shadow: 0 0 12px rgba(34,211,238,0.5);
   }
   .nav-genetix {
     font-family: var(--head);
@@ -140,32 +106,27 @@
     text-transform: uppercase;
     color: var(--text3);
     text-decoration: none;
-    transition: color 0.2s, text-shadow 0.2s;
+    transition: color 0.2s;
   }
-  .nav-links a:hover {
-    color: var(--cyan);
-    text-shadow: 0 0 8px rgba(34,211,238,0.4);
-  }
+  .nav-links a:hover { color: var(--teal); }
 
   .nav-pill {
     font-family: var(--mono);
     font-size: 0.6rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--cyan);
+    color: var(--teal);
     background: transparent;
     padding: 0.4rem 1rem;
-    border: 1px solid rgba(34,211,238,0.4);
+    border: 1px solid rgba(82,196,160,0.35);
     border-radius: 2px;
     text-decoration: none;
     transition: all 0.2s;
     font-weight: 700;
-    box-shadow: 0 0 10px rgba(34,211,238,0.1), inset 0 0 10px rgba(34,211,238,0.04);
   }
   .nav-pill:hover {
-    background: rgba(34,211,238,0.08);
-    border-color: rgba(34,211,238,0.7);
-    box-shadow: 0 0 18px rgba(34,211,238,0.2), inset 0 0 12px rgba(34,211,238,0.06);
+    background: rgba(82,196,160,0.08);
+    border-color: rgba(82,196,160,0.6);
     transform: translateY(-1px);
   }
 
@@ -191,24 +152,22 @@
     right: -30%;
     height: 42%;
     background-image:
-      linear-gradient(rgba(34,211,238,0.07) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(34,211,238,0.07) 1px, transparent 1px);
+      linear-gradient(rgba(82,196,160,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(82,196,160,0.05) 1px, transparent 1px);
     background-size: 60px 60px;
     transform: perspective(600px) rotateX(60deg);
     transform-origin: bottom center;
-    mask-image: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 75%);
-    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 75%);
+    mask-image: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 75%);
     pointer-events: none;
     z-index: 0;
   }
-  /* Horizon line glow */
   .hero-grid::after {
     content: '';
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(34,211,238,0.3) 30%, rgba(232,121,249,0.3) 70%, transparent);
-    filter: blur(1px);
+    background: linear-gradient(90deg, transparent, rgba(82,196,160,0.2) 40%, rgba(212,165,84,0.2) 60%, transparent);
   }
 
   .hero-eyebrow {
@@ -246,9 +205,6 @@
     line-height: 0.9;
     color: var(--text);
     text-transform: uppercase;
-    text-shadow:
-      0 0 40px rgba(34,211,238,0.12),
-      0 0 80px rgba(34,211,238,0.06);
   }
   .hero-genetix-wrap {
     display: flex;
@@ -263,9 +219,8 @@
     font-size: clamp(2rem, 7vw, 5.5rem);
     letter-spacing: 0.18em;
     line-height: 1;
-    color: var(--cyan);
+    color: var(--teal);
     text-transform: uppercase;
-    text-shadow: 0 0 20px rgba(34,211,238,0.35), 0 0 60px rgba(34,211,238,0.15);
   }
 
   .genetix-svg {
@@ -273,7 +228,6 @@
     display: inline-block;
     vertical-align: baseline;
     margin-left: -0.05em;
-    filter: drop-shadow(0 0 6px rgba(34,211,238,0.5));
   }
 
   .hero-tagline {
@@ -337,21 +291,21 @@
     width: 2px; height: 40px;
     transition: height 0.3s ease;
   }
-  .entry-card.public::before  { background: var(--cyan); }
-  .entry-card.public::after   { background: var(--cyan); }
-  .entry-card.private::before { background: var(--magenta); }
-  .entry-card.private::after  { background: var(--magenta); }
+  .entry-card.public::before  { background: var(--teal); }
+  .entry-card.public::after   { background: var(--teal); }
+  .entry-card.private::before { background: var(--amber); }
+  .entry-card.private::after  { background: var(--amber); }
   .entry-card:hover::before   { width: 80px; }
   .entry-card:hover::after    { height: 80px; }
 
   .entry-card.public:hover {
-    border-color: rgba(34,211,238,0.35);
-    box-shadow: 0 0 24px rgba(34,211,238,0.08), inset 0 0 24px rgba(34,211,238,0.03);
+    border-color: rgba(82,196,160,0.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     transform: translateY(-3px);
   }
   .entry-card.private:hover {
-    border-color: rgba(232,121,249,0.35);
-    box-shadow: 0 0 24px rgba(232,121,249,0.08), inset 0 0 24px rgba(232,121,249,0.03);
+    border-color: rgba(212,165,84,0.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     transform: translateY(-3px);
   }
 
@@ -364,8 +318,8 @@
     justify-content: center;
     font-size: 1.2rem;
   }
-  .entry-card.public  .card-icon { background: rgba(34,211,238,0.08);  border: 1px solid rgba(34,211,238,0.15); }
-  .entry-card.private .card-icon { background: rgba(232,121,249,0.08); border: 1px solid rgba(232,121,249,0.15); }
+  .entry-card.public  .card-icon { background: rgba(82,196,160,0.08);  border: 1px solid rgba(82,196,160,0.15); }
+  .entry-card.private .card-icon { background: rgba(212,165,84,0.08); border: 1px solid rgba(212,165,84,0.15); }
 
   .card-label {
     font-family: var(--mono);
@@ -373,8 +327,8 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
   }
-  .entry-card.public  .card-label { color: var(--cyan); }
-  .entry-card.private .card-label { color: var(--magenta); }
+  .entry-card.public  .card-label { color: var(--teal); }
+  .entry-card.private .card-label { color: var(--amber); }
 
   .card-title {
     font-family: var(--head);
@@ -402,8 +356,8 @@
     gap: 0.5rem;
     transition: gap 0.2s;
   }
-  .entry-card.public  .card-arrow { color: var(--cyan); }
-  .entry-card.private .card-arrow { color: var(--magenta); }
+  .entry-card.public  .card-arrow { color: var(--teal); }
+  .entry-card.private .card-arrow { color: var(--amber); }
   .entry-card:hover .card-arrow { gap: 0.85rem; }
 
   /* ── PROVENANCE STRIP ── */
@@ -434,9 +388,8 @@
     font-family: var(--head);
     font-weight: 600;
     font-size: 1.4rem;
-    color: var(--cyan);
+    color: var(--teal);
     letter-spacing: -0.02em;
-    text-shadow: 0 0 16px rgba(34,211,238,0.4);
   }
   .prov-label {
     font-family: var(--mono);
@@ -465,9 +418,8 @@
     font-size: 0.55rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--magenta);
+    color: var(--teal);
     margin-bottom: 1rem;
-    text-shadow: 0 0 10px rgba(232,121,249,0.3);
   }
   .about-heading {
     font-family: var(--head);
@@ -496,14 +448,14 @@
     padding: 1rem 1.25rem;
     background: var(--card);
     border: 1px solid var(--border);
-    border-left: 2px solid var(--cyan);
+    border-left: 2px solid var(--teal);
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .about-tag:hover {
-    border-left-color: var(--magenta);
-    box-shadow: -2px 0 12px rgba(232,121,249,0.1);
+    border-left-color: var(--amber);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   }
-  .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); flex-shrink: 0; box-shadow: 0 0 6px rgba(34,211,238,0.6); }
+  .tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
   .tag-text { font-size: 0.82rem; color: var(--text2); line-height: 1.5; }
   .tag-text strong { color: var(--text); font-weight: 500; }
 
@@ -533,13 +485,13 @@
     text-transform: uppercase;
     color: var(--text3);
   }
-  .footer-right a { color: var(--text3); text-decoration: none; transition: color 0.2s, text-shadow 0.2s; }
-  .footer-right a:hover { color: var(--cyan); text-shadow: 0 0 8px rgba(34,211,238,0.4); }
+  .footer-right a { color: var(--text3); text-decoration: none; transition: color 0.2s; }
+  .footer-right a:hover { color: var(--teal); }
 
   /* ── LEGAL BANNER ── */
   .legal-banner {
-    background: rgba(232,121,249,0.03);
-    border-top: 1px solid rgba(232,121,249,0.1);
+    background: rgba(82,196,160,0.02);
+    border-top: 1px solid var(--border);
     padding: 0.75rem 3rem;
     text-align: center;
   }
@@ -547,7 +499,7 @@
     font-family: var(--mono);
     font-size: 0.55rem;
     letter-spacing: 0.08em;
-    color: rgba(232,121,249,0.35);
+    color: var(--text3);
     line-height: 1.6;
   }
 
@@ -560,11 +512,6 @@
 </head>
 <body>
 
-<!-- Ambient glows -->
-<div class="glow-orb g1"></div>
-<div class="glow-orb g2"></div>
-<div class="glow-orb g3"></div>
-
 <!-- ── NAV ── -->
 <nav>
   <a class="nav-wordmark" href="/">
@@ -573,8 +520,8 @@
   </a>
   <ul class="nav-links">
     <li><a href="/genetics/">Genetics</a></li>
+    <li><a href="/gallery/">Gallery</a></li>
     <li><a href="#about">About</a></li>
-    <li><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></li>
   </ul>
   <a class="nav-pill" href="/tracker/">Grow Tracker ↗</a>
 </nav>
@@ -590,11 +537,11 @@
     <div class="hero-genetix-wrap">
       <span class="hero-genetix">Genet</span>
       <svg class="genetix-svg" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="ix">
-        <line x1="18" y1="22" x2="18" y2="72" stroke="#22d3ee" stroke-width="7" stroke-linecap="round"/>
-        <circle cx="18" cy="10" r="6" fill="#22d3ee"/>
-        <line x1="21" y1="15" x2="58" y2="52" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
-        <line x1="52" y1="22" x2="88" y2="72" stroke="#22d3ee" stroke-width="7" stroke-linecap="round"/>
-        <line x1="88" y1="22" x2="52" y2="72" stroke="#22d3ee" stroke-width="7" stroke-linecap="round"/>
+        <line x1="18" y1="22" x2="18" y2="72" stroke="#52c4a0" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="18" cy="10" r="6" fill="#52c4a0"/>
+        <line x1="21" y1="15" x2="58" y2="52" stroke="#52c4a0" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
+        <line x1="52" y1="22" x2="88" y2="72" stroke="#52c4a0" stroke-width="7" stroke-linecap="round"/>
+        <line x1="88" y1="22" x2="52" y2="72" stroke="#52c4a0" stroke-width="7" stroke-linecap="round"/>
       </svg>
     </div>
   </div>
@@ -674,6 +621,7 @@
   <div class="footer-left">© 2025 Zombie Genetix</div>
   <div class="footer-right">
     <a href="/genetics/">Genetics</a> &nbsp;·&nbsp;
+    <a href="/gallery/">Gallery</a> &nbsp;·&nbsp;
     <a href="/tracker/">Grow Tracker</a> &nbsp;·&nbsp;
     <a href="#about">About</a>
   </div>

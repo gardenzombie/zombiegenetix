@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Zombie Genetix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700&family=Unbounded:wght@300;400;600;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --bg:#0f1117; --bg2:#14171f; --bg3:#1a1e28;
+    --card:#171b24; --border:#252b38; --border2:#2f3747;
+    --teal:#52c4a0; --teal2:#3da882; --teal-dim:rgba(82,196,160,0.08);
+    --amber:#d4a554; --amber-dim:rgba(212,165,84,0.08);
+    --text:#edeae3; --text2:#8e95a3; --text3:#4e5564;
+    --mono:'Space Mono',monospace; --head:'Unbounded',sans-serif;
+    --body:'DM Sans',sans-serif; --serif:'DM Serif Display',serif;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:0.4}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;height:64px;background:rgba(15,17,23,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+  .nav-wordmark{text-decoration:none;display:flex;flex-direction:column;gap:0}
+  .nav-zombie{font-family:var(--head);font-weight:900;font-size:0.7rem;letter-spacing:0.25em;color:var(--teal);text-transform:uppercase;line-height:1}
+  .nav-genetix{font-family:var(--head);font-weight:300;font-size:0.6rem;letter-spacing:0.4em;color:var(--text3);text-transform:uppercase;line-height:1}
+  .nav-right{display:flex;align-items:center;gap:2rem}
+  .nav-back,.nav-link{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color 0.2s}
+  .nav-back:hover,.nav-link:hover{color:var(--teal)}
+  .nav-pill{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);background:transparent;padding:0.4rem 1rem;border:1px solid rgba(82,196,160,0.35);border-radius:2px;text-decoration:none;transition:all 0.2s;font-weight:700}
+  .nav-pill:hover{background:rgba(82,196,160,0.08);border-color:rgba(82,196,160,0.6)}
+  @media(max-width:600px){nav{padding:0 1.5rem}.nav-right .nav-pill,.nav-right .nav-link{display:none}}
+
+  /* PAGE */
+  .page-wrap{padding:8rem 2rem 5rem;max-width:1340px;margin:0 auto}
+  .page-eyebrow{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;opacity:0;animation:fadeUp 0.7s ease 0.1s forwards}
+  .page-heading{font-family:var(--head);font-weight:900;font-size:clamp(2rem,6vw,4rem);letter-spacing:-0.02em;color:var(--text);margin-bottom:1rem;line-height:1.05;opacity:0;animation:fadeUp 0.8s ease 0.2s forwards}
+  .page-sub{font-size:0.88rem;color:var(--text2);line-height:1.8;max-width:580px;margin-bottom:2.5rem;opacity:0;animation:fadeUp 0.8s ease 0.3s forwards}
+
+  /* FILTER ROW */
+  .filter-bar{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem;opacity:0;animation:fadeUp 0.8s ease 0.4s forwards}
+  .tag-btn{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.3rem 0.7rem;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:1px;transition:all 0.18s;white-space:nowrap}
+  .tag-btn:hover{color:var(--text2)}
+  .tag-btn.active{background:var(--teal-dim);border-color:rgba(82,196,160,0.35);color:var(--teal)}
+
+  /* MASONRY GRID */
+  .gallery-grid{
+    columns:3 280px;
+    gap:12px;
+    opacity:0;animation:fadeUp 0.9s ease 0.5s forwards;
+  }
+  .gallery-item{
+    break-inside:avoid;
+    margin-bottom:12px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    border-radius:2px;
+    border:1px solid var(--border);
+    background:var(--card);
+    transition:border-color 0.2s,transform 0.25s,box-shadow 0.25s;
+  }
+  .gallery-item:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+  .gallery-item img{width:100%;display:block;transition:transform 0.45s ease}
+  .gallery-item:hover img{transform:scale(1.03)}
+  .gallery-caption{
+    padding:0.85rem 1rem;
+  }
+  .cap-strain{font-family:var(--serif);font-size:0.9rem;color:var(--text);line-height:1.3}
+  .cap-meta{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-top:0.3rem}
+  .cap-tags{display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.5rem}
+  .cap-tag{font-family:var(--mono);font-size:0.4rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.15rem 0.4rem;border:1px solid var(--border2);border-radius:1px;color:var(--text3)}
+
+  /* EMPTY / LOADING */
+  .gallery-msg{padding:5rem 2rem;text-align:center;font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3)}
+
+  /* LIGHTBOX */
+  .lb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;align-items:center;justify-content:center;padding:2rem}
+  .lb-overlay.open{display:flex}
+  .lb-inner{position:relative;max-width:min(90vw,1000px);max-height:90vh;display:flex;flex-direction:column;gap:1rem}
+  .lb-img{max-width:100%;max-height:75vh;object-fit:contain;display:block;border-radius:2px}
+  .lb-caption{font-family:var(--serif);font-size:1rem;color:var(--text);text-align:center}
+  .lb-meta{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);text-align:center}
+  .lb-close{position:absolute;top:-2.5rem;right:0;background:transparent;border:none;color:var(--text3);font-size:1.5rem;cursor:pointer;line-height:1;transition:color 0.2s}
+  .lb-close:hover{color:var(--teal)}
+  .lb-nav{display:flex;gap:1rem;justify-content:center}
+  .lb-nav button{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:1px;transition:all 0.18s}
+  .lb-nav button:hover{border-color:rgba(82,196,160,0.35);color:var(--teal)}
+
+  /* FOOTER */
+  footer{margin-top:5rem;padding:2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+  .footer-left,.footer-right{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
+  .footer-right a{color:var(--text3);text-decoration:none;transition:color 0.2s}
+  .footer-right a:hover{color:var(--teal)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:680px){.page-wrap{padding:6rem 1.25rem 4rem}.gallery-grid{columns:2 200px;gap:8px}.gallery-item{margin-bottom:8px}}
+  @media(max-width:400px){.gallery-grid{columns:1}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-wordmark" href="/">
+    <span class="nav-zombie">Zombie</span>
+    <span class="nav-genetix">Genetix</span>
+  </a>
+  <div class="nav-right">
+    <a class="nav-back" href="/">← Home</a>
+    <a class="nav-link" href="/genetics/">Genetics</a>
+    <a class="nav-pill" href="/tracker/">Grow Tracker ↗</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-eyebrow">Grow Documentation · Visual</div>
+  <h1 class="page-heading">Photo<br>Gallery</h1>
+  <p class="page-sub">
+    Garden documentation — seedlings, canopy, flower development, and harvest. Tagged by strain where applicable.
+  </p>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="tag-btn active" data-tag="all">All Photos</button>
+  </div>
+
+  <div id="galleryGrid" class="gallery-grid">
+    <div class="gallery-msg" style="column-span:all">
+      Connect Supabase to load gallery photos, or add images via the admin panel.
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lb-overlay" id="lightbox">
+  <div class="lb-inner">
+    <button class="lb-close" id="lbClose">✕</button>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <div class="lb-caption" id="lbCaption"></div>
+    <div class="lb-meta" id="lbMeta"></div>
+    <div class="lb-nav">
+      <button id="lbPrev">← Prev</button>
+      <button id="lbNext">Next →</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">© 2025 Zombie Genetix · No sales</div>
+  <div class="footer-right">
+    <a href="/">Home</a> &nbsp;·&nbsp;
+    <a href="/genetics/">Genetics</a> &nbsp;·&nbsp;
+    <a href="/tracker/">Grow Tracker</a>
+  </div>
+</footer>
+
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+// Must match the credentials in genetics/index.html
+const SUPABASE_URL = '';
+const SUPABASE_ANON_KEY = '';
+
+let sb = null;
+if (SUPABASE_URL && SUPABASE_ANON_KEY && typeof supabase !== 'undefined') {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+// ── SAMPLE PHOTOS (static fallback) ─────────────────────────────────────────
+// Replace or supplement with Supabase gallery_photos table.
+// Structure: { url, caption, strain, tags[], taken_at }
+const SAMPLE_PHOTOS = [
+  // { url: '/images/gallery/example.jpg', caption: 'Week 6 flower', strain: 'Cadillac Rainbow', tags: ['flower','indica'], taken_at: '2025-03-01' },
+];
+
+let ALL_PHOTOS = [];
+let activeTag = 'all';
+let lbIndex = 0;
+let filteredPhotos = [];
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildTagBar(photos) {
+  const tags = new Set();
+  photos.forEach(p => (p.tags||[]).forEach(t => tags.add(t)));
+  const bar = document.getElementById('filterBar');
+  bar.innerHTML = '<button class="tag-btn active" data-tag="all">All Photos</button>';
+  [...tags].sort().forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-btn';
+    btn.dataset.tag = t;
+    btn.textContent = t;
+    bar.appendChild(btn);
+  });
+  bar.addEventListener('click', e => {
+    const btn = e.target.closest('.tag-btn');
+    if (!btn) return;
+    activeTag = btn.dataset.tag;
+    bar.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGallery();
+  });
+}
+
+function renderGallery() {
+  filteredPhotos = activeTag === 'all'
+    ? ALL_PHOTOS
+    : ALL_PHOTOS.filter(p => (p.tags||[]).includes(activeTag));
+
+  const grid = document.getElementById('galleryGrid');
+  if (filteredPhotos.length === 0) {
+    grid.innerHTML = '<div class="gallery-msg" style="column-span:all">No photos match this filter.</div>';
+    return;
+  }
+
+  grid.innerHTML = filteredPhotos.map((p, i) => {
+    const tagsHtml = (p.tags||[]).map(t => `<span class="cap-tag">${esc(t)}</span>`).join('');
+    const dateStr = p.taken_at ? new Date(p.taken_at).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : '';
+    return `
+    <div class="gallery-item" data-index="${i}">
+      <img src="${esc(p.url)}" alt="${esc(p.caption||p.strain||'')}" loading="lazy">
+      <div class="gallery-caption">
+        ${p.caption ? `<div class="cap-strain">${esc(p.caption)}</div>` : ''}
+        <div class="cap-meta">${[p.strain, dateStr].filter(Boolean).join(' · ')}</div>
+        ${tagsHtml ? `<div class="cap-tags">${tagsHtml}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.gallery-item').forEach(el => {
+    el.addEventListener('click', () => openLightbox(+el.dataset.index));
+  });
+}
+
+// Lightbox
+function openLightbox(index) {
+  lbIndex = index;
+  showLb();
+  document.getElementById('lightbox').classList.add('open');
+}
+function showLb() {
+  const p = filteredPhotos[lbIndex];
+  document.getElementById('lbImg').src = p.url;
+  document.getElementById('lbCaption').textContent = p.caption || p.strain || '';
+  const dateStr = p.taken_at ? new Date(p.taken_at).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : '';
+  document.getElementById('lbMeta').textContent = [p.strain, dateStr].filter(Boolean).join(' · ');
+}
+document.getElementById('lbClose').addEventListener('click', () => document.getElementById('lightbox').classList.remove('open'));
+document.getElementById('lightbox').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+document.getElementById('lbPrev').addEventListener('click', () => { lbIndex = (lbIndex - 1 + filteredPhotos.length) % filteredPhotos.length; showLb(); });
+document.getElementById('lbNext').addEventListener('click', () => { lbIndex = (lbIndex + 1) % filteredPhotos.length; showLb(); });
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'ArrowLeft')  { lbIndex = (lbIndex - 1 + filteredPhotos.length) % filteredPhotos.length; showLb(); }
+  if (e.key === 'ArrowRight') { lbIndex = (lbIndex + 1) % filteredPhotos.length; showLb(); }
+  if (e.key === 'Escape') lb.classList.remove('open');
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  if (sb) {
+    const { data, error } = await sb
+      .from('gallery_photos')
+      .select('*, strains(strain)')
+      .order('taken_at', { ascending: false });
+    if (!error && data && data.length) {
+      ALL_PHOTOS = data.map(p => ({
+        ...p,
+        strain: p.strains?.strain || p.strain_name || '',
+        url: p.url,
+      }));
+    }
+  }
+  if (ALL_PHOTOS.length === 0) ALL_PHOTOS = SAMPLE_PHOTOS;
+  buildTagBar(ALL_PHOTOS);
+  renderGallery();
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Zombie Genetix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1117;--card:#171b24;--border:#252b38;--border2:#2f3747;
+    --teal:#52c4a0;--amber:#d4a554;--red:#e06c75;
+    --text:#edeae3;--text2:#8e95a3;--text3:#4e5564;
+    --mono:'Space Mono',monospace;--body:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;padding:2rem}
+  h1{font-family:var(--mono);font-size:0.85rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--teal);margin-bottom:0.25rem}
+  .sub{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:2rem}
+
+  /* AUTH */
+  #authWall{max-width:400px;margin:8rem auto}
+  .auth-label{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:0.5rem}
+  .auth-input{width:100%;padding:0.65rem 0.85rem;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.75rem;outline:none;border-radius:2px;transition:border-color 0.2s}
+  .auth-input:focus{border-color:rgba(82,196,160,0.4)}
+  .btn{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.2rem;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;border-radius:1px;transition:all 0.18s;margin-top:0.75rem}
+  .btn:hover{border-color:rgba(82,196,160,0.4);color:var(--teal)}
+  .btn.primary{border-color:rgba(82,196,160,0.5);color:var(--teal)}
+  .btn.primary:hover{background:rgba(82,196,160,0.08)}
+  .btn.danger{border-color:rgba(224,108,117,0.4);color:var(--red)}
+  .btn.danger:hover{background:rgba(224,108,117,0.07)}
+  .auth-err{font-family:var(--mono);font-size:0.5rem;color:var(--red);margin-top:0.5rem;display:none}
+
+  /* MAIN */
+  #adminMain{display:none}
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:2rem}
+  .tab{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.65rem 1.25rem;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;transition:all 0.18s;margin-bottom:-1px}
+  .tab:hover{color:var(--text2)}
+  .tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  /* FORM */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  @media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+  .form-full{grid-column:1/-1}
+  .field{display:flex;flex-direction:column;gap:0.35rem}
+  .field label{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
+  .field input,.field select,.field textarea{padding:0.55rem 0.75rem;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:0.82rem;outline:none;border-radius:2px;transition:border-color 0.2s;width:100%}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(82,196,160,0.4)}
+  .field textarea{resize:vertical;min-height:80px}
+  .field select option{background:var(--bg)}
+  .form-actions{display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-top:0.5rem}
+  .msg{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.1em;color:var(--teal);display:none}
+  .msg.err{color:var(--red)}
+
+  /* TABLE */
+  .strain-table{width:100%;border-collapse:collapse;margin-top:1.5rem}
+  .strain-table th{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+  .strain-table td{font-size:0.8rem;color:var(--text2);padding:0.6rem 0.75rem;border-bottom:1px solid var(--border);vertical-align:middle}
+  .strain-table tr:hover td{background:rgba(255,255,255,0.02)}
+  .td-strain{color:var(--text);font-weight:500}
+  .td-img{width:48px;height:32px;object-fit:cover;border-radius:1px;opacity:0.8}
+  .td-actions{display:flex;gap:0.5rem}
+
+  /* UPLOAD */
+  .upload-zone{border:1px dashed var(--border2);border-radius:2px;padding:2rem;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:1rem}
+  .upload-zone:hover,.upload-zone.drag{border-color:rgba(82,196,160,0.4)}
+  .upload-zone input{display:none}
+  .upload-label{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
+  .upload-preview{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem}
+  .preview-thumb{position:relative;width:80px;height:60px}
+  .preview-thumb img{width:100%;height:100%;object-fit:cover;border-radius:2px;border:1px solid var(--border)}
+  .preview-rm{position:absolute;top:-4px;right:-4px;background:var(--red);border:none;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+  .progress{height:2px;background:var(--border);border-radius:1px;overflow:hidden;margin-bottom:0.5rem;display:none}
+  .progress-bar{height:100%;background:var(--teal);width:0;transition:width 0.2s}
+
+  section{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:1.5rem;margin-bottom:1.5rem}
+  section h2{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem}
+</style>
+</head>
+<body>
+
+<!-- AUTH WALL -->
+<div id="authWall">
+  <h1>Zombie Genetix</h1>
+  <div class="sub">Admin Panel</div>
+  <label class="auth-label" for="passInput">Passphrase</label>
+  <input class="auth-input" type="password" id="passInput" placeholder="Enter admin passphrase" autocomplete="current-password">
+  <br>
+  <button class="btn primary" id="authBtn">Unlock →</button>
+  <div class="auth-err" id="authErr">Incorrect passphrase.</div>
+</div>
+
+<!-- ADMIN MAIN -->
+<div id="adminMain">
+  <h1>Admin Panel</h1>
+  <div class="sub">Zombie Genetix · <span id="connStatus">Connecting…</span> &nbsp;<button class="btn" id="logoutBtn" style="padding:0.2rem 0.6rem;font-size:0.42rem">Lock</button></div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="strains">Strains</button>
+    <button class="tab" data-tab="gallery">Gallery</button>
+  </div>
+
+  <!-- STRAINS TAB -->
+  <div class="tab-panel active" id="tab-strains">
+
+    <section>
+      <h2 id="strainFormTitle">Add Strain</h2>
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <div class="field"><label>Breeder *</label><input type="text" id="fBreeder"></div>
+        <div class="field"><label>Strain Name *</label><input type="text" id="fStrain"></div>
+        <div class="field"><label>Type</label>
+          <select id="fType"><option value="Photo">Photo</option><option value="Auto">Auto</option></select>
+        </div>
+        <div class="field"><label>Sex</label>
+          <select id="fSex"><option value="Fem">Fem</option><option value="Reg">Reg</option></select>
+        </div>
+        <div class="field"><label>Hybrid Type</label>
+          <select id="fHybridType"><option value="Hybrid">Hybrid</option><option value="Indica">Indica</option><option value="Sativa">Sativa</option></select>
+        </div>
+        <div class="field"><label>Hybrid Detail</label><input type="text" id="fHybridDetail" placeholder="e.g. Indica Dom"></div>
+        <div class="field"><label>THC/CBD</label><input type="text" id="fThcCbd" placeholder="e.g. 24-27% THC"></div>
+        <div class="field"><label>Flower Time</label><input type="text" id="fFlowerTime" placeholder="e.g. 75-80 days"></div>
+        <div class="field form-full"><label>Lineage</label><input type="text" id="fLineage" placeholder="e.g. Runtz × Pure Michigan"></div>
+        <div class="field form-full"><label>Notes</label><textarea id="fNotes"></textarea></div>
+        <div class="field"><label>Status Badge</label>
+          <select id="fStatus"><option value="">None</option><option value="house">House Breed</option><option value="featured">Featured</option><option value="new">New Acquisition</option></select>
+        </div>
+        <div class="field"><label>Image URL</label><input type="text" id="fImageUrl" placeholder="https://… or Supabase storage path"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="saveStrainBtn">Save Strain</button>
+        <button class="btn" id="clearStrainBtn" style="display:none">Cancel Edit</button>
+        <span class="msg" id="strainMsg"></span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Strain Library <span id="strainCount" style="color:var(--text3);font-size:0.8em"></span></h2>
+      <div id="strainTableWrap"><div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">Loading…</div></div>
+    </section>
+  </div>
+
+  <!-- GALLERY TAB -->
+  <div class="tab-panel" id="tab-gallery">
+    <section>
+      <h2>Upload Photos</h2>
+      <div class="upload-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        <div class="upload-label">Drop images here or click to select</div>
+      </div>
+      <div class="upload-preview" id="uploadPreview"></div>
+      <div class="progress" id="uploadProgress"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Linked Strain (optional)</label>
+          <select id="gStrain"><option value="">— None —</option></select>
+        </div>
+        <div class="field"><label>Date Taken</label><input type="date" id="gDate"></div>
+        <div class="field form-full"><label>Caption</label><input type="text" id="gCaption" placeholder="e.g. Week 6 canopy"></div>
+        <div class="field form-full"><label>Tags (comma-separated)</label><input type="text" id="gTags" placeholder="flower, macro, harvest"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="uploadBtn">Upload Photos</button>
+        <span class="msg" id="galleryMsg"></span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Gallery Photos <span id="galleryCount" style="color:var(--text3);font-size:0.8em"></span></h2>
+      <div id="galleryTableWrap"><div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">Loading…</div></div>
+    </section>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────────
+// IMPORTANT: Use the SERVICE ROLE key here (not the anon key).
+// Never commit this file with real credentials — keep it local only.
+const SUPABASE_URL         = '';
+const SUPABASE_SERVICE_KEY = '';
+const ADMIN_PASSPHRASE     = 'changeme'; // change this before use
+const IMG_BUCKET_STRAINS   = 'genetics-images';
+const IMG_BUCKET_GALLERY   = 'gallery-photos';
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+const SESSION_KEY = 'zg-admin-auth';
+let sb = null;
+
+function unlock() {
+  const pass = document.getElementById('passInput').value;
+  if (pass !== ADMIN_PASSPHRASE) {
+    document.getElementById('authErr').style.display = 'block'; return;
+  }
+  sessionStorage.setItem(SESSION_KEY, '1');
+  showAdmin();
+}
+
+function showAdmin() {
+  document.getElementById('authWall').style.display = 'none';
+  document.getElementById('adminMain').style.display = 'block';
+  if (SUPABASE_URL && SUPABASE_SERVICE_KEY && typeof supabase !== 'undefined') {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    document.getElementById('connStatus').textContent = 'Supabase connected';
+    document.getElementById('connStatus').style.color = 'var(--teal)';
+    loadStrains(); loadGallery(); populateStrainSelect();
+  } else {
+    document.getElementById('connStatus').textContent = 'Supabase not configured';
+  }
+}
+
+document.getElementById('authBtn').addEventListener('click', unlock);
+document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+});
+if (sessionStorage.getItem(SESSION_KEY)) showAdmin();
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showMsg(id, text, isErr) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.style.display = 'block';
+  el.classList.toggle('err', !!isErr);
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ── STRAINS ──────────────────────────────────────────────────────────────────
+async function loadStrains() {
+  if (!sb) return;
+  const { data } = await sb.from('strains').select('*').order('breeder').order('strain');
+  const rows = data || [];
+  document.getElementById('strainCount').textContent = `(${rows.length})`;
+  const wrap = document.getElementById('strainTableWrap');
+  if (!rows.length) { wrap.innerHTML = '<div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">No strains yet.</div>'; return; }
+  wrap.innerHTML = `<table class="strain-table">
+    <thead><tr><th>Image</th><th>Strain</th><th>Breeder</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${rows.map(s => `
+      <tr>
+        <td>${s.image_url ? `<img class="td-img" src="${esc(s.image_url)}" alt="">` : '—'}</td>
+        <td class="td-strain">${esc(s.strain)}</td>
+        <td>${esc(s.breeder)}</td>
+        <td>${esc(s.type)} / ${esc(s.sex)}</td>
+        <td>${esc(s.status||'')}</td>
+        <td><div class="td-actions">
+          <button class="btn" onclick="editStrain('${s.id}')">Edit</button>
+          <button class="btn danger" onclick="deleteStrain('${s.id}','${esc(s.strain)}')">Del</button>
+        </div></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+function clearStrainForm() {
+  ['fBreeder','fStrain','fHybridDetail','fThcCbd','fFlowerTime','fLineage','fNotes','fImageUrl','editId'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fType').value = 'Photo';
+  document.getElementById('fSex').value = 'Fem';
+  document.getElementById('fHybridType').value = 'Hybrid';
+  document.getElementById('fStatus').value = '';
+  document.getElementById('strainFormTitle').textContent = 'Add Strain';
+  document.getElementById('clearStrainBtn').style.display = 'none';
+}
+
+async function editStrain(id) {
+  if (!sb) return;
+  const { data } = await sb.from('strains').select('*').eq('id', id).single();
+  if (!data) return;
+  document.getElementById('editId').value = data.id;
+  document.getElementById('fBreeder').value       = data.breeder      || '';
+  document.getElementById('fStrain').value        = data.strain       || '';
+  document.getElementById('fType').value          = data.type         || 'Photo';
+  document.getElementById('fSex').value           = data.sex          || 'Fem';
+  document.getElementById('fHybridType').value    = data.hybrid_type  || 'Hybrid';
+  document.getElementById('fHybridDetail').value  = data.hybrid_detail|| '';
+  document.getElementById('fThcCbd').value        = data.thc_cbd      || '';
+  document.getElementById('fFlowerTime').value    = data.flower_time  || '';
+  document.getElementById('fLineage').value       = data.lineage      || '';
+  document.getElementById('fNotes').value         = data.notes        || '';
+  document.getElementById('fStatus').value        = data.status       || '';
+  document.getElementById('fImageUrl').value      = data.image_url    || '';
+  document.getElementById('strainFormTitle').textContent = 'Edit Strain';
+  document.getElementById('clearStrainBtn').style.display = 'inline-block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function deleteStrain(id, name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  const { error } = await sb.from('strains').delete().eq('id', id);
+  if (error) { showMsg('strainMsg', error.message, true); return; }
+  showMsg('strainMsg', 'Deleted.');
+  loadStrains();
+}
+
+document.getElementById('saveStrainBtn').addEventListener('click', async () => {
+  if (!sb) { showMsg('strainMsg', 'Supabase not configured.', true); return; }
+  const id = document.getElementById('editId').value;
+  const payload = {
+    breeder:       document.getElementById('fBreeder').value.trim(),
+    strain:        document.getElementById('fStrain').value.trim(),
+    type:          document.getElementById('fType').value,
+    sex:           document.getElementById('fSex').value,
+    hybrid_type:   document.getElementById('fHybridType').value,
+    hybrid_detail: document.getElementById('fHybridDetail').value.trim() || null,
+    thc_cbd:       document.getElementById('fThcCbd').value.trim()       || null,
+    flower_time:   document.getElementById('fFlowerTime').value.trim()   || null,
+    lineage:       document.getElementById('fLineage').value.trim()      || null,
+    notes:         document.getElementById('fNotes').value.trim()        || null,
+    status:        document.getElementById('fStatus').value              || null,
+    image_url:     document.getElementById('fImageUrl').value.trim()     || null,
+  };
+  if (!payload.breeder || !payload.strain) { showMsg('strainMsg', 'Breeder and strain are required.', true); return; }
+  const op = id
+    ? sb.from('strains').update(payload).eq('id', id)
+    : sb.from('strains').insert(payload);
+  const { error } = await op;
+  if (error) { showMsg('strainMsg', error.message, true); return; }
+  showMsg('strainMsg', id ? 'Updated.' : 'Saved.');
+  clearStrainForm(); loadStrains();
+});
+
+document.getElementById('clearStrainBtn').addEventListener('click', clearStrainForm);
+
+// ── GALLERY ──────────────────────────────────────────────────────────────────
+let pendingFiles = [];
+
+async function populateStrainSelect() {
+  if (!sb) return;
+  const { data } = await sb.from('strains').select('id,strain,breeder').order('breeder').order('strain');
+  const sel = document.getElementById('gStrain');
+  (data||[]).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = `${s.strain} (${s.breeder})`;
+    sel.appendChild(opt);
+  });
+}
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); addFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => addFiles(e.target.files));
+
+function addFiles(files) {
+  [...files].forEach(f => {
+    if (!f.type.startsWith('image/')) return;
+    pendingFiles.push(f);
+    const thumb = document.createElement('div'); thumb.className = 'preview-thumb';
+    const img = document.createElement('img'); img.src = URL.createObjectURL(f);
+    const rm = document.createElement('button'); rm.className = 'preview-rm'; rm.textContent = '×';
+    rm.onclick = () => { pendingFiles = pendingFiles.filter(x => x !== f); thumb.remove(); };
+    thumb.appendChild(img); thumb.appendChild(rm);
+    document.getElementById('uploadPreview').appendChild(thumb);
+  });
+}
+
+document.getElementById('uploadBtn').addEventListener('click', async () => {
+  if (!sb) { showMsg('galleryMsg', 'Supabase not configured.', true); return; }
+  if (!pendingFiles.length) { showMsg('galleryMsg', 'No files selected.', true); return; }
+  const progress = document.getElementById('uploadProgress');
+  const bar = document.getElementById('progressBar');
+  progress.style.display = 'block';
+  const strainId = document.getElementById('gStrain').value || null;
+  const caption  = document.getElementById('gCaption').value.trim() || null;
+  const takenAt  = document.getElementById('gDate').value || null;
+  const tags     = document.getElementById('gTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+
+  for (let i = 0; i < pendingFiles.length; i++) {
+    bar.style.width = `${Math.round(((i) / pendingFiles.length) * 100)}%`;
+    const f = pendingFiles[i];
+    const path = `${Date.now()}-${f.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+    const { data: up, error: upErr } = await sb.storage.from(IMG_BUCKET_GALLERY).upload(path, f, { upsert: true });
+    if (upErr) { showMsg('galleryMsg', `Upload error: ${upErr.message}`, true); continue; }
+    const { data: urlData } = sb.storage.from(IMG_BUCKET_GALLERY).getPublicUrl(path);
+    await sb.from('gallery_photos').insert({
+      url: urlData.publicUrl, strain_id: strainId, caption, taken_at: takenAt, tags
+    });
+  }
+  bar.style.width = '100%';
+  setTimeout(() => { progress.style.display = 'none'; bar.style.width = '0'; }, 800);
+  showMsg('galleryMsg', `${pendingFiles.length} photo(s) uploaded.`);
+  pendingFiles = []; document.getElementById('uploadPreview').innerHTML = '';
+  loadGallery();
+});
+
+async function loadGallery() {
+  if (!sb) return;
+  const { data } = await sb.from('gallery_photos').select('*, strains(strain)').order('created_at', {ascending:false});
+  const rows = data || [];
+  document.getElementById('galleryCount').textContent = `(${rows.length})`;
+  const wrap = document.getElementById('galleryTableWrap');
+  if (!rows.length) { wrap.innerHTML = '<div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">No photos yet.</div>'; return; }
+  wrap.innerHTML = `<table class="strain-table">
+    <thead><tr><th>Preview</th><th>Caption</th><th>Strain</th><th>Tags</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>${rows.map(p => `
+      <tr>
+        <td><img class="td-img" src="${esc(p.url)}" alt=""></td>
+        <td>${esc(p.caption||'')}</td>
+        <td>${esc(p.strains?.strain||'')}</td>
+        <td style="font-size:0.7rem">${(p.tags||[]).join(', ')}</td>
+        <td style="font-size:0.7rem">${p.taken_at||''}</td>
+        <td><button class="btn danger" onclick="deletePhoto('${p.id}')">Del</button></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+async function deletePhoto(id) {
+  if (!confirm('Delete this photo?')) return;
+  await sb.from('gallery_photos').delete().eq('id', id);
+  loadGallery();
+}
+</script>
+</body>
+</html>

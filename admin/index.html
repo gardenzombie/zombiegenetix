@@ -86,11 +86,30 @@
 <div id="authWall">
   <h1>Zombie Genetix</h1>
   <div class="sub">Admin Panel</div>
-  <label class="auth-label" for="passInput">Passphrase</label>
-  <input class="auth-input" type="password" id="passInput" placeholder="Enter admin passphrase" autocomplete="current-password">
-  <br>
-  <button class="btn primary" id="authBtn">Unlock →</button>
-  <div class="auth-err" id="authErr">Incorrect passphrase.</div>
+
+  <!-- First-time setup -->
+  <div id="setupPanel" style="display:none">
+    <p style="color:var(--text-muted);font-size:0.55rem;margin-bottom:1rem">First visit — create your admin passphrase.<br>It is stored only in this browser and never committed to git.</p>
+    <label class="auth-label">New Passphrase</label>
+    <input class="auth-input" type="password" id="setupPass1" placeholder="Create a passphrase" autocomplete="new-password">
+    <label class="auth-label" style="margin-top:0.6rem">Confirm Passphrase</label>
+    <input class="auth-input" type="password" id="setupPass2" placeholder="Confirm passphrase" autocomplete="new-password">
+    <br>
+    <button class="btn primary" id="setupBtn">Save Passphrase →</button>
+    <div class="auth-err" id="setupErr"></div>
+  </div>
+
+  <!-- Login -->
+  <div id="loginPanel" style="display:none">
+    <label class="auth-label" for="passInput">Passphrase</label>
+    <input class="auth-input" type="password" id="passInput" placeholder="Enter admin passphrase" autocomplete="current-password">
+    <br>
+    <button class="btn primary" id="authBtn">Unlock →</button>
+    <div class="auth-err" id="authErr">Incorrect passphrase.</div>
+    <div style="margin-top:1rem;text-align:center">
+      <button class="btn" id="resetPassBtn" style="font-size:0.4rem;opacity:0.5">Reset passphrase</button>
+    </div>
+  </div>
 </div>
 
 <!-- ADMIN MAIN -->
@@ -181,21 +200,47 @@
 // Never commit this file with real credentials — keep it local only.
 const SUPABASE_URL = 'https://wgtsjhcpxqgumsnuvzbb.supabase.co';
 const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndndHNqaGNweHFndW1zbnV2emJiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjgyNzUzNCwiZXhwIjoyMDg4NDAzNTM0fQ.hZxvsfB2Up-0O41cMn8ILTuyIvaoXabQ__2rawMSh5Q';
-const ADMIN_PASSPHRASE     = 'CHANGE_ME_BEFORE_USE'; // change this before use
 const IMG_BUCKET_STRAINS   = 'genetics-images';
 const IMG_BUCKET_GALLERY   = 'gallery-photos';
 
 // ── AUTH ─────────────────────────────────────────────────────────────────────
 const SESSION_KEY = 'zg-admin-auth';
+const HASH_KEY    = 'zg-admin-hash';
 let sb = null;
 
-function unlock() {
+async function hashPass(pass) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function unlock() {
   const pass = document.getElementById('passInput').value;
-  if (pass !== ADMIN_PASSPHRASE) {
+  const stored = localStorage.getItem(HASH_KEY);
+  if ((await hashPass(pass)) !== stored) {
     document.getElementById('authErr').style.display = 'block'; return;
   }
   sessionStorage.setItem(SESSION_KEY, '1');
   showAdmin();
+}
+
+async function setupPassphrase() {
+  const p1  = document.getElementById('setupPass1').value;
+  const p2  = document.getElementById('setupPass2').value;
+  const err = document.getElementById('setupErr');
+  err.style.display = 'none';
+  if (!p1 || p1.length < 6) { err.textContent = 'Must be at least 6 characters.'; err.style.display='block'; return; }
+  if (p1 !== p2)             { err.textContent = 'Passphrases do not match.';      err.style.display='block'; return; }
+  localStorage.setItem(HASH_KEY, await hashPass(p1));
+  document.getElementById('setupPanel').style.display = 'none';
+  document.getElementById('loginPanel').style.display = 'block';
+}
+
+function initAuth() {
+  if (localStorage.getItem(HASH_KEY)) {
+    document.getElementById('loginPanel').style.display = 'block';
+  } else {
+    document.getElementById('setupPanel').style.display = 'block';
+  }
 }
 
 function showAdmin() {
@@ -213,11 +258,21 @@ function showAdmin() {
 
 document.getElementById('authBtn').addEventListener('click', unlock);
 document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+document.getElementById('setupBtn').addEventListener('click', setupPassphrase);
+document.getElementById('setupPass2').addEventListener('keydown', e => { if (e.key === 'Enter') setupPassphrase(); });
+document.getElementById('resetPassBtn').addEventListener('click', () => {
+  if (!confirm('Reset passphrase? You will need to create a new one.')) return;
+  localStorage.removeItem(HASH_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginPanel').style.display = 'none';
+  document.getElementById('setupPanel').style.display = 'block';
+});
 document.getElementById('logoutBtn').addEventListener('click', () => {
   sessionStorage.removeItem(SESSION_KEY);
   location.reload();
 });
-if (sessionStorage.getItem(SESSION_KEY)) showAdmin();
+
+if (sessionStorage.getItem(SESSION_KEY)) { showAdmin(); } else { initAuth(); }
 
 // ── TABS ─────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab => {

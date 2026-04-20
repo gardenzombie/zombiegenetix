@@ -179,6 +179,7 @@
         </div>
         <div class="field"><label>Date Taken</label><input type="date" id="gDate"></div>
         <div class="field form-full"><label>Caption</label><input type="text" id="gCaption" placeholder="e.g. Week 6 canopy"></div>
+        <div class="field form-full"><label>Photo Credit</label><input type="text" id="gCredit" placeholder="e.g. Jane Doe / example.com — leave blank if your own photo"></div>
         <div class="field form-full"><label>Tags (comma-separated)</label><input type="text" id="gTags" placeholder="flower, macro, harvest"></div>
       </div>
       <div class="form-actions">
@@ -431,6 +432,7 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
   progress.style.display = 'block';
   const strainId = document.getElementById('gStrain').value || null;
   const caption  = document.getElementById('gCaption').value.trim() || null;
+  const credit   = document.getElementById('gCredit').value.trim()  || null;
   const takenAt  = document.getElementById('gDate').value || null;
   const tags     = document.getElementById('gTags').value.split(',').map(t=>t.trim()).filter(Boolean);
 
@@ -442,7 +444,7 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
     if (upErr) { showMsg('galleryMsg', `Upload error: ${upErr.message}`, true); continue; }
     const { data: urlData } = sb.storage.from(IMG_BUCKET_GALLERY).getPublicUrl(path);
     await sb.from('gallery_photos').insert({
-      url: urlData.publicUrl, strain_id: strainId, caption, taken_at: takenAt, tags
+      url: urlData.publicUrl, strain_id: strainId, caption, credit, taken_at: takenAt, tags
     });
   }
   bar.style.width = '100%';

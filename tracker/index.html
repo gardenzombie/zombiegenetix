@@ -1460,6 +1460,9 @@
     <button class="sidebar-item" id="sidebar-tab-retired" onclick="showPage('retired')">
       Retired <span class="sidebar-badge" id="badge-retired">—</span>
     </button>
+    <button class="sidebar-item" id="sidebar-tab-drying" onclick="showPage('drying')">
+      Dry &amp; Cure <span class="sidebar-badge" id="badge-drying">—</span>
+    </button>
 
     <div class="sidebar-section-label">Grow Tips</div>
     <button class="sidebar-item" id="sidebar-tab-tips" onclick="showPage('tips')">
@@ -1799,6 +1802,26 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════ DRYING & CURING -->
+<div class="page" id="page-drying">
+  <div class="section-header flex-between">
+    <div>
+      <div class="section-title">Drying &amp; Curing</div>
+      <div class="section-desc">Post-harvest countdown tracker</div>
+    </div>
+    <button class="btn btn-primary" onclick="openNewDry()">+ New Batch</button>
+  </div>
+
+  <div class="card-label" style="margin-bottom:0.75rem">Drying</div>
+  <div id="drying-active"></div>
+
+  <div class="card-label" style="margin:1.5rem 0 0.75rem">Curing</div>
+  <div id="curing-active"></div>
+
+  <div class="card-label" style="margin:1.5rem 0 0.5rem;opacity:0.6">Completed</div>
+  <div id="drying-done"></div>
+</div>
+
 <div class="page" id="page-claude">
   <div class="section-header">
     <div class="section-title">AI Research Assistant</div>
@@ -2003,6 +2026,78 @@
     <button class="btn btn-primary" onclick="openAddBreeding()">+ New Project</button>
   </div>
   <div id="breeding-content"></div>
+</div>
+
+<!-- ── NEW DRY BATCH MODAL ── -->
+<div class="modal-overlay" id="modal-drying">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">Start Drying Batch</div>
+      <button class="modal-close" onclick="closeModal('modal-drying')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Strain / Batch Name *</label>
+          <input class="form-input" type="text" id="dry-strain" placeholder="e.g. Cadillac Rainbow #2">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date Drying Started</label>
+          <input class="form-input" type="date" id="dry-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Dry Period (days)</label>
+          <input class="form-input" type="number" id="dry-target" min="1" max="30" value="12">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Drying Method</label>
+          <select class="form-select" id="dry-method">
+            <option value="whole-plant">Whole-plant hung</option>
+            <option value="branches">Separated into branches / stems</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="dry-notes" rows="2" placeholder="e.g. Tent 2, 60°F / 60% RH"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-drying')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDrySession()">Start Drying</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOVE TO CURE MODAL ── -->
+<div class="modal-overlay" id="modal-cure">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Move to Cure</div>
+      <button class="modal-close" onclick="closeModal('modal-cure')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cure-session-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cure Start Date</label>
+          <input class="form-input" type="date" id="cure-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Cure Period (days)</label>
+          <input class="form-input" type="number" id="cure-target" min="1" value="60">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="cure-notes" rows="2" placeholder="e.g. 4 jars, burp daily for first 2 weeks"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cure')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMoveToCure()">Start Curing</button>
+    </div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -3814,6 +3909,170 @@ if (_twDate !== TODAY_STR) { topWaterChecks = {}; localStorage.setItem('growtrac
 let customPlants = JSON.parse(localStorage.getItem('growtracker-plants') || '[]');
 let breedingProjects = JSON.parse(localStorage.getItem('growtracker-breeding') || JSON.stringify(DEFAULT_BREEDING));
 
+// ── DRYING & CURING DATA ───────────────────────────────────────
+let dryingSessions = JSON.parse(localStorage.getItem('growtracker-drying') || '[]');
+
+function saveDrying() { localStorage.setItem('growtracker-drying', JSON.stringify(dryingSessions)); }
+function dryDaysElapsed(dateStr) { return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000); }
+function dryEscHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderDrying() {
+  const active = dryingSessions.filter(s => s.phase === 'drying');
+  const curing = dryingSessions.filter(s => s.phase === 'curing');
+  const done   = dryingSessions.filter(s => s.phase === 'complete');
+
+  const badge = document.getElementById('badge-drying');
+  if (badge) badge.textContent = (active.length + curing.length) || '—';
+
+  const dryEl  = document.getElementById('drying-active');
+  const cureEl = document.getElementById('curing-active');
+  const doneEl = document.getElementById('drying-done');
+  if (!dryEl) return;
+
+  dryEl.innerHTML  = active.length ? active.map(renderDryCard).join('') :
+    '<div class="alert alert-info" style="margin-bottom:0.5rem">No active drying batches.</div>';
+
+  cureEl.innerHTML = curing.length ? curing.map(renderCureCard).join('') :
+    '<div class="alert alert-info" style="margin-bottom:0.5rem">No active curing batches.</div>';
+
+  doneEl.innerHTML = done.length ? done.map(s => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);gap:1rem;flex-wrap:wrap">
+      <span style="font-weight:500">${dryEscHtml(s.strain)}</span>
+      <span style="color:var(--text3);font-family:var(--mono);font-size:0.58rem">${s.startDate} &middot; ${s.method === 'whole-plant' ? 'Whole-plant' : 'Branches'}</span>
+      <button class="btn btn-danger" onclick="deleteDrySession('${s.id}')">Remove</button>
+    </div>`).join('') :
+    '<div style="color:var(--text3);font-family:var(--mono);font-size:0.65rem;padding:0.75rem 0">No completed batches yet.</div>';
+}
+
+function renderDryCard(s) {
+  const elapsed = dryDaysElapsed(s.startDate);
+  const left    = Math.max(0, s.targetDays - elapsed);
+  const pct     = Math.min(100, Math.round((elapsed / s.targetDays) * 100));
+  const ready   = elapsed >= s.targetDays;
+  const method  = s.method === 'whole-plant' ? 'Whole-plant hung' : 'Branches / stems';
+  return `
+  <div class="card card-amber" style="margin-bottom:0.75rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem">
+      <div>
+        <div class="card-label">Drying</div>
+        <div style="font-size:1.15rem;font-weight:600;margin-bottom:0.2rem">${dryEscHtml(s.strain)}</div>
+        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Started ${s.startDate} &middot; ${method}</div>
+        ${s.notes ? `<div style="font-size:0.8rem;color:var(--text2);margin-top:0.3rem">${dryEscHtml(s.notes)}</div>` : ''}
+      </div>
+      <div style="text-align:right;min-width:70px">
+        ${ready
+          ? `<div style="font-family:var(--mono);font-size:0.95rem;color:var(--green);font-weight:700">READY</div>
+             <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">${elapsed} days elapsed</div>`
+          : `<div style="font-family:var(--head);font-size:1.6rem;color:var(--amber);line-height:1">${left}</div>
+             <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">days left</div>`}
+      </div>
+    </div>
+    <div style="margin:0.75rem 0 0.2rem;background:var(--border);border-radius:4px;height:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${ready?'var(--green)':'var(--amber)'};border-radius:4px;transition:width 0.3s"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);margin-bottom:0.75rem">${elapsed} of ${s.targetDays} days &middot; ${pct}%</div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openMoveToCure('${s.id}')">→ Move to Cure</button>
+      <button class="btn btn-ghost" onclick="completeDrySession('${s.id}')">Mark Complete</button>
+      <button class="btn btn-danger" onclick="deleteDrySession('${s.id}')">Delete</button>
+    </div>
+  </div>`;
+}
+
+function renderCureCard(s) {
+  const elapsed = dryDaysElapsed(s.cureStartDate);
+  const left    = Math.max(0, s.cureTargetDays - elapsed);
+  const pct     = Math.min(100, Math.round((elapsed / s.cureTargetDays) * 100));
+  const ready   = elapsed >= s.cureTargetDays;
+  return `
+  <div class="card card-accent" style="margin-bottom:0.75rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem">
+      <div>
+        <div class="card-label">Curing</div>
+        <div style="font-size:1.15rem;font-weight:600;margin-bottom:0.2rem">${dryEscHtml(s.strain)}</div>
+        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Curing since ${s.cureStartDate} &middot; Dried ${s.targetDays} days</div>
+        ${s.cureNotes ? `<div style="font-size:0.8rem;color:var(--text2);margin-top:0.3rem">${dryEscHtml(s.cureNotes)}</div>` : ''}
+      </div>
+      <div style="text-align:right;min-width:70px">
+        ${ready
+          ? `<div style="font-family:var(--mono);font-size:0.95rem;color:var(--green);font-weight:700">CURED</div>
+             <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">${elapsed} days</div>`
+          : `<div style="font-family:var(--head);font-size:1.6rem;color:var(--cyan);line-height:1">${left}</div>
+             <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">days left</div>`}
+      </div>
+    </div>
+    <div style="margin:0.75rem 0 0.2rem;background:var(--border);border-radius:4px;height:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${ready?'var(--green)':'var(--cyan)'};border-radius:4px;transition:width 0.3s"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);margin-bottom:0.75rem">${elapsed} of ${s.cureTargetDays} days &middot; ${pct}%</div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="completeDrySession('${s.id}')">Mark Complete</button>
+      <button class="btn btn-danger" onclick="deleteDrySession('${s.id}')">Delete</button>
+    </div>
+  </div>`;
+}
+
+function openNewDry() {
+  document.getElementById('dry-strain').value  = '';
+  document.getElementById('dry-date').value    = TODAY_STR;
+  document.getElementById('dry-method').value  = 'whole-plant';
+  document.getElementById('dry-target').value  = '12';
+  document.getElementById('dry-notes').value   = '';
+  openModal('modal-drying');
+}
+
+function saveDrySession() {
+  const strain = document.getElementById('dry-strain').value.trim();
+  if (!strain) { alert('Strain / batch name is required.'); return; }
+  dryingSessions.unshift({
+    id:         String(Date.now()),
+    strain,
+    startDate:  document.getElementById('dry-date').value,
+    method:     document.getElementById('dry-method').value,
+    targetDays: parseInt(document.getElementById('dry-target').value) || 12,
+    notes:      document.getElementById('dry-notes').value.trim(),
+    phase:      'drying',
+  });
+  saveDrying(); renderDrying();
+  closeModal('modal-drying');
+  showToast('success', '🌿', 'Drying batch started');
+}
+
+function openMoveToCure(id) {
+  document.getElementById('cure-session-id').value = id;
+  document.getElementById('cure-date').value        = TODAY_STR;
+  document.getElementById('cure-target').value      = '60';
+  document.getElementById('cure-notes').value       = '';
+  openModal('modal-cure');
+}
+
+function saveMoveToCure() {
+  const id = document.getElementById('cure-session-id').value;
+  const s  = dryingSessions.find(x => x.id === id);
+  if (!s) return;
+  s.phase          = 'curing';
+  s.cureStartDate  = document.getElementById('cure-date').value;
+  s.cureTargetDays = parseInt(document.getElementById('cure-target').value) || 60;
+  s.cureNotes      = document.getElementById('cure-notes').value.trim();
+  saveDrying(); renderDrying();
+  closeModal('modal-cure');
+  showToast('success', '🫙', 'Moved to cure');
+}
+
+function completeDrySession(id) {
+  const s = dryingSessions.find(x => x.id === id);
+  if (!s) return;
+  s.phase = 'complete';
+  saveDrying(); renderDrying();
+  showToast('success', '✓', 'Batch marked complete');
+}
+
+function deleteDrySession(id) {
+  if (!confirm('Delete this batch?')) return;
+  dryingSessions = dryingSessions.filter(x => x.id !== id);
+  saveDrying(); renderDrying();
+}
+
 // ── GROW TIPS DATA ────────────────────────────────────────────
 const BUILTIN_TIPS = [
   {
@@ -3979,6 +4238,7 @@ function showPage(id) {
   if (id === 'breeding') renderBreeding();
   if (id === 'timeline') renderCalendar();
   if (id === 'retired') renderRetired();
+  if (id === 'drying') renderDrying();
   if (id === 'tips') renderTips();
   if (id === 'claude') renderClaudePage();
   updateSidebarBadges();

@@ -55,6 +55,13 @@
   .msg{font-family:var(--mono);font-size:0.48rem;letter-spacing:0.1em;color:var(--teal);display:none}
   .msg.err{color:var(--red)}
 
+  /* STRAIN IMAGE UPLOAD */
+  .img-upload-wrap{display:flex;flex-direction:column;gap:0.5rem}
+  .img-upload-actions{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}
+  .img-upload-actions input[type=file]{display:none}
+  .strain-img-preview{max-height:100px;border-radius:2px;border:1px solid var(--border);display:none;margin-top:0.25rem}
+  .img-status{font-family:var(--mono);font-size:0.44rem;letter-spacing:0.1em;color:var(--text3)}
+
   /* TABLE */
   .strain-table{width:100%;border-collapse:collapse;margin-top:1.5rem}
   .strain-table th{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
@@ -86,11 +93,30 @@
 <div id="authWall">
   <h1>Zombie Genetix</h1>
   <div class="sub">Admin Panel</div>
-  <label class="auth-label" for="passInput">Passphrase</label>
-  <input class="auth-input" type="password" id="passInput" placeholder="Enter admin passphrase" autocomplete="current-password">
-  <br>
-  <button class="btn primary" id="authBtn">Unlock →</button>
-  <div class="auth-err" id="authErr">Incorrect passphrase.</div>
+
+  <!-- First-time setup -->
+  <div id="setupPanel" style="display:none">
+    <p style="color:var(--text-muted);font-size:0.55rem;margin-bottom:1rem">First visit — create your admin passphrase.<br>It is stored only in this browser and never committed to git.</p>
+    <label class="auth-label">New Passphrase</label>
+    <input class="auth-input" type="password" id="setupPass1" placeholder="Create a passphrase" autocomplete="new-password">
+    <label class="auth-label" style="margin-top:0.6rem">Confirm Passphrase</label>
+    <input class="auth-input" type="password" id="setupPass2" placeholder="Confirm passphrase" autocomplete="new-password">
+    <br>
+    <button class="btn primary" id="setupBtn">Save Passphrase →</button>
+    <div class="auth-err" id="setupErr"></div>
+  </div>
+
+  <!-- Login -->
+  <div id="loginPanel" style="display:none">
+    <label class="auth-label" for="passInput">Passphrase</label>
+    <input class="auth-input" type="password" id="passInput" placeholder="Enter admin passphrase" autocomplete="current-password">
+    <br>
+    <button class="btn primary" id="authBtn">Unlock →</button>
+    <div class="auth-err" id="authErr">Incorrect passphrase.</div>
+    <div style="margin-top:1rem;text-align:center">
+      <button class="btn" id="resetPassBtn" style="font-size:0.4rem;opacity:0.5">Reset passphrase</button>
+    </div>
+  </div>
 </div>
 
 <!-- ADMIN MAIN -->
@@ -129,7 +155,19 @@
         <div class="field"><label>Status Badge</label>
           <select id="fStatus"><option value="">None</option><option value="house">House Breed</option><option value="featured">Featured</option><option value="new">New Acquisition</option></select>
         </div>
-        <div class="field"><label>Image URL</label><input type="text" id="fImageUrl" placeholder="https://… or Supabase storage path"></div>
+        <div class="field form-full">
+          <label>Strain Image</label>
+          <div class="img-upload-wrap">
+            <input type="text" id="fImageUrl" placeholder="Paste a URL — or use the buttons below">
+            <div class="img-upload-actions">
+              <label class="btn" for="fStrainImgFile">Upload from device</label>
+              <input type="file" id="fStrainImgFile" accept="image/*">
+              <button class="btn" id="fetchRemoteImgBtn">Fetch &amp; upload remote URL</button>
+              <span class="img-status" id="strainImgStatus"></span>
+            </div>
+            <img id="strainImgPreview" class="strain-img-preview" alt="strain preview">
+          </div>
+        </div>
       </div>
       <div class="form-actions">
         <button class="btn primary" id="saveStrainBtn">Save Strain</button>
@@ -160,6 +198,7 @@
         </div>
         <div class="field"><label>Date Taken</label><input type="date" id="gDate"></div>
         <div class="field form-full"><label>Caption</label><input type="text" id="gCaption" placeholder="e.g. Week 6 canopy"></div>
+        <div class="field form-full"><label>Photo Credit</label><input type="text" id="gCredit" placeholder="e.g. Jane Doe / example.com — leave blank if your own photo"></div>
         <div class="field form-full"><label>Tags (comma-separated)</label><input type="text" id="gTags" placeholder="flower, macro, harvest"></div>
       </div>
       <div class="form-actions">
@@ -181,21 +220,47 @@
 // Never commit this file with real credentials — keep it local only.
 const SUPABASE_URL = 'https://wgtsjhcpxqgumsnuvzbb.supabase.co';
 const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndndHNqaGNweHFndW1zbnV2emJiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjgyNzUzNCwiZXhwIjoyMDg4NDAzNTM0fQ.hZxvsfB2Up-0O41cMn8ILTuyIvaoXabQ__2rawMSh5Q';
-const ADMIN_PASSPHRASE     = 'N@ncyz0201!'; // change this before use
 const IMG_BUCKET_STRAINS   = 'genetics-images';
 const IMG_BUCKET_GALLERY   = 'gallery-photos';
 
 // ── AUTH ─────────────────────────────────────────────────────────────────────
 const SESSION_KEY = 'zg-admin-auth';
+const HASH_KEY    = 'zg-admin-hash';
 let sb = null;
 
-function unlock() {
+async function hashPass(pass) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function unlock() {
   const pass = document.getElementById('passInput').value;
-  if (pass !== ADMIN_PASSPHRASE) {
+  const stored = localStorage.getItem(HASH_KEY);
+  if ((await hashPass(pass)) !== stored) {
     document.getElementById('authErr').style.display = 'block'; return;
   }
   sessionStorage.setItem(SESSION_KEY, '1');
   showAdmin();
+}
+
+async function setupPassphrase() {
+  const p1  = document.getElementById('setupPass1').value;
+  const p2  = document.getElementById('setupPass2').value;
+  const err = document.getElementById('setupErr');
+  err.style.display = 'none';
+  if (!p1 || p1.length < 6) { err.textContent = 'Must be at least 6 characters.'; err.style.display='block'; return; }
+  if (p1 !== p2)             { err.textContent = 'Passphrases do not match.';      err.style.display='block'; return; }
+  localStorage.setItem(HASH_KEY, await hashPass(p1));
+  document.getElementById('setupPanel').style.display = 'none';
+  document.getElementById('loginPanel').style.display = 'block';
+}
+
+function initAuth() {
+  if (localStorage.getItem(HASH_KEY)) {
+    document.getElementById('loginPanel').style.display = 'block';
+  } else {
+    document.getElementById('setupPanel').style.display = 'block';
+  }
 }
 
 function showAdmin() {
@@ -213,11 +278,21 @@ function showAdmin() {
 
 document.getElementById('authBtn').addEventListener('click', unlock);
 document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+document.getElementById('setupBtn').addEventListener('click', setupPassphrase);
+document.getElementById('setupPass2').addEventListener('keydown', e => { if (e.key === 'Enter') setupPassphrase(); });
+document.getElementById('resetPassBtn').addEventListener('click', () => {
+  if (!confirm('Reset passphrase? You will need to create a new one.')) return;
+  localStorage.removeItem(HASH_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginPanel').style.display = 'none';
+  document.getElementById('setupPanel').style.display = 'block';
+});
 document.getElementById('logoutBtn').addEventListener('click', () => {
   sessionStorage.removeItem(SESSION_KEY);
   location.reload();
 });
-if (sessionStorage.getItem(SESSION_KEY)) showAdmin();
+
+if (sessionStorage.getItem(SESSION_KEY)) { showAdmin(); } else { initAuth(); }
 
 // ── TABS ─────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab => {
@@ -271,6 +346,8 @@ function clearStrainForm() {
   document.getElementById('fStatus').value = '';
   document.getElementById('strainFormTitle').textContent = 'Add Strain';
   document.getElementById('clearStrainBtn').style.display = 'none';
+  showStrainPreview('');
+  setStrainImgStatus('');
 }
 
 async function editStrain(id) {
@@ -290,6 +367,8 @@ async function editStrain(id) {
   document.getElementById('fNotes').value         = data.notes        || '';
   document.getElementById('fStatus').value        = data.status       || '';
   document.getElementById('fImageUrl').value      = data.image_url    || '';
+  showStrainPreview(data.image_url || '');
+  setStrainImgStatus('');
   document.getElementById('strainFormTitle').textContent = 'Edit Strain';
   document.getElementById('clearStrainBtn').style.display = 'inline-block';
   window.scrollTo({top:0, behavior:'smooth'});
@@ -302,6 +381,61 @@ async function deleteStrain(id, name) {
   showMsg('strainMsg', 'Deleted.');
   loadStrains();
 }
+
+// ── STRAIN IMAGE HELPERS ─────────────────────────────────────────────────────
+function setStrainImgStatus(msg, isErr) {
+  const el = document.getElementById('strainImgStatus');
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--red)' : 'var(--text3)';
+}
+function showStrainPreview(url) {
+  const img = document.getElementById('strainImgPreview');
+  if (url) { img.src = url; img.style.display = 'block'; }
+  else      { img.src = ''; img.style.display = 'none'; }
+}
+
+async function uploadStrainImage(file) {
+  if (!sb) { setStrainImgStatus('Supabase not connected.', true); return; }
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const path = `strain-${Date.now()}.${ext}`;
+  setStrainImgStatus('Uploading…');
+  const { error } = await sb.storage.from(IMG_BUCKET_STRAINS).upload(path, file, { upsert: true });
+  if (error) { setStrainImgStatus(error.message, true); return; }
+  const { data } = sb.storage.from(IMG_BUCKET_STRAINS).getPublicUrl(path);
+  document.getElementById('fImageUrl').value = data.publicUrl;
+  showStrainPreview(data.publicUrl);
+  setStrainImgStatus('Uploaded.');
+}
+
+// Local file picker
+document.getElementById('fStrainImgFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (file) await uploadStrainImage(file);
+  e.target.value = '';
+});
+
+// Fetch remote URL and re-upload
+document.getElementById('fetchRemoteImgBtn').addEventListener('click', async () => {
+  const url = document.getElementById('fImageUrl').value.trim();
+  if (!url) { setStrainImgStatus('Paste a URL first.', true); return; }
+  if (!sb)  { setStrainImgStatus('Supabase not connected.', true); return; }
+  setStrainImgStatus('Fetching…');
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const ext  = (blob.type.split('/')[1] || 'jpg').replace('jpeg','jpg');
+    await uploadStrainImage(new File([blob], `remote.${ext}`, { type: blob.type }));
+  } catch (err) {
+    const isCors = err.message.includes('Failed to fetch') || err.message.includes('NetworkError');
+    setStrainImgStatus(
+      isCors
+        ? 'CORS blocked — right-click the image on the breeder site → "Save image as", then use "Upload from device"'
+        : err.message,
+      true
+    );
+  }
+});
 
 document.getElementById('saveStrainBtn').addEventListener('click', async () => {
   if (!sb) { showMsg('strainMsg', 'Supabase not configured.', true); return; }
@@ -376,6 +510,7 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
   progress.style.display = 'block';
   const strainId = document.getElementById('gStrain').value || null;
   const caption  = document.getElementById('gCaption').value.trim() || null;
+  const credit   = document.getElementById('gCredit').value.trim()  || null;
   const takenAt  = document.getElementById('gDate').value || null;
   const tags     = document.getElementById('gTags').value.split(',').map(t=>t.trim()).filter(Boolean);
 
@@ -387,7 +522,7 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
     if (upErr) { showMsg('galleryMsg', `Upload error: ${upErr.message}`, true); continue; }
     const { data: urlData } = sb.storage.from(IMG_BUCKET_GALLERY).getPublicUrl(path);
     await sb.from('gallery_photos').insert({
-      url: urlData.publicUrl, strain_id: strainId, caption, taken_at: takenAt, tags
+      url: urlData.publicUrl, strain_id: strainId, caption, credit, taken_at: takenAt, tags
     });
   }
   bar.style.width = '100%';

@@ -27,6 +27,7 @@ create table if not exists gallery_photos (
   strain_id   uuid references strains(id) on delete set null,
   url         text not null,
   caption     text,
+  credit      text,
   tags        text[] default '{}',
   taken_at    date,
   created_at  timestamptz default now()

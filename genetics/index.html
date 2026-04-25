@@ -91,6 +91,20 @@
   .ph-icon svg{width:100%;height:100%;display:block}
   .card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.45s ease}
   .strain-card:hover .card-img{transform:scale(1.05)}
+
+  /* Zoom hint overlay */
+  .card-zoom-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;opacity:0;transition:opacity 0.2s;background:rgba(0,0,0,0.18);cursor:zoom-in}
+  .card-zoom-hint svg{width:36px;height:36px;color:#fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5))}
+  .card-image:hover .card-zoom-hint{opacity:1}
+
+  /* Lightbox */
+  .img-lb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
+  .img-lb-overlay.open{display:flex}
+  .img-lb-inner{position:relative;max-width:min(92vw,1100px);max-height:90vh;display:flex;flex-direction:column;align-items:center;gap:0.75rem}
+  .img-lb-img{max-width:100%;max-height:80vh;object-fit:contain;border-radius:2px;display:block;box-shadow:0 8px 48px rgba(0,0,0,0.6)}
+  .img-lb-caption{font-family:var(--serif);font-size:1.1rem;color:var(--text);text-align:center}
+  .img-lb-close{position:absolute;top:-2.5rem;right:0;background:transparent;border:none;color:var(--text3);font-size:1.6rem;cursor:pointer;line-height:1;transition:color 0.2s}
+  .img-lb-close:hover{color:var(--teal)}
   .card-status{position:absolute;bottom:0;left:0;right:0;z-index:2;font-family:var(--mono);font-size:0.46rem;letter-spacing:0.22em;text-transform:uppercase;padding:0.4rem 0.75rem;font-weight:700;text-align:center}
   .status-house{background:var(--amber);color:#100c02}
   .status-featured{background:var(--teal);color:#0a100d}
@@ -291,9 +305,10 @@ function renderCard(s) {
 
   return `
   <div class="strain-card">
-    <div class="card-image">
+    <div class="card-image" ${imgUrl ? `data-img="${esc(imgUrl)}" data-strain="${esc(s.strain)}"` : ''}>
       <div class="card-placeholder"><div class="ph-icon">${PH_ICON}</div></div>
       ${imgUrl ? `<img class="card-img" src="${esc(imgUrl)}" alt="${esc(s.strain)}" loading="lazy">` : ''}
+      ${imgUrl ? `<div class="card-zoom-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>` : ''}
       ${statusBadge(s)}
     </div>
     <div class="card-body">
@@ -444,6 +459,48 @@ function exportXLSX(strains, filename) {
   XLSX.utils.book_append_sheet(wb, ws, 'Genetics');
   XLSX.writeFile(wb, filename);
 }
+// ── IMAGE LIGHTBOX ────────────────────────────────────────────────────────────
+(function() {
+  const overlay = document.createElement('div');
+  overlay.className = 'img-lb-overlay';
+  overlay.innerHTML = `
+    <div class="img-lb-inner">
+      <button class="img-lb-close" id="imgLbClose">✕</button>
+      <img class="img-lb-img" id="imgLbImg" src="" alt="">
+      <div class="img-lb-caption" id="imgLbCaption"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  function openLb(src, name) {
+    document.getElementById('imgLbImg').src = src;
+    document.getElementById('imgLbCaption').textContent = name;
+    overlay.classList.add('open');
+  }
+  function closeLb() { overlay.classList.remove('open'); }
+
+  document.getElementById('imgLbClose').addEventListener('click', e => { e.stopPropagation(); closeLb(); });
+  overlay.addEventListener('click', closeLb);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+  let hoverTimer = null;
+  document.getElementById('grid').addEventListener('mouseover', e => {
+    const card = e.target.closest('.card-image[data-img]');
+    if (!card || hoverTimer) return;
+    hoverTimer = setTimeout(() => { openLb(card.dataset.img, card.dataset.strain); hoverTimer = null; }, 1000);
+  });
+  document.getElementById('grid').addEventListener('mouseout', e => {
+    const card = e.target.closest('.card-image[data-img]');
+    if (!card) return;
+    clearTimeout(hoverTimer); hoverTimer = null;
+  });
+  document.getElementById('grid').addEventListener('click', e => {
+    const card = e.target.closest('.card-image[data-img]');
+    if (!card) return;
+    clearTimeout(hoverTimer); hoverTimer = null;
+    openLb(card.dataset.img, card.dataset.strain);
+  });
+})();
+
 const dateStr = () => new Date().toISOString().split('T')[0];
 
 document.getElementById('exportCsvFiltered').addEventListener('click',  () => exportCSV(getFiltered(),  `zombie-genetix-genetics-filtered-${dateStr()}.csv`));

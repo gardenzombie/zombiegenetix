@@ -483,17 +483,17 @@ function exportXLSX(strains, filename) {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
 
   let hoverTimer = null;
-  document.getElementById('grid').addEventListener('mouseover', e => {
+  document.getElementById('strainGrid').addEventListener('mouseover', e => {
     const card = e.target.closest('.card-image[data-img]');
     if (!card || hoverTimer) return;
     hoverTimer = setTimeout(() => { openLb(card.dataset.img, card.dataset.strain); hoverTimer = null; }, 1000);
   });
-  document.getElementById('grid').addEventListener('mouseout', e => {
+  document.getElementById('strainGrid').addEventListener('mouseout', e => {
     const card = e.target.closest('.card-image[data-img]');
     if (!card) return;
     clearTimeout(hoverTimer); hoverTimer = null;
   });
-  document.getElementById('grid').addEventListener('click', e => {
+  document.getElementById('strainGrid').addEventListener('click', e => {
     const card = e.target.closest('.card-image[data-img]');
     if (!card) return;
     clearTimeout(hoverTimer); hoverTimer = null;

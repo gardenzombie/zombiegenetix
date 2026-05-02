@@ -57,15 +57,34 @@
     margin-bottom:12px;
     cursor:pointer;
     position:relative;
-    overflow:hidden;
     border-radius:2px;
     border:1px solid var(--border);
     background:var(--card);
     transition:border-color 0.2s,transform 0.25s,box-shadow 0.25s;
   }
   .gallery-item:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
-  .gallery-item img{width:100%;display:block;transition:transform 0.45s ease}
-  .gallery-item:hover img{transform:scale(1.03)}
+
+  /* Image wrapper — needed so overlay clips to image, not the full card */
+  .img-wrap{position:relative;overflow:hidden}
+  .img-wrap img{width:100%;display:block;transition:transform 0.45s ease}
+  .gallery-item:hover .img-wrap img{transform:scale(1.03)}
+
+  /* Credit overlay — slides up from image bottom on hover */
+  .credit-overlay{
+    position:absolute;bottom:0;left:0;right:0;
+    padding:2.5rem 0.75rem 0.55rem;
+    background:linear-gradient(to top,rgba(0,0,0,0.72) 0%,transparent 100%);
+    transform:translateY(100%);
+    transition:transform 0.32s ease;
+    pointer-events:none;
+  }
+  .gallery-item:hover .credit-overlay{transform:translateY(0);pointer-events:auto}
+  /* Always visible on touch devices (no hover) */
+  @media(hover:none){.credit-overlay{transform:translateY(0);background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 100%)}}
+  .credit-chip{display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--mono);font-size:0.42rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.78)}
+  .credit-chip svg{opacity:0.7;flex-shrink:0}
+  .credit-chip a{color:rgba(255,255,255,0.78);text-decoration:none;transition:color 0.2s;border-bottom:1px solid rgba(255,255,255,0.2)}
+  .credit-chip a:hover{color:var(--teal);border-bottom-color:rgba(82,196,160,0.5)}
   .gallery-caption{
     padding:0.85rem 1rem;
   }
@@ -73,8 +92,9 @@
   .cap-meta{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-top:0.3rem}
   .cap-tags{display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.5rem}
   .cap-tag{font-family:var(--mono);font-size:0.4rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.15rem 0.4rem;border:1px solid var(--border2);border-radius:1px;color:var(--text3)}
-  .cap-credit{font-family:var(--mono);font-size:0.4rem;letter-spacing:0.08em;color:var(--text3);margin-top:0.4rem;opacity:0.7}
-  .lb-credit{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.1em;color:var(--text3);text-align:center;opacity:0.7}
+  .lb-credit{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.1em;color:var(--text3);text-align:center;opacity:0.75;display:flex;align-items:center;justify-content:center;gap:0.35rem}
+  .lb-credit a{color:var(--text3);text-decoration:none;border-bottom:1px solid var(--border2);transition:color 0.2s,border-color 0.2s}
+  .lb-credit a:hover{color:var(--teal);border-bottom-color:rgba(82,196,160,0.4)}
 
   /* EMPTY / LOADING */
   .gallery-msg{padding:5rem 2rem;text-align:center;font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3)}
@@ -97,6 +117,7 @@
   .footer-left,.footer-right{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
   .footer-right a{color:var(--text3);text-decoration:none;transition:color 0.2s}
   .footer-right a:hover{color:var(--teal)}
+  .footer-photo-note{width:100%;font-family:var(--mono);font-size:0.45rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);opacity:0.55;text-align:center;padding-top:1.25rem;border-top:1px solid var(--border)}
 
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   @media(max-width:680px){.page-wrap{padding:6rem 1.25rem 4rem}.gallery-grid{columns:2 200px;gap:8px}.gallery-item{margin-bottom:8px}}
@@ -156,6 +177,9 @@
     <a href="/">Home</a> &nbsp;·&nbsp;
     <a href="/genetics/">Genetics</a> &nbsp;·&nbsp;
     <a href="/tracker/">Grow Tracker</a>
+  </div>
+  <div class="footer-photo-note">
+    All photos are the property of their respective creators &amp; breeders — attribution shown where known.
   </div>
 </footer>
 
@@ -219,17 +243,26 @@ function renderGallery() {
     return;
   }
 
+  const CAM = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
   grid.innerHTML = filteredPhotos.map((p, i) => {
     const tagsHtml = (p.tags||[]).map(t => `<span class="cap-tag">${esc(t)}</span>`).join('');
     const dateStr = p.taken_at ? new Date(p.taken_at).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : '';
+    const creditChip = p.credit ? `
+      <div class="credit-overlay"><div class="credit-chip">${CAM}${
+        p.credit_url
+          ? `<a href="${esc(p.credit_url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${esc(p.credit)}</a>`
+          : esc(p.credit)
+      }</div></div>` : '';
     return `
     <div class="gallery-item" data-index="${i}">
-      <img src="${esc(p.url)}" alt="${esc(p.caption||p.strain||'')}" loading="lazy">
+      <div class="img-wrap">
+        <img src="${esc(p.url)}" alt="${esc(p.caption||p.strain||'')}" loading="lazy">
+        ${creditChip}
+      </div>
       <div class="gallery-caption">
         ${p.caption ? `<div class="cap-strain">${esc(p.caption)}</div>` : ''}
         <div class="cap-meta">${[p.strain, dateStr].filter(Boolean).join(' · ')}</div>
         ${tagsHtml ? `<div class="cap-tags">${tagsHtml}</div>` : ''}
-        ${p.credit ? `<div class="cap-credit">Photo: ${esc(p.credit)}</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -247,11 +280,20 @@ function openLightbox(index) {
 }
 function showLb() {
   const p = filteredPhotos[lbIndex];
+  const CAM_LB = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
   document.getElementById('lbImg').src = p.url;
   document.getElementById('lbCaption').textContent = p.caption || p.strain || '';
   const dateStr = p.taken_at ? new Date(p.taken_at).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : '';
   document.getElementById('lbMeta').textContent = [p.strain, dateStr].filter(Boolean).join(' · ');
-  document.getElementById('lbCredit').textContent = p.credit ? `Photo: ${p.credit}` : '';
+  const creditEl = document.getElementById('lbCredit');
+  if (p.credit) {
+    const nameHtml = p.credit_url
+      ? `<a href="${esc(p.credit_url)}" target="_blank" rel="noopener noreferrer">${esc(p.credit)}</a>`
+      : esc(p.credit);
+    creditEl.innerHTML = `${CAM_LB}${nameHtml}`;
+  } else {
+    creditEl.innerHTML = '';
+  }
 }
 document.getElementById('lbClose').addEventListener('click', () => document.getElementById('lightbox').classList.remove('open'));
 document.getElementById('lightbox').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });

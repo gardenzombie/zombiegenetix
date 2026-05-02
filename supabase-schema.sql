@@ -28,6 +28,7 @@ create table if not exists gallery_photos (
   url         text not null,
   caption     text,
   credit      text,
+  credit_url  text,
   tags        text[] default '{}',
   taken_at    date,
   created_at  timestamptz default now()

@@ -378,6 +378,14 @@ function filterAndRender() {
   const filtered = applyFilters(LIVE_DATA || STRAINS);
   const total    = (LIVE_DATA || STRAINS).length;
 
+  // Photos-first: strains with an image float to the top, then alphabetical within each group
+  filtered.sort((a, b) => {
+    const aImg = !!(a.image_url || a.imageUrl || STRAIN_IMAGES[a.strain]);
+    const bImg = !!(b.image_url || b.imageUrl || STRAIN_IMAGES[b.strain]);
+    if (aImg !== bImg) return aImg ? -1 : 1;
+    return (a.breeder + a.strain).localeCompare(b.breeder + b.strain);
+  });
+
   const grid = document.getElementById('strainGrid');
   grid.innerHTML = filtered.length === 0
     ? '<div class="empty-state"><div class="empty-icon">🌿</div><div class="empty-msg">No strains match your filters</div></div>'

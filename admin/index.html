@@ -85,6 +85,11 @@
 
   section{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:1.5rem;margin-bottom:1.5rem}
   section h2{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem}
+
+  /* Edit modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:300;display:flex;align-items:center;justify-content:center;padding:2rem}
+  .modal-box{background:var(--card);border:1px solid var(--border2);border-radius:3px;padding:1.5rem;max-width:540px;width:100%;max-height:90vh;overflow-y:auto}
+  .modal-title{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem}
 </style>
 </head>
 <body>
@@ -168,6 +173,8 @@
             <img id="strainImgPreview" class="strain-img-preview" alt="strain preview">
           </div>
         </div>
+        <div class="field form-full"><label>Image Credit</label><input type="text" id="fImageCredit" placeholder="e.g. u/username · Photographer Name — leave blank if your own photo"></div>
+        <div class="field form-full"><label>Image Credit URL <span style="font-weight:400;opacity:0.6">(optional — makes the credit a clickable link)</span></label><input type="url" id="fImageCreditUrl" placeholder="e.g. https://reddit.com/u/username"></div>
       </div>
       <div class="form-actions">
         <button class="btn primary" id="saveStrainBtn">Save Strain</button>
@@ -212,6 +219,29 @@
       <h2>Gallery Photos <span id="galleryCount" style="color:var(--text3);font-size:0.8em"></span></h2>
       <div id="galleryTableWrap"><div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">Loading…</div></div>
     </section>
+  </div>
+</div>
+
+<!-- Photo Edit Modal -->
+<div class="modal-overlay" id="photoEditModal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">Edit Photo Metadata</div>
+    <input type="hidden" id="editPhotoId">
+    <div class="form-grid">
+      <div class="field"><label>Linked Strain</label>
+        <select id="eStrain"><option value="">— None —</option></select>
+      </div>
+      <div class="field"><label>Date Taken</label><input type="date" id="eDate"></div>
+      <div class="field form-full"><label>Caption</label><input type="text" id="eCaption"></div>
+      <div class="field form-full"><label>Photo Credit</label><input type="text" id="eCredit" placeholder="e.g. u/username · Jane Doe"></div>
+      <div class="field form-full"><label>Credit URL <span style="font-weight:400;opacity:0.6">(optional)</span></label><input type="url" id="eCreditUrl" placeholder="e.g. https://reddit.com/u/username"></div>
+      <div class="field form-full"><label>Tags (comma-separated)</label><input type="text" id="eTags"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn primary" id="savePhotoEditBtn">Save Changes</button>
+      <button class="btn" id="cancelPhotoEditBtn">Cancel</button>
+      <span class="msg" id="photoEditMsg"></span>
+    </div>
   </div>
 </div>
 
@@ -340,7 +370,7 @@ async function loadStrains() {
 }
 
 function clearStrainForm() {
-  ['fBreeder','fStrain','fHybridDetail','fThcCbd','fFlowerTime','fLineage','fNotes','fImageUrl','editId'].forEach(id => document.getElementById(id).value = '');
+  ['fBreeder','fStrain','fHybridDetail','fThcCbd','fFlowerTime','fLineage','fNotes','fImageUrl','fImageCredit','fImageCreditUrl','editId'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fType').value = 'Photo';
   document.getElementById('fSex').value = 'Fem';
   document.getElementById('fHybridType').value = 'Hybrid';
@@ -367,7 +397,9 @@ async function editStrain(id) {
   document.getElementById('fLineage').value       = data.lineage      || '';
   document.getElementById('fNotes').value         = data.notes        || '';
   document.getElementById('fStatus').value        = data.status       || '';
-  document.getElementById('fImageUrl').value      = data.image_url    || '';
+  document.getElementById('fImageUrl').value       = data.image_url        || '';
+  document.getElementById('fImageCredit').value    = data.image_credit     || '';
+  document.getElementById('fImageCreditUrl').value = data.image_credit_url || '';
   showStrainPreview(data.image_url || '');
   setStrainImgStatus('');
   document.getElementById('strainFormTitle').textContent = 'Edit Strain';
@@ -453,7 +485,9 @@ document.getElementById('saveStrainBtn').addEventListener('click', async () => {
     lineage:       document.getElementById('fLineage').value.trim()      || null,
     notes:         document.getElementById('fNotes').value.trim()        || null,
     status:        document.getElementById('fStatus').value              || null,
-    image_url:     document.getElementById('fImageUrl').value.trim()     || null,
+    image_url:         document.getElementById('fImageUrl').value.trim()         || null,
+    image_credit:      document.getElementById('fImageCredit').value.trim()      || null,
+    image_credit_url:  document.getElementById('fImageCreditUrl').value.trim()   || null,
   };
   if (!payload.breeder || !payload.strain) { showMsg('strainMsg', 'Breeder and strain are required.', true); return; }
   const op = id
@@ -542,15 +576,16 @@ async function loadGallery() {
   const wrap = document.getElementById('galleryTableWrap');
   if (!rows.length) { wrap.innerHTML = '<div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">No photos yet.</div>'; return; }
   wrap.innerHTML = `<table class="strain-table">
-    <thead><tr><th>Preview</th><th>Caption</th><th>Strain</th><th>Tags</th><th>Date</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Preview</th><th>Caption</th><th>Credit</th><th>Strain</th><th>Tags</th><th>Date</th><th>Actions</th></tr></thead>
     <tbody>${rows.map(p => `
       <tr>
         <td><img class="td-img" src="${esc(p.url)}" alt=""></td>
         <td>${esc(p.caption||'')}</td>
+        <td style="font-size:0.7rem">${esc(p.credit||'')}</td>
         <td>${esc(p.strains?.strain||'')}</td>
         <td style="font-size:0.7rem">${(p.tags||[]).join(', ')}</td>
         <td style="font-size:0.7rem">${p.taken_at||''}</td>
-        <td><button class="btn danger" onclick="deletePhoto('${p.id}')">Del</button></td>
+        <td><div class="td-actions"><button class="btn" onclick="editPhoto('${p.id}')">Edit</button><button class="btn danger" onclick="deletePhoto('${p.id}')">Del</button></div></td>
       </tr>`).join('')}
     </tbody></table>`;
 }
@@ -560,6 +595,51 @@ async function deletePhoto(id) {
   await sb.from('gallery_photos').delete().eq('id', id);
   loadGallery();
 }
+
+// ── GALLERY EDIT MODAL ───────────────────────────────────────────────────────
+async function editPhoto(id) {
+  if (!sb) return;
+  const { data } = await sb.from('gallery_photos').select('*').eq('id', id).single();
+  if (!data) return;
+  document.getElementById('editPhotoId').value = data.id;
+  document.getElementById('eCaption').value    = data.caption    || '';
+  document.getElementById('eCredit').value     = data.credit     || '';
+  document.getElementById('eCreditUrl').value  = data.credit_url || '';
+  document.getElementById('eDate').value       = data.taken_at   || '';
+  document.getElementById('eTags').value       = (data.tags||[]).join(', ');
+  // Mirror strain options from the upload form select
+  const eStrainSel = document.getElementById('eStrain');
+  const gStrainSel = document.getElementById('gStrain');
+  eStrainSel.innerHTML = gStrainSel.innerHTML;
+  eStrainSel.value = data.strain_id || '';
+  document.getElementById('photoEditModal').style.display = 'flex';
+}
+
+document.getElementById('savePhotoEditBtn').addEventListener('click', async () => {
+  if (!sb) return;
+  const id = document.getElementById('editPhotoId').value;
+  const payload = {
+    caption:    document.getElementById('eCaption').value.trim()   || null,
+    credit:     document.getElementById('eCredit').value.trim()    || null,
+    credit_url: document.getElementById('eCreditUrl').value.trim() || null,
+    taken_at:   document.getElementById('eDate').value             || null,
+    strain_id:  document.getElementById('eStrain').value           || null,
+    tags:       document.getElementById('eTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+  };
+  const { error } = await sb.from('gallery_photos').update(payload).eq('id', id);
+  if (error) { showMsg('photoEditMsg', error.message, true); return; }
+  showMsg('photoEditMsg', 'Saved.');
+  setTimeout(() => { document.getElementById('photoEditModal').style.display = 'none'; }, 700);
+  loadGallery();
+});
+
+document.getElementById('cancelPhotoEditBtn').addEventListener('click', () => {
+  document.getElementById('photoEditModal').style.display = 'none';
+});
+// Close modal on backdrop click
+document.getElementById('photoEditModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.style.display = 'none';
+});
 </script>
 </body>
 </html>

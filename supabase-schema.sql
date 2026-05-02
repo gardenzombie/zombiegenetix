@@ -15,7 +15,9 @@ create table if not exists strains (
   notes        text,
   flower_time  text,
   status       text check (status in ('house','featured','new') or status is null),
-  image_url    text,
+  image_url        text,
+  image_credit     text,
+  image_credit_url text,
   sort_order   integer default 0,
   created_at   timestamptz default now(),
   updated_at   timestamptz default now()

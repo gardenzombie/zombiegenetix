@@ -97,6 +97,19 @@
   .card-zoom-hint svg{width:36px;height:36px;color:#fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5))}
   .card-image:hover .card-zoom-hint{opacity:1}
 
+  /* Credit overlay — slides up from image bottom on hover */
+  .card-image .credit-overlay{position:absolute;bottom:0;left:0;right:0;z-index:4;padding:2.5rem 0.75rem 0.55rem;background:linear-gradient(to top,rgba(0,0,0,0.72) 0%,transparent 100%);transform:translateY(100%);transition:transform 0.32s ease;pointer-events:none}
+  .strain-card:hover .card-image .credit-overlay{transform:translateY(0);pointer-events:auto}
+  @media(hover:none){.card-image .credit-overlay{transform:translateY(0);background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 100%)}}
+  .credit-chip{display:inline-flex;align-items:center;gap:0.35rem;font-family:var(--mono);font-size:0.42rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.78)}
+  .credit-chip svg{opacity:0.7;flex-shrink:0}
+  .credit-chip a{color:rgba(255,255,255,0.78);text-decoration:none;transition:color 0.2s;border-bottom:1px solid rgba(255,255,255,0.2)}
+  .credit-chip a:hover{color:var(--teal);border-bottom-color:rgba(82,196,160,0.5)}
+  /* Lightbox credit line */
+  .img-lb-credit{font-family:var(--mono);font-size:0.45rem;letter-spacing:0.1em;color:var(--text3);text-align:center;opacity:0.75;display:flex;align-items:center;justify-content:center;gap:0.35rem}
+  .img-lb-credit a{color:var(--text3);text-decoration:none;border-bottom:1px solid var(--border2);transition:color 0.2s,border-color 0.2s}
+  .img-lb-credit a:hover{color:var(--teal);border-bottom-color:rgba(82,196,160,0.4)}
+
   /* Lightbox */
   .img-lb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
   .img-lb-overlay.open{display:flex}
@@ -289,8 +302,13 @@ function statusBadge(s) {
   return '';
 }
 
+const CAM_CARD = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+const CAM_LB   = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+
 function renderCard(s) {
-  const imgUrl = s.image_url || s.imageUrl || STRAIN_IMAGES[s.strain] || '';
+  const imgUrl       = s.image_url        || s.imageUrl       || STRAIN_IMAGES[s.strain] || '';
+  const imgCredit    = s.image_credit     || s.imageCredit    || '';
+  const imgCreditUrl = s.image_credit_url || s.imageCreditUrl || '';
   const hybridLabel = s.hybridDetail || s.hybrid_detail || s.hybridType || s.hybrid_type || '';
   const hybridType  = s.hybridType  || s.hybrid_type  || 'Hybrid';
   const thcCbd      = s.thcCbd      || s.thc_cbd      || '';
@@ -303,12 +321,20 @@ function renderCard(s) {
   const hybridBadge = hybridType === 'Indica' ? 'badge-indica'
                     : hybridType === 'Sativa' ? 'badge-sativa' : 'badge-hybrid';
 
+  const creditOverlay = imgUrl && imgCredit ? `
+    <div class="credit-overlay"><div class="credit-chip">${CAM_CARD}${
+      imgCreditUrl
+        ? `<a href="${esc(imgCreditUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${esc(imgCredit)}</a>`
+        : esc(imgCredit)
+    }</div></div>` : '';
+
   return `
   <div class="strain-card">
-    <div class="card-image" ${imgUrl ? `data-img="${esc(imgUrl)}" data-strain="${esc(s.strain)}"` : ''}>
+    <div class="card-image" ${imgUrl ? `data-img="${esc(imgUrl)}" data-strain="${esc(s.strain)}" data-credit="${esc(imgCredit)}" data-credit-url="${esc(imgCreditUrl)}"` : ''}>
       <div class="card-placeholder"><div class="ph-icon">${PH_ICON}</div></div>
       ${imgUrl ? `<img class="card-img" src="${esc(imgUrl)}" alt="${esc(s.strain)}" loading="lazy">` : ''}
       ${imgUrl ? `<div class="card-zoom-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>` : ''}
+      ${creditOverlay}
       ${statusBadge(s)}
     </div>
     <div class="card-body">
@@ -468,12 +494,22 @@ function exportXLSX(strains, filename) {
       <button class="img-lb-close" id="imgLbClose">✕</button>
       <img class="img-lb-img" id="imgLbImg" src="" alt="">
       <div class="img-lb-caption" id="imgLbCaption"></div>
+      <div class="img-lb-credit" id="imgLbCredit"></div>
     </div>`;
   document.body.appendChild(overlay);
 
-  function openLb(src, name) {
+  function openLb(src, name, credit, creditUrl) {
     document.getElementById('imgLbImg').src = src;
     document.getElementById('imgLbCaption').textContent = name;
+    const creditEl = document.getElementById('imgLbCredit');
+    if (credit) {
+      const nameHtml = creditUrl
+        ? `<a href="${esc(creditUrl)}" target="_blank" rel="noopener noreferrer">${esc(credit)}</a>`
+        : esc(credit);
+      creditEl.innerHTML = `${CAM_LB}${nameHtml}`;
+    } else {
+      creditEl.innerHTML = '';
+    }
     overlay.classList.add('open');
   }
   function closeLb() { overlay.classList.remove('open'); }
@@ -486,7 +522,7 @@ function exportXLSX(strains, filename) {
   document.getElementById('strainGrid').addEventListener('mouseover', e => {
     const card = e.target.closest('.card-image[data-img]');
     if (!card || hoverTimer) return;
-    hoverTimer = setTimeout(() => { openLb(card.dataset.img, card.dataset.strain); hoverTimer = null; }, 1000);
+    hoverTimer = setTimeout(() => { openLb(card.dataset.img, card.dataset.strain, card.dataset.credit, card.dataset.creditUrl); hoverTimer = null; }, 1000);
   });
   document.getElementById('strainGrid').addEventListener('mouseout', e => {
     const card = e.target.closest('.card-image[data-img]');
@@ -497,7 +533,7 @@ function exportXLSX(strains, filename) {
     const card = e.target.closest('.card-image[data-img]');
     if (!card) return;
     clearTimeout(hoverTimer); hoverTimer = null;
-    openLb(card.dataset.img, card.dataset.strain);
+    openLb(card.dataset.img, card.dataset.strain, card.dataset.credit, card.dataset.creditUrl);
   });
 })();
 
